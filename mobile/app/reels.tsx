@@ -11,9 +11,24 @@ import {
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import * as DocumentPicker from 'expo-document-picker';
+import * as FileSystem from 'expo-file-system';
+import * as Sharing from 'expo-sharing';
 import { useReelGenerationContext } from '@/lib/ReelGenerationContext';
 import { apiFetch } from '@/lib/api';
 import { API_BASE } from '@/lib/api';
+import { FP_ACCENT } from '@/lib/theme';
+
+const PHASE_MESSAGES: Record<1 | 2, string[]> = {
+  1: ['Scanning Pexels for your footage…', 'Picking the best clips…', 'Trimming clips to fit…', 'Syncing to your audio…'],
+  2: ['Layering your audio…', 'Compositing and scaling…', 'Burning subtitles…', 'Almost ready…'],
+};
+
+const KEYWORD_SUGGESTIONS = [
+  { label: 'Vibes', items: ['golden hour', 'dark academia', 'soft life', 'neon city'] },
+  { label: 'Energy', items: ['high energy', 'party crowd', 'fast cuts', 'slow motion'] },
+  { label: 'Aesthetic', items: ['film grain', 'minimalist', 'vintage 90s', 'pastel tones'] },
+  { label: 'Nature', items: ['ocean waves', 'mountain fog', 'forest light', 'desert sunset'] },
+];
 
 interface AudioFile {
   id: string;
@@ -40,8 +55,6 @@ function KeywordInput({
 
   const remove = (kw: string) => onChange(keywords.filter((k) => k !== kw));
 
-  const SUGGESTIONS = ['sunset aesthetic', 'city lights', 'golden hour', 'ocean vibes', 'adventure travel', 'minimalist'];
-
   return (
     <View className="bg-secondary rounded-xl p-4 border border-border">
       {/* Chips */}
@@ -61,26 +74,37 @@ function KeywordInput({
       <TextInput
         value={input}
         onChangeText={setInput}
-        placeholder="Type keyword + return…"
-        placeholderTextColor="#71717a"
+        placeholder="e.g. golden hour, ocean vibes…"
+        placeholderTextColor="rgba(255,255,255,0.28)"
         returnKeyType="done"
         onSubmitEditing={() => add(input)}
-        onBlur={() => add(input)}
+        onBlur={() => { if (input.trim()) add(input); }}
         className="w-full px-3 py-2 rounded-lg bg-secondary border border-border text-foreground text-sm mb-3"
       />
 
-      <Text className="text-xs text-muted-foreground mb-2">Suggestions:</Text>
-      <View className="flex-row flex-wrap gap-1.5">
-        {SUGGESTIONS.filter((s) => !keywords.includes(s)).slice(0, 4).map((s) => (
-          <Pressable
-            key={s}
-            onPress={() => add(s)}
-            className="px-2 py-0.5 rounded-full bg-secondary border border-border"
-          >
-            <Text className="text-xs text-muted-foreground">+ {s}</Text>
-          </Pressable>
-        ))}
-      </View>
+      <Text className="text-[10px] text-muted-foreground mb-2 uppercase tracking-wider">
+        Keywords drive what footage Pexels returns — be visual and specific
+      </Text>
+      {KEYWORD_SUGGESTIONS.map((group) => {
+        const available = group.items.filter((s) => !keywords.includes(s));
+        if (!available.length) return null;
+        return (
+          <View key={group.label} className="mb-2">
+            <Text className="text-[10px] text-primary/70 font-semibold uppercase tracking-wider mb-1">{group.label}</Text>
+            <View className="flex-row flex-wrap gap-1.5">
+              {available.slice(0, 3).map((s) => (
+                <Pressable
+                  key={s}
+                  onPress={() => add(s)}
+                  className="px-2 py-0.5 rounded-full bg-secondary border border-border"
+                >
+                  <Text className="text-xs text-muted-foreground">+ {s}</Text>
+                </Pressable>
+              ))}
+            </View>
+          </View>
+        );
+      })}
     </View>
   );
 }
@@ -94,6 +118,56 @@ function ProgressBar({ progress, status }: { progress: number; status: string })
   return (
     <View className="w-full h-1.5 bg-secondary rounded-full overflow-hidden">
       <View style={{ width: `${width}%`, backgroundColor: color, height: '100%', borderRadius: 999 }} />
+    </View>
+  );
+}
+
+// ── Generating view ───────────────────────────────────────────────────────────
+
+function GeneratingView({ job, phase, onStop }: { job: any; phase: 1 | 2; onStop: () => void }) {
+  const [msgIndex, setMsgIndex] = useState(0);
+  const [elapsed, setElapsed] = useState(0);
+  const startRef = useRef(Date.now());
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setElapsed(Math.floor((Date.now() - startRef.current) / 1000));
+      setMsgIndex((i) => (i + 1) % PHASE_MESSAGES[phase].length);
+    }, 3000);
+    return () => clearInterval(interval);
+  }, [phase]);
+
+  const mm = String(Math.floor(elapsed / 60)).padStart(2, '0');
+  const ss = String(elapsed % 60).padStart(2, '0');
+  const progress = Math.round(job?.phase_progress ?? job?.progress ?? 0);
+
+  return (
+    <View className="flex-1 bg-background items-center justify-center p-6 gap-6">
+      <View className="w-20 h-20 rounded-2xl bg-primary/15 items-center justify-center" style={{ borderWidth: 1, borderColor: 'rgba(170,168,255,0.2)' }}>
+        <ActivityIndicator size="large" color={FP_ACCENT} />
+      </View>
+      <View className="items-center gap-1">
+        <Text className="text-base font-semibold text-foreground text-center">
+          {PHASE_MESSAGES[phase][msgIndex]}
+        </Text>
+        <Text className="text-xs text-muted-foreground">Phase {phase} of 2</Text>
+      </View>
+      {job && (
+        <View className="w-full gap-2">
+          <View className="w-full h-1.5 bg-secondary rounded-full overflow-hidden">
+            <View
+              style={{ width: `${Math.max(progress, 2)}%`, backgroundColor: FP_ACCENT, height: '100%', borderRadius: 999 }}
+            />
+          </View>
+          <View className="flex-row justify-between">
+            <Text className="text-xs text-muted-foreground">{progress}%</Text>
+            <Text className="text-xs text-muted-foreground">{mm}:{ss}</Text>
+          </View>
+        </View>
+      )}
+      <Pressable onPress={onStop} className="px-4 py-2 rounded-xl border border-border bg-secondary">
+        <Text className="text-destructive text-sm">Stop</Text>
+      </Pressable>
     </View>
   );
 }
@@ -203,10 +277,14 @@ export default function ReelsScreen() {
   };
 
   const handleDownload = async (reelId: string) => {
-    // On mobile, open the download URL in the browser / share sheet
     const url = `${API_BASE}/reels/download/${reelId}`;
-    // expo-sharing or expo-file-system can be used here; for now just alert the URL
-    Alert.alert('Reel ready', `Download URL:\n${url}`, [{ text: 'OK' }]);
+    const localUri = `${FileSystem.cacheDirectory}reel_${reelId}.mp4`;
+    try {
+      const { uri } = await FileSystem.downloadAsync(url, localUri);
+      await Sharing.shareAsync(uri, { mimeType: 'video/mp4', UTI: 'public.mpeg-4' });
+    } catch {
+      Alert.alert('Download failed', 'Could not download the reel. Try again.');
+    }
   };
 
   // ── Form (idle state) ─────────────────────────────────────────────────────
@@ -232,11 +310,32 @@ export default function ReelsScreen() {
         <View>
           <Text className="text-sm font-semibold text-foreground mb-2">2. Audio Track</Text>
           {audioError ? (
-            <Text className="text-xs text-destructive mb-2">{audioError}</Text>
+            <View className="flex-row items-center gap-2 mb-2">
+              <Text className="text-xs text-destructive flex-1">{audioError}</Text>
+              <Pressable
+                onPress={async () => {
+                  setIsLoadingAudio(true);
+                  setAudioError(null);
+                  try {
+                    const res = await apiFetch('/reels/audio');
+                    if (!res.ok) throw new Error('Failed to load audio');
+                    const data = await res.json();
+                    setAudioFiles(data.audio_files ?? []);
+                  } catch (err) {
+                    setAudioError(err instanceof Error ? err.message : 'Failed to load audio');
+                  } finally {
+                    setIsLoadingAudio(false);
+                  }
+                }}
+                className="px-2.5 py-1 rounded-lg bg-secondary border border-border"
+              >
+                <Text className="text-xs text-foreground">Retry</Text>
+              </Pressable>
+            </View>
           ) : null}
 
           {isLoadingAudio ? (
-            <ActivityIndicator color="#a855f7" />
+            <ActivityIndicator color={FP_ACCENT} />
           ) : (
             <View className="gap-2">
               {audioFiles.map((audio) => (
@@ -271,7 +370,7 @@ export default function ReelsScreen() {
                 className="flex-row items-center gap-2 px-4 py-2.5 rounded-xl border border-border bg-secondary disabled:opacity-50"
               >
                 {isUploading
-                  ? <ActivityIndicator size="small" color="#a855f7" />
+                  ? <ActivityIndicator size="small" color={FP_ACCENT} />
                   : <Text className="text-foreground text-sm">↑ Upload Audio</Text>
                 }
               </Pressable>
@@ -336,7 +435,7 @@ export default function ReelsScreen() {
           disabled={isGenerating || !keywords.length || !selectedAudioId}
           className="w-full py-3.5 rounded-xl bg-primary items-center justify-center disabled:opacity-40"
         >
-          <Text className="text-primary-foreground font-semibold">Generate Reel</Text>
+          <Text className="text-primary-foreground font-semibold">Create Reel</Text>
         </Pressable>
       </ScrollView>
     );
@@ -346,30 +445,8 @@ export default function ReelsScreen() {
 
   if (isActive && !allSettled && !isAwaitingApproval) {
     const job = jobs[0];
-    return (
-      <View className="flex-1 bg-background items-center justify-center p-6 gap-5">
-        <ActivityIndicator size="large" color="#a855f7" />
-        <View className="items-center">
-          <Text className="text-base font-semibold text-foreground">
-            {job?.phase === 2 ? 'Rendering reel…' : 'Preparing clips…'}
-          </Text>
-          <Text className="text-xs text-muted-foreground mt-1">
-            Phase {job?.phase ?? 1} of 2
-          </Text>
-        </View>
-        {job && (
-          <View className="w-full">
-            <ProgressBar progress={job.phase_progress ?? job.progress} status={job.status} />
-            <Text className="text-xs text-muted-foreground text-center mt-1">
-              {Math.round(job.phase_progress ?? job.progress)}%
-            </Text>
-          </View>
-        )}
-        <Pressable onPress={reset} className="px-4 py-2 rounded-xl border border-border bg-secondary">
-          <Text className="text-destructive text-sm">Stop</Text>
-        </Pressable>
-      </View>
-    );
+    const phase = (job?.phase ?? 1) as 1 | 2;
+    return <GeneratingView job={job} phase={phase} onStop={reset} />;
   }
 
   // ── Clip approval ──────────────────────────────────────────────────────────

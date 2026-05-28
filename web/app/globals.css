@@ -51,7 +51,12 @@
   --color-fp-surface:    var(--fp-surface);
   --color-fp-surface-2:  var(--fp-surface-2);
   --color-fp-accent:     var(--fp-accent);
+  --color-fp-accent-2:   var(--fp-accent-2);
   --color-fp-green:      var(--fp-green);
+  --color-fp-purple:     var(--fp-purple);
+  --color-fp-yellow:     var(--fp-yellow);
+  --color-fp-blush:      var(--fp-blush);
+  --color-fp-lime:       var(--fp-lime);
   --color-fp-text:       var(--fp-text);
   --color-fp-text-muted: var(--fp-text-muted);
   --color-fp-border:     var(--fp-border);

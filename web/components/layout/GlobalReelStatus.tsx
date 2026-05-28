@@ -37,12 +37,12 @@ export function GlobalReelStatus() {
           transition={{ type: 'spring', stiffness: 320, damping: 26 }}
           className="fixed bottom-6 right-6 z-50"
         >
-          <div className="flex items-center gap-3 px-4 py-3 bg-surface-panel border border-white/10 rounded-2xl shadow-2xl backdrop-blur-md min-w-[220px]">
+          <div className="flex items-center gap-3 px-4 py-3 bg-fp-surface-2 border border-fp-border rounded-2xl shadow-2xl backdrop-blur-md min-w-[220px]">
             {!allSettled ? (
               /* ── Generating / Awaiting Approval ── */
               <>
                 <Loader2
-                  className={`w-7 h-7 shrink-0 animate-spin ${awaitingApproval ? 'text-amber-400' : 'text-blue-400'}`}
+                  className={`w-7 h-7 shrink-0 animate-spin ${awaitingApproval ? 'text-fp-yellow' : 'text-fp-green'}`}
                   style={{ animationDuration: '1.8s' }}
                 />
                 <div className="flex-1 min-w-0">
@@ -73,7 +73,7 @@ export function GlobalReelStatus() {
                       dismiss();
                       router.push('/reels');
                     }}
-                    className="text-[10px] text-blue-400 hover:text-blue-300 underline underline-offset-2 transition-colors"
+                    className="text-[10px] text-fp-accent hover:opacity-70 underline underline-offset-2 transition-opacity"
                   >
                     View results →
                   </button>

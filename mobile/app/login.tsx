@@ -9,13 +9,14 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import { useRouter } from 'expo-router';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { API_BASE } from '@/lib/api';
+import { login } from '@/lib/auth';
 
 export default function LoginScreen() {
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [showGuide, setShowGuide] = useState(false);
   const router = useRouter();
 
   const handleLogin = async () => {
@@ -23,13 +24,7 @@ export default function LoginScreen() {
     setError('');
     setLoading(true);
     try {
-      // Verify the password against the backend health endpoint as a quick check
-      // The backend auth is password-based; we store it locally for API calls
-      const res = await fetch(`${API_BASE}/health/backend`);
-      if (!res.ok) throw new Error('Cannot reach API — check your API URL in settings');
-
-      // Store the password to use as the app-level auth token
-      await AsyncStorage.setItem('__framed_password', password);
+      await login(password);
       router.replace('/reels');
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Login failed');
@@ -46,11 +41,14 @@ export default function LoginScreen() {
       <View className="w-full max-w-sm">
         {/* Logo */}
         <View className="items-center mb-10">
-          <View className="w-16 h-16 rounded-2xl bg-primary/20 items-center justify-center mb-4">
+          <View
+            className="w-16 h-16 rounded-2xl bg-primary/20 items-center justify-center mb-4"
+            style={{ borderWidth: 1, borderColor: 'rgba(170,168,255,0.3)' }}
+          >
             <Text className="text-3xl">🎬</Text>
           </View>
           <Text className="text-2xl font-bold text-foreground">Framed</Text>
-          <Text className="text-sm text-muted-foreground mt-1">AI-powered reel creator</Text>
+          <Text className="text-sm text-muted-foreground mt-1">Your personal reels creation tool</Text>
         </View>
 
         {/* Card */}
@@ -61,17 +59,22 @@ export default function LoginScreen() {
           <Text className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-1.5">
             Password
           </Text>
-          <TextInput
-            value={password}
-            onChangeText={setPassword}
-            secureTextEntry
-            placeholder="Enter your password"
-            placeholderTextColor="#71717a"
-            autoFocus
-            returnKeyType="go"
-            onSubmitEditing={handleLogin}
-            className="w-full px-4 py-3 rounded-xl bg-secondary border border-border text-foreground text-sm mb-4"
-          />
+          <View className="flex-row items-center bg-secondary border border-border rounded-xl mb-4">
+            <TextInput
+              value={password}
+              onChangeText={setPassword}
+              secureTextEntry={!showPassword}
+              placeholder="Enter your password"
+              placeholderTextColor="rgba(255,255,255,0.28)"
+              autoFocus
+              returnKeyType="go"
+              onSubmitEditing={handleLogin}
+              className="flex-1 px-4 py-3 text-foreground text-sm"
+            />
+            <Pressable onPress={() => setShowPassword(!showPassword)} className="px-3 py-3">
+              <Text className="text-muted-foreground text-xs">{showPassword ? '🙈' : '👁'}</Text>
+            </Pressable>
+          </View>
 
           {error ? (
             <Text className="text-xs text-destructive bg-destructive/10 px-3 py-2 rounded-lg mb-4">
@@ -85,11 +88,33 @@ export default function LoginScreen() {
             className="w-full py-3 rounded-xl bg-primary items-center justify-center disabled:opacity-40"
           >
             {loading
-              ? <ActivityIndicator color="#fff" />
+              ? <ActivityIndicator color="#030203" />
               : <Text className="text-primary-foreground font-semibold text-sm">Sign in</Text>
             }
           </Pressable>
         </View>
+
+        {/* First-time guide */}
+        <Pressable onPress={() => setShowGuide(!showGuide)} className="mt-4 items-center">
+          <Text className="text-xs text-muted-foreground">
+            First time here? {showGuide ? '▲' : '▼'}
+          </Text>
+        </Pressable>
+
+        {showGuide && (
+          <View className="mt-3 bg-card rounded-xl p-4 border border-border">
+            {[
+              'Deploy the Framed API to Render',
+              'Set your APP_PASSWORD environment variable',
+              'Set EXPO_PUBLIC_API_URL to your API URL',
+              'Enter that password above',
+            ].map((step, i) => (
+              <Text key={i} className="text-xs text-muted-foreground mb-1.5">
+                <Text className="text-primary font-semibold">{i + 1}. </Text>{step}
+              </Text>
+            ))}
+          </View>
+        )}
       </View>
     </KeyboardAvoidingView>
   );

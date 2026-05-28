@@ -43,8 +43,8 @@ function StatusLabel({ status, phase, progress }: { status: JobStatus['status'];
   };
   const colors: Record<JobStatus['status'], string> = {
     queued: 'text-muted-foreground',
-    processing: 'text-blue-400',
-    awaiting_clip_approval: 'text-amber-400',
+    processing: 'text-fp-green',
+    awaiting_clip_approval: 'text-fp-yellow',
     done: 'text-emerald-400',
     failed: 'text-destructive',
   };
@@ -690,7 +690,7 @@ export default function ReelsPage() {
               <div className="flex items-center justify-between pt-3 border-t border-border">
                 <div>
                   <div className="flex items-center gap-2">
-                    <Layers className="w-4 h-4 text-violet-400" />
+                    <Layers className="w-4 h-4 text-primary" />
                     <span className="text-sm font-medium text-foreground">Bulk Creation</span>
                   </div>
                   <p className="text-xs text-muted-foreground mt-0.5">
@@ -701,7 +701,7 @@ export default function ReelsPage() {
                   onClick={() => setIsBulk(!isBulk)}
                   className={cn(
                     'relative w-11 h-6 rounded-full transition-colors duration-200 focus:outline-none',
-                    isBulk ? 'bg-violet-500' : 'bg-secondary border border-border'
+                    isBulk ? 'bg-primary' : 'bg-secondary border border-border'
                   )}
                   aria-label="Toggle bulk creation"
                 >
@@ -754,8 +754,8 @@ export default function ReelsPage() {
                         className={cn(
                           'py-2 rounded-xl text-sm font-semibold border transition-all',
                           reelCount === n
-                            ? 'bg-violet-500/15 border-violet-400/40 text-violet-400'
-                            : 'bg-secondary border-border text-muted-foreground hover:border-violet-400/30 hover:text-violet-400'
+                            ? 'bg-primary/15 border-primary/40 text-primary'
+                            : 'bg-secondary border-border text-muted-foreground hover:border-violet-400/30 hover:text-primary'
                         )}
                       >
                         {n}
@@ -923,7 +923,7 @@ export default function ReelsPage() {
             whileTap={{ scale: 0.97 }}
             onClick={handleGenerate}
             disabled={isGenerating || !keywords.length || !selectedAudioId}
-            className="w-full px-6 py-3 bg-gradient-to-r from-blue-600 to-violet-600 hover:from-blue-500 hover:to-violet-500 disabled:opacity-40 disabled:cursor-not-allowed text-white font-semibold rounded-xl flex items-center justify-center gap-2 transition-all shadow-lg shadow-blue-900/20"
+            className="w-full px-6 py-3 bg-primary hover:opacity-90 disabled:opacity-40 disabled:cursor-not-allowed text-primary-foreground font-semibold rounded-xl flex items-center justify-center gap-2 transition-opacity"
           >
             {isBulk ? (
               <>
@@ -1080,7 +1080,7 @@ export default function ReelsPage() {
                 <button
                   onClick={() => handleApproveClips(job.job_id)}
                   disabled={approvingJob === job.job_id || replacingClips.size > 0}
-                  className="w-full px-6 py-3 bg-gradient-to-r from-blue-600 to-violet-600 hover:from-blue-500 hover:to-violet-500 disabled:opacity-40 disabled:cursor-not-allowed text-white font-semibold rounded-xl flex items-center justify-center gap-2 transition-all shadow-lg shadow-blue-900/20"
+                  className="w-full px-6 py-3 bg-primary hover:opacity-90 disabled:opacity-40 disabled:cursor-not-allowed text-primary-foreground font-semibold rounded-xl flex items-center justify-center gap-2 transition-opacity"
                 >
                   {approvingJob === job.job_id ? (
                     <><Loader2 className="w-4 h-4 animate-spin" /> Starting render…</>
