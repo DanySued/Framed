@@ -11,7 +11,7 @@ _keys_file = os.path.join(os.getenv("DATA_DIR", "/data"), ".env.keys")
 if os.path.isfile(_keys_file):
     load_dotenv(_keys_file, override=True)
 
-from routers import health, reels
+from routers import health, reels, auth
 from models.database import init_db, db
 from services.job_queue import init_scheduler
 
@@ -56,6 +56,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+app.include_router(auth.router, prefix="/auth", tags=["auth"])
 app.include_router(health.router, prefix="/health", tags=["health"])
 app.include_router(reels.router, prefix="/reels", tags=["reels"])
 
