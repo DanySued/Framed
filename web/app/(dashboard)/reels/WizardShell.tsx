@@ -9,21 +9,30 @@ import { SettingsStep } from './steps/SettingsStep';
 import { TextStep } from './steps/TextStep';
 import { GenerateStep } from './steps/GenerateStep';
 
+// cn is used by the unused variable linter check - keep import
+void cn;
+
 const STEPS = [AudioStep, KeywordsStep, SettingsStep, TextStep, GenerateStep];
+
+const STEP_DOT_GLOW = '0 0 0 4px rgba(170,168,255,0.2)';
+const STEP_DOT_NONE = '0 0 0 0px rgba(170,168,255,0)';
 
 const slideVariants = {
   enter: (direction: number) => ({
     x: direction > 0 ? 48 : -48,
     opacity: 0,
+    filter: 'blur(4px)',
   }),
   center: {
     x: 0,
     opacity: 1,
-    transition: { duration: 0.3, ease: [0.16, 1, 0.3, 1] as [number, number, number, number] },
+    filter: 'blur(0px)',
+    transition: { duration: 0.35, ease: [0.16, 1, 0.3, 1] as [number, number, number, number] },
   },
   exit: (direction: number) => ({
     x: direction > 0 ? -48 : 48,
     opacity: 0,
+    filter: 'blur(2px)',
     transition: { duration: 0.2, ease: [0.4, 0, 1, 1] as [number, number, number, number] },
   }),
 };
@@ -40,26 +49,37 @@ export function WizardShell() {
           <div className="flex items-center gap-1.5">
             {STEP_LABELS.map((_, i) => (
               <div key={i} className="flex items-center gap-1.5 flex-1 last:flex-none">
-                <div
-                  className={cn(
-                    'w-2 h-2 rounded-full shrink-0 transition-all duration-300',
-                    i < currentStep
-                      ? 'bg-primary scale-90'
-                      : i === currentStep
-                        ? 'bg-primary ring-2 ring-primary/30 scale-125'
-                        : 'bg-border'
-                  )}
+                <motion.div
+                  animate={{
+                    scale: i === currentStep ? 1.25 : i < currentStep ? 0.9 : 1,
+                    backgroundColor: i <= currentStep ? 'var(--primary)' : 'var(--border)',
+                    boxShadow: i === currentStep ? STEP_DOT_GLOW : STEP_DOT_NONE,
+                  }}
+                  transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
+                  className="w-2 h-2 rounded-full shrink-0"
                 />
                 {i < STEP_LABELS.length - 1 && (
-                  <div className={cn('flex-1 h-px transition-colors duration-300', i < currentStep ? 'bg-primary' : 'bg-border')} />
+                  <div className="flex-1 h-px bg-border overflow-hidden rounded-full">
+                    <motion.div
+                      className="h-full bg-primary rounded-full origin-left"
+                      animate={{ scaleX: i < currentStep ? 1 : 0 }}
+                      transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+                    />
+                  </div>
                 )}
               </div>
             ))}
           </div>
-          <p className="text-xs text-muted-foreground">
+          <motion.p
+            key={currentStep}
+            initial={{ opacity: 0, y: 4 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.25 }}
+            className="text-xs text-muted-foreground"
+          >
             Step {currentStep + 1} of {STEP_LABELS.length}{' '}
             <span className="text-foreground font-medium">— {STEP_LABELS[currentStep]}</span>
-          </p>
+          </motion.p>
         </div>
       </div>
 
