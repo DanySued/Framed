@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { Music, Loader2, Trash2, Upload, Play, Square } from 'lucide-react';
+import { motion, AnimatePresence } from 'motion/react';
 import { ErrorBanner } from '@/components/ui/error-banner';
 import { Skeleton } from '@/components/ui/skeleton';
 import { cn } from '@/lib/utils';
@@ -160,57 +161,78 @@ export function AudioStep() {
           {[1, 2, 3].map((i) => <Skeleton key={i} className="h-[54px] w-full rounded-xl" />)}
         </div>
       ) : audioFiles.length > 0 ? (
-        <div className="space-y-2">
-          {audioFiles.map((audio) => (
-            <label
-              key={audio.id}
-              className={cn(
-                'flex items-center p-3.5 rounded-xl border cursor-pointer transition-all',
-                selectedAudioId === audio.id
-                  ? 'bg-primary/10 border-primary/40'
-                  : 'bg-secondary/50 border-border hover:border-border/80 hover:bg-secondary'
-              )}
-            >
-              <input
-                type="radio"
-                name="audio"
-                value={audio.id}
-                checked={selectedAudioId === audio.id}
-                onChange={(e) => {
-                  stopPreview();
-                  setSongStartTime(0);
-                  setSelectedAudioId(e.target.value);
-                  setSelectedAudioDuration(audio.duration);
+        <motion.div
+          className="space-y-2"
+          initial="hidden"
+          animate="visible"
+          variants={{ visible: { transition: { staggerChildren: 0.06 } } }}
+        >
+          <AnimatePresence>
+            {audioFiles.map((audio) => (
+              <motion.label
+                key={audio.id}
+                variants={{
+                  hidden: { opacity: 0, y: 10 },
+                  visible: { opacity: 1, y: 0, transition: { duration: 0.3, ease: [0.16, 1, 0.3, 1] } },
                 }}
-                className="mr-3 accent-primary"
-              />
-              <Music className={cn('w-4 h-4 mr-2.5', selectedAudioId === audio.id ? 'text-primary' : 'text-muted-foreground')} />
-              <div className="flex-1 min-w-0">
-                <div className="text-sm font-medium text-foreground truncate">{audio.filename}</div>
-                <div className="text-xs text-muted-foreground">{audio.duration}s</div>
-              </div>
-              <button
-                type="button"
-                onClick={(e) => { e.preventDefault(); handleDeleteAudio(audio.id); }}
-                disabled={deletingAudioId === audio.id}
-                className="ml-2 p-1.5 rounded-lg text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors disabled:opacity-40 shrink-0"
-                aria-label={`Delete ${audio.filename}`}
+                exit={{ opacity: 0, x: -20, transition: { duration: 0.2 } }}
+                whileHover={{ scale: 1.01 }}
+                transition={{ type: 'spring', stiffness: 400, damping: 30 }}
+                className={cn(
+                  'flex items-center p-3.5 rounded-xl border cursor-pointer transition-all',
+                  selectedAudioId === audio.id
+                    ? 'bg-primary/10 border-primary/40 shadow-[0_0_12px_rgba(170,168,255,0.12)]'
+                    : 'bg-secondary/50 border-border hover:border-primary/20 hover:bg-secondary'
+                )}
               >
-                {deletingAudioId === audio.id
-                  ? <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                  : <Trash2 className="w-3.5 h-3.5" />}
-              </button>
-            </label>
-          ))}
-        </div>
+                <input
+                  type="radio"
+                  name="audio"
+                  value={audio.id}
+                  checked={selectedAudioId === audio.id}
+                  onChange={(e) => {
+                    stopPreview();
+                    setSongStartTime(0);
+                    setSelectedAudioId(e.target.value);
+                    setSelectedAudioDuration(audio.duration);
+                  }}
+                  className="mr-3 accent-primary"
+                />
+                <Music className={cn('w-4 h-4 mr-2.5 transition-colors', selectedAudioId === audio.id ? 'text-primary' : 'text-muted-foreground')} />
+                <div className="flex-1 min-w-0">
+                  <div className="text-sm font-medium text-foreground truncate">{audio.filename}</div>
+                  <div className="text-xs text-muted-foreground">{audio.duration}s</div>
+                </div>
+                <motion.button
+                  type="button"
+                  whileHover={{ scale: 1.15 }}
+                  whileTap={{ scale: 0.9 }}
+                  onClick={(e) => { e.preventDefault(); handleDeleteAudio(audio.id); }}
+                  disabled={deletingAudioId === audio.id}
+                  className="ml-2 p-1.5 rounded-lg text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors disabled:opacity-40 shrink-0"
+                  aria-label={`Delete ${audio.filename}`}
+                >
+                  {deletingAudioId === audio.id
+                    ? <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                    : <Trash2 className="w-3.5 h-3.5" />}
+                </motion.button>
+              </motion.label>
+            ))}
+          </AnimatePresence>
+        </motion.div>
       ) : (
-        <div className="flex flex-col items-center justify-center py-10 rounded-xl border border-dashed border-border bg-secondary/30 text-center">
+        <motion.div
+          initial={{ opacity: 0, scale: 0.97 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.4 }}
+          className="flex flex-col items-center justify-center py-10 rounded-xl border border-dashed border-border bg-secondary/30 text-center"
+        >
           <div className="w-10 h-10 rounded-xl bg-secondary flex items-center justify-center mb-3">
             <Music className="w-5 h-5 text-muted-foreground" />
           </div>
           <p className="text-sm font-medium text-foreground mb-1">No audio tracks yet</p>
           <p className="text-xs text-muted-foreground mb-4">Upload an MP3, WAV, or M4A file to get started</p>
-        </div>
+        </motion.div>
       )}
 
       {selectedAudio && (
@@ -273,12 +295,15 @@ export function AudioStep() {
         </div>
       )}
 
-      <label
+      <motion.label
+        whileHover={isUploading ? {} : { scale: 1.02, boxShadow: '0 0 12px rgba(170,168,255,0.15)' }}
+        whileTap={isUploading ? {} : { scale: 0.97 }}
+        transition={{ type: 'spring', stiffness: 400, damping: 20 }}
         className={cn(
           'inline-flex items-center gap-2 px-4 py-2 border rounded-xl text-sm font-medium transition-colors',
           isUploading
             ? 'bg-secondary/60 border-border text-muted-foreground cursor-not-allowed opacity-70'
-            : 'bg-secondary hover:bg-secondary/80 border-border text-foreground cursor-pointer'
+            : 'bg-secondary hover:bg-secondary/80 hover:border-primary/30 border-border text-foreground cursor-pointer'
         )}
       >
         {isUploading ? <><Loader2 className="w-3.5 h-3.5 animate-spin" /> Uploading…</> : <><Upload className="w-3.5 h-3.5" /> Upload Audio</>}
@@ -289,7 +314,7 @@ export function AudioStep() {
           className="hidden"
           disabled={isLoadingAudio || isUploading}
         />
-      </label>
+      </motion.label>
 
       <StepNav
         onNext={goNext}

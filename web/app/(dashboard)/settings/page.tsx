@@ -99,6 +99,7 @@ function StatusBadge({ status }: { status: Status }) {
 }
 
 function IntegrationCard({ config }: { config: IntegrationConfig }) {
+  // Card hover lift is handled by wrapper motion.div in parent
   const [apiKey, setApiKey] = useState("");
   const [status, setStatus] = useState<Status>("idle");
   const [errorMsg, setErrorMsg] = useState("");
@@ -252,18 +253,32 @@ function IntegrationCard({ config }: { config: IntegrationConfig }) {
 
 export default function SettingsPage() {
   return (
-    <div className="p-6 max-w-2xl mx-auto space-y-8">
-      <section>
+    <motion.div
+      className="p-6 max-w-2xl mx-auto space-y-8"
+      initial="hidden"
+      animate="visible"
+      variants={{ visible: { transition: { staggerChildren: 0.1 } } }}
+    >
+      <motion.section
+        variants={{ hidden: { opacity: 0, y: 16 }, visible: { opacity: 1, y: 0, transition: { duration: 0.4, ease: [0.16, 1, 0.3, 1] } } }}
+      >
         <h2 className="text-sm font-semibold text-foreground mb-1">API Connections</h2>
         <p className="text-xs text-muted-foreground mb-4">
           These keys are stored in the backend and never leave your server.
         </p>
         <div className="space-y-3">
-          {INTEGRATIONS.map((config) => (
-            <IntegrationCard key={config.id} config={config} />
+          {INTEGRATIONS.map((config, i) => (
+            <motion.div
+              key={config.id}
+              variants={{ hidden: { opacity: 0, y: 12 }, visible: { opacity: 1, y: 0, transition: { duration: 0.35, delay: i * 0.08, ease: [0.16, 1, 0.3, 1] } } }}
+              whileHover={{ y: -2, boxShadow: '0 8px 32px rgba(170,168,255,0.08)' }}
+              transition={{ type: 'spring', stiffness: 300, damping: 25 }}
+            >
+              <IntegrationCard config={config} />
+            </motion.div>
           ))}
         </div>
-      </section>
-    </div>
+      </motion.section>
+    </motion.div>
   );
 }

@@ -1,16 +1,12 @@
 'use client';
 
 import { AnimatePresence, motion } from 'motion/react';
-import { cn } from '@/lib/utils';
 import { STEP_LABELS, useWizard } from './WizardContext';
 import { AudioStep } from './steps/AudioStep';
 import { KeywordsStep } from './steps/KeywordsStep';
 import { SettingsStep } from './steps/SettingsStep';
 import { TextStep } from './steps/TextStep';
 import { GenerateStep } from './steps/GenerateStep';
-
-// cn is used by the unused variable linter check - keep import
-void cn;
 
 const STEPS = [AudioStep, KeywordsStep, SettingsStep, TextStep, GenerateStep];
 

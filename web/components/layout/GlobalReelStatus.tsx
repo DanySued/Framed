@@ -41,10 +41,13 @@ export function GlobalReelStatus() {
             {!allSettled ? (
               /* ── Generating / Awaiting Approval ── */
               <>
-                <Loader2
-                  className={`w-7 h-7 shrink-0 animate-spin ${awaitingApproval ? 'text-fp-yellow' : 'text-fp-green'}`}
-                  style={{ animationDuration: '1.8s' }}
-                />
+                <motion.div
+                  animate={{ rotate: 360 }}
+                  transition={{ duration: 1.8, repeat: Infinity, ease: 'linear' }}
+                  className={`w-7 h-7 shrink-0 ${awaitingApproval ? 'text-fp-yellow' : 'text-fp-green'}`}
+                >
+                  <Loader2 className="w-full h-full" />
+                </motion.div>
                 <div className="flex-1 min-w-0">
                   <p className="text-xs font-medium text-white truncate">
                     {awaitingApproval

@@ -2,6 +2,7 @@
 
 import { useRef } from 'react';
 import { Plus, X } from 'lucide-react';
+import { motion, AnimatePresence } from 'motion/react';
 import { cn } from '@/lib/utils';
 import { TextOverlay, useWizard } from '../WizardContext';
 import { StepNav } from './StepNav';
@@ -132,24 +133,42 @@ export function TextStep() {
           <h1 className="text-xl font-semibold text-foreground">Text overlay</h1>
           <p className="text-sm text-muted-foreground mt-1">Add text on top of your reel — optional.</p>
         </div>
-        <button
+        <motion.button
+          whileTap={{ scale: 0.92 }}
           onClick={() => setNoText(!noText)}
           className={cn(
             'relative w-11 h-6 rounded-full transition-colors duration-200 focus:outline-none shrink-0 mt-1',
-            !noText ? 'bg-primary' : 'bg-secondary border border-border'
+            !noText ? 'bg-primary shadow-[0_0_10px_rgba(170,168,255,0.4)]' : 'bg-secondary border border-border'
           )}
           aria-label="Toggle text overlay"
         >
-          <span className={cn('absolute top-0.5 left-0.5 w-5 h-5 rounded-full bg-white shadow transition-transform duration-200', !noText ? 'translate-x-5' : 'translate-x-0')} />
-        </button>
+          <motion.span
+            animate={{ x: !noText ? 20 : 0 }}
+            transition={{ type: 'spring', stiffness: 500, damping: 30 }}
+            className="absolute top-0.5 left-0.5 w-5 h-5 rounded-full bg-white shadow block"
+          />
+        </motion.button>
       </div>
 
+      <AnimatePresence mode="wait">
       {!noText ? (
-        <div className="flex gap-4 items-start bg-secondary/50 rounded-xl border border-border p-4">
+        <motion.div
+          key="text-editor"
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -8 }}
+          transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
+          className="flex gap-4 items-start bg-secondary/50 rounded-xl border border-border p-4"
+        >
           <div className="flex-1 min-w-0 space-y-2">
+            <AnimatePresence>
             {overlays.map((ov) => (
-              <div
+              <motion.div
                 key={ov.id}
+                initial={{ opacity: 0, x: -10 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -10, transition: { duration: 0.15 } }}
+                transition={{ duration: 0.2 }}
                 onClick={() => setSelectedOverlayId(ov.id)}
                 className={cn(
                   'flex items-center gap-1.5 p-2 rounded-xl border cursor-pointer transition-all',
@@ -196,16 +215,19 @@ export function TextStep() {
                     <X className="w-3.5 h-3.5" />
                   </button>
                 )}
-              </div>
+              </motion.div>
             ))}
+            </AnimatePresence>
 
-            <button
+            <motion.button
+              whileHover={{ color: 'var(--foreground)', x: 2 }}
+              whileTap={{ scale: 0.96 }}
               onClick={addOverlay}
               className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors py-1"
             >
               <Plus className="w-3.5 h-3.5" />
               Add text layer
-            </button>
+            </motion.button>
 
             {selectedOverlay && (
               <p className="text-xs text-muted-foreground">
@@ -223,12 +245,20 @@ export function TextStep() {
             onSelect={setSelectedOverlayId}
             onPositionChange={(id, pos) => updateOverlay(id, pos)}
           />
-        </div>
+        </motion.div>
       ) : (
-        <p className="text-xs text-muted-foreground bg-secondary/50 rounded-xl border border-border px-4 py-3">
+        <motion.p
+          key="no-text"
+          initial={{ opacity: 0, y: 4 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: 4 }}
+          transition={{ duration: 0.2 }}
+          className="text-xs text-muted-foreground bg-secondary/50 rounded-xl border border-border px-4 py-3"
+        >
           No text will be added to the reel.
-        </p>
+        </motion.p>
       )}
+      </AnimatePresence>
 
       <StepNav
         onNext={goNext}

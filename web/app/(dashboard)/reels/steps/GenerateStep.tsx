@@ -178,70 +178,92 @@ export function GenerateStep() {
     goToStep(0);
   };
 
+  const summaryRows = [
+    { label: 'Keywords', value: keywords.join(', ') },
+    { label: 'Duration', value: `${duration}s` },
+    { label: 'Reels', value: String(isBulk ? reelCount : 1) },
+    { label: 'Subtitles', value: subtitlesEnabled ? 'On' : 'Off' },
+    { label: 'Text overlay', value: noText ? 'None' : `${overlays.filter(o => o.text).length} layer(s)` },
+  ];
+
   // Pre-generate state
   if (!isActive) {
     return (
-      <div className="space-y-5">
-        <div>
+      <motion.div
+        className="space-y-5"
+        initial="hidden"
+        animate="visible"
+        variants={{ visible: { transition: { staggerChildren: 0.07 } } }}
+      >
+        <motion.div
+          variants={{ hidden: { opacity: 0, y: 12 }, visible: { opacity: 1, y: 0, transition: { duration: 0.3 } } }}
+        >
           <h1 className="text-xl font-semibold text-foreground">Ready to generate</h1>
           <p className="text-sm text-muted-foreground mt-1">Review your settings and hit generate.</p>
-        </div>
+        </motion.div>
 
-        <div className="bg-secondary/50 rounded-xl border border-border p-4 space-y-2 text-sm">
-          <div className="flex justify-between">
-            <span className="text-muted-foreground">Keywords</span>
-            <span className="text-foreground font-medium truncate max-w-[200px]">{keywords.join(', ')}</span>
-          </div>
-          <div className="flex justify-between">
-            <span className="text-muted-foreground">Duration</span>
-            <span className="text-foreground font-medium">{duration}s</span>
-          </div>
-          <div className="flex justify-between">
-            <span className="text-muted-foreground">Reels</span>
-            <span className="text-foreground font-medium">{isBulk ? reelCount : 1}</span>
-          </div>
-          <div className="flex justify-between">
-            <span className="text-muted-foreground">Subtitles</span>
-            <span className="text-foreground font-medium">{subtitlesEnabled ? 'On' : 'Off'}</span>
-          </div>
-          <div className="flex justify-between">
-            <span className="text-muted-foreground">Text overlay</span>
-            <span className="text-foreground font-medium">{noText ? 'None' : `${overlays.filter(o => o.text).length} layer(s)`}</span>
-          </div>
-        </div>
+        <motion.div
+          variants={{ hidden: { opacity: 0, y: 12 }, visible: { opacity: 1, y: 0, transition: { duration: 0.3 } } }}
+          className="bg-secondary/50 rounded-xl border border-border p-4 space-y-2 text-sm overflow-hidden"
+        >
+          {summaryRows.map((row, i) => (
+            <motion.div
+              key={row.label}
+              initial={{ opacity: 0, x: -10 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.15 + i * 0.05, duration: 0.25 }}
+              className="flex justify-between"
+            >
+              <span className="text-muted-foreground">{row.label}</span>
+              <span className="text-foreground font-medium truncate max-w-[200px]">{row.value}</span>
+            </motion.div>
+          ))}
+        </motion.div>
 
         {(validationError || error) && <ErrorBanner message={validationError || error!} />}
 
-        <div className="flex items-center justify-between pt-1">
-          <button
+        <motion.div
+          variants={{ hidden: { opacity: 0, y: 12 }, visible: { opacity: 1, y: 0, transition: { duration: 0.3 } } }}
+          className="flex items-center justify-between pt-1"
+        >
+          <motion.button
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.96 }}
             onClick={handleCleanup}
             disabled={cleanupState.status === 'loading'}
             className="inline-flex items-center gap-2 px-3.5 py-2 bg-secondary hover:bg-secondary/80 border border-border text-muted-foreground hover:text-foreground rounded-xl text-xs font-medium transition-colors disabled:opacity-50"
           >
             {cleanupState.status === 'loading' ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Trash2 className="w-3.5 h-3.5" />}
             {cleanupState.status === 'loading' ? 'Cleaning…' : cleanupState.status === 'done' ? `Freed ${cleanupState.freed_mb} MB` : 'Free Up Space'}
-          </button>
-        </div>
+          </motion.button>
+        </motion.div>
 
-        <div className="flex items-center justify-between pt-4">
-          <button
+        <motion.div
+          variants={{ hidden: { opacity: 0, y: 12 }, visible: { opacity: 1, y: 0, transition: { duration: 0.3 } } }}
+          className="flex items-center justify-between pt-4"
+        >
+          <motion.button
+            whileHover={{ x: -2 }}
+            whileTap={{ scale: 0.95 }}
             onClick={goBack}
             className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm text-muted-foreground hover:text-foreground hover:bg-secondary border border-transparent hover:border-border transition-all"
           >
             <ChevronLeft className="w-4 h-4" />
             Back
-          </button>
+          </motion.button>
 
           <motion.button
+            whileHover={{ scale: 1.04, boxShadow: '0 0 24px rgba(170,168,255,0.45)' }}
             whileTap={{ scale: 0.97 }}
+            transition={{ type: 'spring', stiffness: 400, damping: 20 }}
             onClick={handleGenerate}
             disabled={isGenerating}
-            className="px-6 py-3 bg-primary hover:opacity-90 disabled:opacity-40 disabled:cursor-not-allowed text-primary-foreground font-semibold rounded-xl flex items-center justify-center gap-2 transition-opacity"
+            className="px-6 py-3 bg-primary hover:opacity-95 disabled:opacity-40 disabled:cursor-not-allowed text-primary-foreground font-semibold rounded-xl flex items-center justify-center gap-2 transition-opacity shadow-lg shadow-primary/25"
           >
             {isBulk ? `Generate ${reelCount} Reels` : 'Generate Reel'}
           </motion.button>
-        </div>
-      </div>
+        </motion.div>
+      </motion.div>
     );
   }
 
@@ -250,13 +272,15 @@ export function GenerateStep() {
     return (
       <div className="space-y-5">
         <div className="flex justify-end">
-          <button
+          <motion.button
+            whileHover={{ scale: 1.04 }}
+            whileTap={{ scale: 0.95 }}
             onClick={reset}
             className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-medium border border-border bg-secondary hover:bg-destructive/10 hover:border-destructive/40 hover:text-destructive text-muted-foreground transition-colors"
           >
             <Square className="w-3 h-3" />
             Stop
-          </button>
+          </motion.button>
         </div>
 
         <div className="flex flex-col items-center gap-5 py-12">
@@ -344,13 +368,15 @@ export function GenerateStep() {
                   );
                 })}
               </div>
-              <button
+              <motion.button
+                whileHover={approvingJob === job.job_id || replacingClips.size > 0 ? {} : { scale: 1.02, boxShadow: '0 0 20px rgba(170,168,255,0.4)' }}
+                whileTap={approvingJob === job.job_id || replacingClips.size > 0 ? {} : { scale: 0.97 }}
                 onClick={() => handleApproveClips(job.job_id)}
                 disabled={approvingJob === job.job_id || replacingClips.size > 0}
-                className="w-full px-6 py-3 bg-primary hover:opacity-90 disabled:opacity-40 disabled:cursor-not-allowed text-primary-foreground font-semibold rounded-xl flex items-center justify-center gap-2 transition-opacity"
+                className="w-full px-6 py-3 bg-primary hover:opacity-90 disabled:opacity-40 disabled:cursor-not-allowed text-primary-foreground font-semibold rounded-xl flex items-center justify-center gap-2 transition-opacity shadow-lg shadow-primary/25"
               >
                 {approvingJob === job.job_id ? <><Loader2 className="w-4 h-4 animate-spin" /> Starting render…</> : 'Approve & Generate Reel'}
-              </button>
+              </motion.button>
             </div>
           );
         })}
@@ -373,13 +399,29 @@ export function GenerateStep() {
 
   // Done state
   return (
-    <div className="space-y-6">
-      <div className="flex items-center gap-3">
-        <CheckCircle className="w-5 h-5 text-emerald-400" />
+    <motion.div
+      className="space-y-6"
+      initial={{ opacity: 0, y: 16 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+    >
+      <motion.div
+        className="flex items-center gap-3"
+        initial={{ opacity: 0, scale: 0.9 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ type: 'spring', stiffness: 300, damping: 20, delay: 0.1 }}
+      >
+        <motion.div
+          initial={{ scale: 0 }}
+          animate={{ scale: 1 }}
+          transition={{ type: 'spring', stiffness: 400, damping: 15, delay: 0.15 }}
+        >
+          <CheckCircle className="w-5 h-5 text-emerald-400" />
+        </motion.div>
         <h2 className="text-base font-semibold text-foreground">
           {doneJobs.length} of {jobs.length} reel{jobs.length !== 1 ? 's' : ''} ready
         </h2>
-      </div>
+      </motion.div>
 
       {doneJobs.length > 0 && (
         <>
@@ -477,12 +519,14 @@ export function GenerateStep() {
         ) : null
       )}
 
-      <button
+      <motion.button
+        whileHover={{ scale: 1.02 }}
+        whileTap={{ scale: 0.97 }}
         onClick={handleCreateNew}
         className="w-full px-6 py-3 bg-secondary hover:bg-secondary/80 border border-border text-foreground font-semibold rounded-xl transition-colors"
       >
         Create New Reel
-      </button>
-    </div>
+      </motion.button>
+    </motion.div>
   );
 }

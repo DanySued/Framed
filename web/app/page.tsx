@@ -161,7 +161,7 @@ export default function LandingPage() {
       </section>
 
       {/* ── Features ── */}
-      <section className="fp-section border-t border-border/60">
+      <section className="fr-section border-t border-border/60">
         <div className="fr-container">
           {/* Section heading */}
           <motion.div
@@ -203,7 +203,7 @@ export default function LandingPage() {
       </section>
 
       {/* ── How it works ── */}
-      <section id="how-it-works" className="fp-section border-t border-border/60">
+      <section id="how-it-works" className="fr-section border-t border-border/60">
         <div className="fr-container">
           <motion.div
             variants={fadeUp}
@@ -251,7 +251,7 @@ export default function LandingPage() {
       </section>
 
       {/* ── CTA ── */}
-      <section className="fp-section border-t border-border/60">
+      <section className="fr-section border-t border-border/60">
         <div className="fr-container">
           <motion.div
             variants={fadeUp}
