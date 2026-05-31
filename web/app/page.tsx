@@ -1,5 +1,281 @@
-import { redirect } from "next/navigation";
+'use client';
 
-export default function RootPage() {
-  redirect("/reels");
+import Link from 'next/link';
+import { motion, useReducedMotion } from 'motion/react';
+import {
+  Clapperboard,
+  Wand2,
+  Music2,
+  Type,
+  Zap,
+  ArrowRight,
+  Sparkles,
+} from 'lucide-react';
+
+const FEATURES = [
+  {
+    icon: Music2,
+    title: 'Audio-first workflow',
+    description:
+      'Upload your audio track and let Framed build the reel around it — timing, cuts, and rhythm all handled automatically.',
+  },
+  {
+    icon: Type,
+    title: 'AI-generated captions',
+    description:
+      'Smart keyword extraction turns your audio into punchy on-screen text. Edit or regenerate any line instantly.',
+  },
+  {
+    icon: Wand2,
+    title: 'Guided step-by-step wizard',
+    description:
+      'Five focused steps take you from raw audio to a finished reel in minutes, with no timeline headaches.',
+  },
+  {
+    icon: Zap,
+    title: 'Background generation',
+    description:
+      'Kick off a render and keep working. Framed processes your reel in the background and notifies you when it's ready.',
+  },
+];
+
+const STEPS = [
+  { number: '01', label: 'Upload audio', description: 'Drop in your track or record directly.' },
+  { number: '02', label: 'Generate keywords', description: 'AI picks the best moments for on-screen text.' },
+  { number: '03', label: 'Tune settings', description: 'Choose style, ratio, and visual options.' },
+  { number: '04', label: 'Review text', description: 'Edit captions before they're baked in.' },
+  { number: '05', label: 'Export reel', description: 'Render in the background, download instantly.' },
+];
+
+const fadeUp = {
+  hidden: { opacity: 0, y: 24 },
+  show: (i = 0) => ({
+    opacity: 1,
+    y: 0,
+    transition: { duration: 0.5, delay: i * 0.07, ease: [0.16, 1, 0.3, 1] as [number, number, number, number] },
+  }),
+};
+
+export default function LandingPage() {
+  const shouldReduce = useReducedMotion();
+
+  return (
+    <div className="min-h-screen bg-background text-foreground overflow-x-hidden">
+      {/* ── Nav ── */}
+      <header className="fixed top-0 inset-x-0 z-50 h-14 flex items-center px-6 border-b border-border bg-background/80 backdrop-blur-sm">
+        <div className="fp-container w-full flex items-center justify-between">
+          <Link href="/" className="flex items-center gap-2">
+            <div className="flex items-center justify-center w-7 h-7 rounded-lg bg-primary/15 ring-1 ring-primary/30">
+              <Clapperboard className="w-3.5 h-3.5 text-primary" />
+            </div>
+            <span className="text-sm font-semibold tracking-tight">Framed</span>
+          </Link>
+          <Link
+            href="/reels"
+            className="flex items-center gap-1.5 text-sm font-medium text-primary hover:brightness-110 transition-all"
+          >
+            Open app <ArrowRight className="w-3.5 h-3.5" />
+          </Link>
+        </div>
+      </header>
+
+      {/* ── Hero ── */}
+      <section className="relative min-h-screen flex items-center justify-center pt-14">
+        {/* Background glows */}
+        <div className="pointer-events-none absolute inset-0 overflow-hidden">
+          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-primary/8 blur-[140px] rounded-full" />
+          <div className="absolute bottom-0 right-1/4 w-[500px] h-[250px] bg-primary/5 blur-[120px] rounded-full" />
+        </div>
+
+        <div className="fp-container relative z-10 text-center py-24 sm:py-32">
+          {/* Badge */}
+          <motion.div
+            variants={fadeUp}
+            initial={shouldReduce ? 'show' : 'hidden'}
+            animate="show"
+            custom={0}
+            className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full glass text-xs font-medium text-primary mb-8"
+          >
+            <Sparkles className="w-3 h-3" />
+            AI-powered reels creation
+          </motion.div>
+
+          {/* Headline */}
+          <motion.h1
+            variants={fadeUp}
+            initial={shouldReduce ? 'show' : 'hidden'}
+            animate="show"
+            custom={1}
+            className="text-5xl sm:text-6xl lg:text-7xl font-serif leading-[1.05] tracking-tight mb-6"
+          >
+            Turn audio into<br />
+            <span className="gradient-text italic">scroll-stopping</span> reels
+          </motion.h1>
+
+          {/* Subheading */}
+          <motion.p
+            variants={fadeUp}
+            initial={shouldReduce ? 'show' : 'hidden'}
+            animate="show"
+            custom={2}
+            className="max-w-xl mx-auto text-lg text-muted-foreground leading-relaxed mb-10"
+          >
+            Framed takes your audio and produces a fully captioned video reel in minutes — no editing
+            experience needed, no timeline to wrestle with.
+          </motion.p>
+
+          {/* CTAs */}
+          <motion.div
+            variants={fadeUp}
+            initial={shouldReduce ? 'show' : 'hidden'}
+            animate="show"
+            custom={3}
+            className="flex flex-col sm:flex-row items-center justify-center gap-3"
+          >
+            <Link
+              href="/reels"
+              className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-primary text-primary-foreground font-semibold text-sm shadow-lg shadow-primary/20 hover:brightness-110 transition-all"
+            >
+              <Clapperboard className="w-4 h-4" />
+              Start creating
+            </Link>
+            <a
+              href="#how-it-works"
+              className="inline-flex items-center gap-2 px-6 py-3 rounded-xl glass text-sm font-medium text-foreground hover:bg-white/[0.08] transition-all"
+            >
+              See how it works
+            </a>
+          </motion.div>
+        </div>
+      </section>
+
+      {/* ── Features ── */}
+      <section className="fp-section border-t border-border">
+        <div className="fp-container">
+          {/* Section heading */}
+          <motion.div
+            variants={fadeUp}
+            initial={shouldReduce ? 'show' : 'hidden'}
+            whileInView="show"
+            viewport={{ once: true, amount: 0.3 }}
+            className="text-center mb-14"
+          >
+            <p className="fp-eyebrow">Features</p>
+            <h2 className="fp-h2">Everything you need to ship reels fast</h2>
+          </motion.div>
+
+          {/* Feature cards */}
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
+            {FEATURES.map((f, i) => (
+              <motion.div
+                key={f.title}
+                variants={fadeUp}
+                initial={shouldReduce ? 'show' : 'hidden'}
+                whileInView="show"
+                viewport={{ once: true, amount: 0.2 }}
+                custom={i}
+                className="glass rounded-2xl p-6 flex flex-col gap-4 hover:bg-white/[0.07] transition-colors"
+              >
+                <div className="w-10 h-10 rounded-xl bg-primary/10 ring-1 ring-primary/20 flex items-center justify-center shrink-0">
+                  <f.icon className="w-5 h-5 text-primary" />
+                </div>
+                <div>
+                  <h3 className="text-sm font-semibold text-foreground mb-1.5">{f.title}</h3>
+                  <p className="text-sm text-muted-foreground leading-relaxed">{f.description}</p>
+                </div>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ── How it works ── */}
+      <section id="how-it-works" className="fp-section border-t border-border">
+        <div className="fp-container">
+          <motion.div
+            variants={fadeUp}
+            initial={shouldReduce ? 'show' : 'hidden'}
+            whileInView="show"
+            viewport={{ once: true, amount: 0.3 }}
+            className="text-center mb-14"
+          >
+            <p className="fp-eyebrow">How it works</p>
+            <h2 className="fp-h2">Five steps, one great reel</h2>
+          </motion.div>
+
+          <div className="max-w-2xl mx-auto space-y-0">
+            {STEPS.map((step, i) => (
+              <motion.div
+                key={step.number}
+                variants={fadeUp}
+                initial={shouldReduce ? 'show' : 'hidden'}
+                whileInView="show"
+                viewport={{ once: true, amount: 0.4 }}
+                custom={i}
+                className="flex gap-6 relative"
+              >
+                {/* Connector line */}
+                {i < STEPS.length - 1 && (
+                  <div className="absolute left-[18px] top-10 bottom-0 w-px bg-border" />
+                )}
+
+                {/* Step indicator */}
+                <div className="shrink-0 w-9 h-9 rounded-full glass ring-1 ring-primary/20 flex items-center justify-center text-xs font-semibold text-primary z-10">
+                  {step.number}
+                </div>
+
+                {/* Content */}
+                <div className="pb-10">
+                  <p className="text-sm font-semibold text-foreground mb-0.5">{step.label}</p>
+                  <p className="text-sm text-muted-foreground">{step.description}</p>
+                </div>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ── CTA ── */}
+      <section className="fp-section border-t border-border">
+        <div className="fp-container">
+          <motion.div
+            variants={fadeUp}
+            initial={shouldReduce ? 'show' : 'hidden'}
+            whileInView="show"
+            viewport={{ once: true, amount: 0.4 }}
+            className="max-w-2xl mx-auto text-center glass rounded-3xl p-12 glow"
+          >
+            <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-primary/30 to-primary/10 ring-1 ring-primary/40 flex items-center justify-center mx-auto mb-6 animate-float">
+              <Clapperboard className="w-6 h-6 text-primary" />
+            </div>
+            <h2 className="fp-h2 mb-4">Ready to make your first reel?</h2>
+            <p className="text-muted-foreground mb-8 leading-relaxed">
+              Drop in your audio and Framed will handle the rest — captions, timing, and export,
+              all in the background while you do other things.
+            </p>
+            <Link
+              href="/reels"
+              className="inline-flex items-center gap-2 px-8 py-3.5 rounded-xl bg-primary text-primary-foreground font-semibold text-sm shadow-lg shadow-primary/20 hover:brightness-110 transition-all"
+            >
+              <Clapperboard className="w-4 h-4" />
+              Open Framed
+            </Link>
+          </motion.div>
+        </div>
+      </section>
+
+      {/* ── Footer ── */}
+      <footer className="border-t border-border py-8">
+        <div className="fp-container flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-muted-foreground">
+          <div className="flex items-center gap-2">
+            <div className="flex items-center justify-center w-5 h-5 rounded-md bg-primary/15 ring-1 ring-primary/30">
+              <Clapperboard className="w-2.5 h-2.5 text-primary" />
+            </div>
+            <span className="font-medium text-foreground">Framed</span>
+          </div>
+          <p>Private access only · Your data stays yours</p>
+        </div>
+      </footer>
+    </div>
+  );
 }
