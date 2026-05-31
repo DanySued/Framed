@@ -23,6 +23,12 @@ const instrumentSerif = Instrument_Serif({
 export const metadata: Metadata = {
   title: "Framed",
   description: "AI-powered video reels creator",
+  icons: {
+    icon: [
+      { url: "/favicon.svg", type: "image/svg+xml" },
+    ],
+    shortcut: "/favicon.svg",
+  },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
