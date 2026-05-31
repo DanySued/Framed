@@ -53,7 +53,7 @@ function ProgressBar({ phaseProgress, status }: { phaseProgress: number; status:
     return () => { if (rafRef.current !== null) cancelAnimationFrame(rafRef.current); };
   }, [phaseProgress]);
 
-  const barColor = isFailed ? 'from-red-500 to-red-600' : isDone ? 'from-emerald-500 to-green-500' : 'from-blue-500 to-purple-500';
+  const barColor = isFailed ? 'from-red-500 to-red-600' : isDone ? 'from-emerald-500 to-green-500' : 'from-fr-gold-dim to-fr-gold';
   const width = isFailed ? 100 : isDone ? 100 : Math.max(displayed, 2);
 
   return (
@@ -253,7 +253,7 @@ export function GenerateStep() {
           </motion.button>
 
           <motion.button
-            whileHover={{ scale: 1.04, boxShadow: '0 0 24px rgba(170,168,255,0.45)' }}
+            whileHover={{ scale: 1.04, boxShadow: '0 0 24px rgba(212,168,75,0.45)' }}
             whileTap={{ scale: 0.97 }}
             transition={{ type: 'spring', stiffness: 400, damping: 20 }}
             onClick={handleGenerate}
@@ -369,7 +369,7 @@ export function GenerateStep() {
                 })}
               </div>
               <motion.button
-                whileHover={approvingJob === job.job_id || replacingClips.size > 0 ? {} : { scale: 1.02, boxShadow: '0 0 20px rgba(170,168,255,0.4)' }}
+                whileHover={approvingJob === job.job_id || replacingClips.size > 0 ? {} : { scale: 1.02, boxShadow: '0 0 20px rgba(212,168,75,0.4)' }}
                 whileTap={approvingJob === job.job_id || replacingClips.size > 0 ? {} : { scale: 0.97 }}
                 onClick={() => handleApproveClips(job.job_id)}
                 disabled={approvingJob === job.job_id || replacingClips.size > 0}
@@ -442,7 +442,7 @@ export function GenerateStep() {
                 {doneJobs[0].srt_path && (
                   <button
                     onClick={() => triggerDownload(`/api/reels/download/${doneJobs[0].reel_id}/srt`, `${REEL_TITLE.replace(/\s+/g, '_')}.srt`)}
-                    className="px-4 py-3 bg-sky-700 hover:bg-sky-600 text-white font-semibold rounded-xl flex items-center gap-2 transition-colors shadow-lg"
+                    className="px-4 py-3 bg-secondary hover:bg-secondary/80 border border-border text-foreground font-semibold rounded-xl flex items-center gap-2 transition-colors"
                   >
                     <Download className="w-4 h-4" />
                     .srt
@@ -494,7 +494,7 @@ export function GenerateStep() {
                 {doneJobs[previewIndex].srt_path && (
                   <button
                     onClick={() => triggerDownload(`/api/reels/download/${doneJobs[previewIndex].reel_id}/srt`, `${REEL_TITLE.replace(/\s+/g, '_')}_${previewIndex + 1}.srt`)}
-                    className="px-4 py-2.5 bg-sky-700 hover:bg-sky-600 text-white font-medium rounded-xl flex items-center gap-2 transition-colors text-sm"
+                    className="px-4 py-2.5 bg-secondary hover:bg-secondary/80 border border-border text-foreground font-medium rounded-xl flex items-center gap-2 transition-colors text-sm"
                   >
                     <Download className="w-4 h-4" />
                     .srt

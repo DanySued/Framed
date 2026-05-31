@@ -53,7 +53,7 @@ export function StepNav({
           </motion.button>
         )}
         <motion.button
-          whileHover={nextDisabled ? {} : { scale: 1.03, boxShadow: '0 0 20px rgba(170,168,255,0.35)' }}
+          whileHover={nextDisabled ? {} : { scale: 1.03, boxShadow: '0 0 20px rgba(212,168,75,0.35)' }}
           whileTap={nextDisabled ? {} : { scale: 0.97 }}
           transition={{ type: 'spring', stiffness: 400, damping: 20 }}
           onClick={onNext}

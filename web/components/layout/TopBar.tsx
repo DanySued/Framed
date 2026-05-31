@@ -63,7 +63,7 @@ export default function TopBar() {
           whileHover={{ scale: 1.08, rotate: -4 }}
           whileTap={{ scale: 0.95 }}
           transition={{ type: "spring", stiffness: 400, damping: 20 }}
-          className="flex items-center justify-center w-7 h-7 rounded-lg bg-primary/15 ring-1 ring-primary/30 group-hover:bg-primary/25 group-hover:ring-primary/50 group-hover:shadow-[0_0_14px_rgba(170,168,255,0.35)] transition-all duration-200"
+          className="flex items-center justify-center w-7 h-7 rounded-lg bg-primary/15 ring-1 ring-primary/30 group-hover:bg-primary/25 group-hover:ring-primary/50 group-hover:shadow-[0_0_14px_rgba(212,168,75,0.3)] transition-all duration-200"
         >
           <Clapperboard className="w-3.5 h-3.5 text-primary" />
         </motion.div>
@@ -92,13 +92,7 @@ export default function TopBar() {
               : "text-muted-foreground hover:text-foreground hover:bg-foreground/[0.07]"
           )}
         >
-          <motion.span
-            whileHover={{ rotate: 30 }}
-            transition={{ type: "spring", stiffness: 300, damping: 20 }}
-            className="flex items-center"
-          >
-            <Settings className="w-4 h-4" />
-          </motion.span>
+          <Settings className="w-4 h-4" />
           {pathname === "/settings" && (
             <motion.span
               layoutId="nav-active-dot"

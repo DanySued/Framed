@@ -176,12 +176,12 @@ export function AudioStep() {
                   visible: { opacity: 1, y: 0, transition: { duration: 0.3, ease: [0.16, 1, 0.3, 1] } },
                 }}
                 exit={{ opacity: 0, x: -20, transition: { duration: 0.2 } }}
-                whileHover={{ scale: 1.01 }}
+                whileHover={{}}
                 transition={{ type: 'spring', stiffness: 400, damping: 30 }}
                 className={cn(
                   'flex items-center p-3.5 rounded-xl border cursor-pointer transition-all',
                   selectedAudioId === audio.id
-                    ? 'bg-primary/10 border-primary/40 shadow-[0_0_12px_rgba(170,168,255,0.12)]'
+                    ? 'bg-primary/10 border-primary/40 shadow-[0_0_12px_rgba(212,168,75,0.12)]'
                     : 'bg-secondary/50 border-border hover:border-primary/20 hover:bg-secondary'
                 )}
               >
@@ -296,7 +296,7 @@ export function AudioStep() {
       )}
 
       <motion.label
-        whileHover={isUploading ? {} : { scale: 1.02, boxShadow: '0 0 12px rgba(170,168,255,0.15)' }}
+        whileHover={isUploading ? {} : { scale: 1.02, boxShadow: '0 0 12px rgba(212,168,75,0.15)' }}
         whileTap={isUploading ? {} : { scale: 0.97 }}
         transition={{ type: 'spring', stiffness: 400, damping: 20 }}
         className={cn(

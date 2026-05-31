@@ -10,26 +10,23 @@ import { GenerateStep } from './steps/GenerateStep';
 
 const STEPS = [AudioStep, KeywordsStep, SettingsStep, TextStep, GenerateStep];
 
-const STEP_DOT_GLOW = '0 0 0 4px rgba(170,168,255,0.2)';
-const STEP_DOT_NONE = '0 0 0 0px rgba(170,168,255,0)';
+const STEP_DOT_GLOW = '0 0 0 4px rgba(212,168,75,0.2)';
+const STEP_DOT_NONE = '0 0 0 0px rgba(212,168,75,0)';
 
 const slideVariants = {
   enter: (direction: number) => ({
-    x: direction > 0 ? 48 : -48,
+    x: direction > 0 ? 32 : -32,
     opacity: 0,
-    filter: 'blur(4px)',
   }),
   center: {
     x: 0,
     opacity: 1,
-    filter: 'blur(0px)',
-    transition: { duration: 0.35, ease: [0.16, 1, 0.3, 1] as [number, number, number, number] },
+    transition: { duration: 0.3, ease: [0.16, 1, 0.3, 1] as [number, number, number, number] },
   },
   exit: (direction: number) => ({
-    x: direction > 0 ? -48 : 48,
+    x: direction > 0 ? -32 : 32,
     opacity: 0,
-    filter: 'blur(2px)',
-    transition: { duration: 0.2, ease: [0.4, 0, 1, 1] as [number, number, number, number] },
+    transition: { duration: 0.18, ease: [0.4, 0, 1, 1] as [number, number, number, number] },
   }),
 };
 
@@ -71,10 +68,9 @@ export function WizardShell() {
             initial={{ opacity: 0, y: 4 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.25 }}
-            className="text-xs text-muted-foreground"
+            className="text-xs text-foreground font-medium"
           >
-            Step {currentStep + 1} of {STEP_LABELS.length}{' '}
-            <span className="text-foreground font-medium">— {STEP_LABELS[currentStep]}</span>
+            {STEP_LABELS[currentStep]}
           </motion.p>
         </div>
       </div>

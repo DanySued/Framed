@@ -99,11 +99,6 @@ export default function LoginPage() {
       {/* Background orbs — cinematic amber glow */}
       <div className="absolute top-[-80px] left-1/2 -translate-x-1/2 w-[700px] h-[320px] bg-primary/6 blur-[140px] rounded-full pointer-events-none" />
       <div className="absolute bottom-[-40px] right-1/4 w-[450px] h-[220px] bg-primary/4 blur-[110px] rounded-full pointer-events-none" />
-      {/* Subtle film strip decorations */}
-      <div className="absolute left-0 top-0 bottom-0 w-8 pointer-events-none opacity-[0.04]"
-        style={{ backgroundImage: 'repeating-linear-gradient(180deg, transparent, transparent 20px, white 20px, white 22px, transparent 22px, transparent 36px, white 36px, white 38px)' }} />
-      <div className="absolute right-0 top-0 bottom-0 w-8 pointer-events-none opacity-[0.04]"
-        style={{ backgroundImage: 'repeating-linear-gradient(180deg, transparent, transparent 20px, white 20px, white 22px, transparent 22px, transparent 36px, white 36px, white 38px)' }} />
 
       <div className="relative w-full max-w-sm">
         {/* Logo */}
@@ -113,13 +108,9 @@ export default function LoginPage() {
           transition={{ type: 'spring', stiffness: 280, damping: 22 }}
           className="flex flex-col items-center mb-9"
         >
-          <motion.div
-            animate={shouldReduce ? {} : { y: [0, -4, 0] }}
-            transition={{ duration: 3.5, repeat: Infinity, ease: 'easeInOut' }}
-            className="w-16 h-16 rounded-2xl bg-gradient-to-br from-primary/25 to-primary/5 ring-1 ring-primary/35 flex items-center justify-center mb-4 shadow-2xl shadow-primary/20"
-          >
+          <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-primary/25 to-primary/5 ring-1 ring-primary/35 flex items-center justify-center mb-4 shadow-2xl shadow-primary/20">
             <Film className="w-7 h-7 text-primary" />
-          </motion.div>
+          </div>
           <h1 className="text-2xl font-normal text-fr-white tracking-tight" style={{ fontFamily: 'var(--font-instrument-serif), Georgia, serif' }}>
             Framed
           </h1>
