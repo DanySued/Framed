@@ -1,10 +1,12 @@
 import { useState } from 'react'
 import {
-  View, Text, Pressable, ScrollView, ActivityIndicator, TextInput, Modal,
+  View, Text, Pressable, ScrollView, ActivityIndicator, TextInput, Modal, Alert,
 } from 'react-native'
 import { useRouter } from 'expo-router'
 import { supabase } from '@/lib/supabase'
 import { useProjects, useCreateProject, useDeleteProject } from '@/features/projects/hooks'
+import { usePreferences } from '@/features/preferences/hooks'
+import { useAutoCompile } from '@/features/preferences/hooks'
 import type { Project } from '@/types'
 import { FR_GOLD } from '@/lib/theme'
 
@@ -15,13 +17,38 @@ export default function ProjectsScreen() {
   const deleteProject = useDeleteProject()
   const [newTitle, setNewTitle] = useState('')
   const [showModal, setShowModal] = useState(false)
+  const [showAutoModal, setShowAutoModal] = useState(false)
+  const [pendingProjectId, setPendingProjectId] = useState<string | null>(null)
+  const { data: prefs } = usePreferences()
+  const autoCompile = useAutoCompile(pendingProjectId ?? '')
 
   const handleCreate = async () => {
     if (!newTitle.trim()) return
     const project = await createProject.mutateAsync(newTitle.trim())
     setNewTitle('')
     setShowModal(false)
-    router.push(`/project/${project.id}`)
+    if (prefs?.tags?.length) {
+      // Offer auto-compile if preferences are set
+      setPendingProjectId(project.id)
+      setShowAutoModal(true)
+    } else {
+      router.push(`/project/${project.id}`)
+    }
+  }
+
+  const handleAutoCompile = async () => {
+    if (!pendingProjectId) return
+    try {
+      const result = await autoCompile.mutateAsync()
+      setShowAutoModal(false)
+      Alert.alert(
+        'Timeline ready!',
+        `Added ${result.clips_added} clips (${result.total_duration.toFixed(1)}s) from "${result.query}".`,
+        [{ text: 'Open editor', onPress: () => router.push(`/project/${pendingProjectId}`) }]
+      )
+    } catch (err: any) {
+      Alert.alert('Auto-compile failed', err.message)
+    }
   }
 
   return (
@@ -30,10 +57,10 @@ export default function ProjectsScreen() {
       <View className="flex-row items-center justify-between mb-6">
         <Text className="text-xl font-bold text-foreground">Projects</Text>
         <Pressable
-          onPress={() => supabase.auth.signOut()}
+          onPress={() => router.push('/settings')}
           className="px-3 py-1.5 rounded-xl border border-border"
         >
-          <Text className="text-xs text-muted-foreground">Sign out</Text>
+          <Text className="text-xs text-muted-foreground">⚙ Settings</Text>
         </Pressable>
       </View>
 
@@ -81,6 +108,42 @@ export default function ProjectsScreen() {
           onDelete={() => deleteProject.mutate(project.id)}
         />
       ))}
+
+      {/* Auto-compile modal */}
+      <Modal visible={showAutoModal} transparent animationType="fade">
+        <View className="flex-1 bg-black/60 items-center justify-center px-6">
+          <View className="w-full max-w-sm bg-card rounded-2xl p-6 border border-border">
+            <Text className="text-base font-semibold text-foreground mb-2">
+              Auto-compile timeline?
+            </Text>
+            <Text className="text-xs text-muted-foreground mb-5">
+              I'll search Pexels using your preferences ({prefs?.tags?.slice(0, 3).join(', ')}) and
+              build a {prefs?.total_duration}s timeline automatically.
+            </Text>
+            <View className="flex-row gap-3">
+              <Pressable
+                onPress={() => {
+                  setShowAutoModal(false)
+                  if (pendingProjectId) router.push(`/project/${pendingProjectId}`)
+                }}
+                className="flex-1 py-2.5 rounded-xl border border-border items-center"
+              >
+                <Text className="text-sm text-muted-foreground">Start empty</Text>
+              </Pressable>
+              <Pressable
+                onPress={handleAutoCompile}
+                disabled={autoCompile.isPending}
+                className="flex-1 py-2.5 rounded-xl bg-primary items-center disabled:opacity-40"
+              >
+                {autoCompile.isPending
+                  ? <ActivityIndicator color="#0a0800" size="small" />
+                  : <Text className="text-primary-foreground font-semibold text-sm">Auto-compile</Text>
+                }
+              </Pressable>
+            </View>
+          </View>
+        </View>
+      </Modal>
 
       {/* New project modal */}
       <Modal visible={showModal} transparent animationType="fade">

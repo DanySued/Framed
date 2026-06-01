@@ -27,3 +27,24 @@ export function useUpsertPreferences() {
     onSuccess: () => qc.invalidateQueries({ queryKey: ['preferences'] }),
   })
 }
+
+export function useAutoCompile(projectId: string) {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: async () => {
+      const res = await apiFetch('/api/auto-compile', {
+        method: 'POST',
+        body: JSON.stringify({ project_id: projectId }),
+      })
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}))
+        throw new Error(err.error ?? 'Auto-compile failed')
+      }
+      return res.json() as Promise<{ clips_added: number; total_duration: number; query: string }>
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['clips', projectId] })
+      qc.invalidateQueries({ queryKey: ['projects', projectId] })
+    },
+  })
+}
