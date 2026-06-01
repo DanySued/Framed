@@ -34,7 +34,8 @@
       [
         "expo-document-picker",
         { "iCloudContainerEnvironment": "Production" }
-      ]
+      ],
+      "react-native-reanimated"
     ],
     "experiments": {
       "typedRoutes": true
