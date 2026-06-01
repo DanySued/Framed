@@ -1,3 +1,4 @@
+import * as Sentry from '@sentry/node'
 import PgBoss from 'pg-boss'
 import fs from 'node:fs'
 import path from 'node:path'
@@ -5,6 +6,12 @@ import os from 'node:os'
 import { supabase } from './supabase.js'
 import { renderTimeline } from './ffmpeg.js'
 import type { RenderJobPayload } from './types.js'
+
+Sentry.init({
+  dsn: process.env.SENTRY_DSN,
+  enabled: !!process.env.SENTRY_DSN,
+  tracesSampleRate: 0.1,
+})
 
 const QUEUE_NAME = 'render'
 

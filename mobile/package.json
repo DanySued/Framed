@@ -31,7 +31,8 @@
     "expo-file-system": "~18.0.1",
     "expo-av": "~15.0.1",
     "react-native-reanimated": "~3.16.1",
-    "react-native-gesture-handler": "~2.20.2"
+    "react-native-gesture-handler": "~2.20.2",
+    "@sentry/react-native": "~6.4.0"
   },
   "devDependencies": {
     "@babel/core": "^7.25.0",

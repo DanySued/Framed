@@ -1,8 +1,6 @@
 # Python
 __pycache__/
 *.pyc
-.env
-.env.keys
 *.db
 
 # Node
@@ -10,7 +8,27 @@ node_modules/
 .next/
 out/
 build/
+dist/
+
+# Env
+.env
+.env.local
+.env.keys
+*.env
+
+# Expo / EAS
+mobile/.expo/
+mobile/dist/
+mobile/web-build/
+google-service-account.json
+
+# Supabase local dev
+.branches/
+.temp/
 
 # Misc
 .DS_Store
 *.log
+.playwright-mcp/
+"Screenshot*.png"
+Screenshot*.png

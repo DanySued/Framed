@@ -1,0 +1,40 @@
+name: Build and Deploy
+on:
+  push:
+    branches:
+      - master
+    paths:
+      - "mobile/**"
+
+jobs:
+  build-ios:
+    name: Build iOS (production)
+    type: build
+    params:
+      platform: ios
+      profile: production
+      working_directory: mobile
+
+  build-android:
+    name: Build Android (production)
+    type: build
+    params:
+      platform: android
+      profile: production
+      working_directory: mobile
+
+  deploy-web:
+    name: Deploy web to EAS Hosting
+    type: deploy
+    params:
+      profile: production
+      working_directory: mobile
+
+  build-worker:
+    name: Notify Render worker deploy
+    needs: [build-ios, build-android, deploy-web]
+    type: run-command
+    params:
+      # Render auto-deploys from GitHub; no extra step needed.
+      # This step exists as a checkpoint to confirm the builds passed.
+      command: echo "Worker will auto-deploy via Render GitHub integration."
