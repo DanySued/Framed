@@ -6,8 +6,9 @@ import {
 import { useLocalSearchParams, useRouter, Stack } from 'expo-router'
 import * as DocumentPicker from 'expo-document-picker'
 import { useProject } from '@/features/projects/hooks'
-import { useClips, useAddPexelsClip, useUploadClip, useRemoveClip } from '@/features/library/hooks'
+import { useClips, useUploadClip, useRemoveClip } from '@/features/library/hooks'
 import { PexelsBrowser } from '@/features/library/PexelsBrowser'
+import { useStartRender, useRenderJob } from '@/features/render/hooks'
 import type { Clip } from '@/types'
 import { FR_GOLD } from '@/lib/theme'
 
@@ -15,10 +16,14 @@ export default function ProjectScreen() {
   const { id } = useLocalSearchParams<{ id: string }>()
   const router = useRouter()
   const [showLibrary, setShowLibrary] = useState(false)
-  const { data: project, isLoading: projectLoading } = useProject(id)
+  const [activeJobId, setActiveJobId] = useState<string | null>(null)
+
+  const { data: project, isLoading: projectLoading, refetch: refetchProject } = useProject(id)
   const { data: clips = [], isLoading: clipsLoading } = useClips(id)
   const uploadClip = useUploadClip(id!)
   const removeClip = useRemoveClip(id!)
+  const startRender = useStartRender()
+  const { data: job } = useRenderJob(activeJobId)
 
   const handleUpload = async () => {
     try {
@@ -32,10 +37,23 @@ export default function ProjectScreen() {
         uri: file.uri,
         filename: file.name,
         contentType: file.mimeType ?? 'video/mp4',
-        duration: 0, // duration unknown before metadata parse; set to 0
+        duration: 0,
       })
     } catch (err: any) {
       Alert.alert('Upload failed', err.message ?? 'Could not upload video')
+    }
+  }
+
+  const handleRender = async () => {
+    if (!clips.length) {
+      Alert.alert('No clips', 'Add at least one clip before rendering.')
+      return
+    }
+    try {
+      const { job_id } = await startRender.mutateAsync(id!)
+      setActiveJobId(job_id)
+    } catch (err: any) {
+      Alert.alert('Render failed', err.message)
     }
   }
 
@@ -48,6 +66,9 @@ export default function ProjectScreen() {
       },
     ])
   }
+
+  const isRendering = project?.status === 'rendering' || job?.status === 'processing' || job?.status === 'pending'
+  const renderProgress = job?.progress ?? 0
 
   if (projectLoading) {
     return (
@@ -64,16 +85,55 @@ export default function ProjectScreen() {
           title: project?.title ?? 'Project',
           headerRight: () => (
             <Pressable
-              onPress={() => Alert.alert('Render', 'Render worker coming in Phase 4')}
-              className="px-3 py-1.5 rounded-xl bg-primary mr-2"
+              onPress={handleRender}
+              disabled={isRendering || startRender.isPending || !clips.length}
+              className="px-3 py-1.5 rounded-xl bg-primary mr-2 disabled:opacity-40"
             >
-              <Text className="text-primary-foreground text-xs font-semibold">Render</Text>
+              {isRendering
+                ? <ActivityIndicator color="#0a0800" size="small" />
+                : <Text className="text-primary-foreground text-xs font-semibold">Render</Text>
+              }
             </Pressable>
           ),
         }}
       />
 
       <ScrollView className="flex-1 bg-background" contentContainerClassName="p-5">
+
+        {/* Render progress banner */}
+        {isRendering && (
+          <View className="bg-fr-surface-3 rounded-xl border border-fr-yellow/30 p-4 mb-4">
+            <View className="flex-row items-center justify-between mb-2">
+              <Text className="text-xs font-semibold text-fr-yellow">Rendering…</Text>
+              <Text className="text-xs text-muted-foreground">{renderProgress}%</Text>
+            </View>
+            <View className="h-1.5 bg-secondary rounded-full overflow-hidden">
+              <View
+                className="h-full bg-fr-yellow rounded-full"
+                style={{ width: `${Math.max(renderProgress, 2)}%` }}
+              />
+            </View>
+          </View>
+        )}
+
+        {/* Done banner */}
+        {job?.status === 'done' && (
+          <View className="bg-fr-surface-3 rounded-xl border border-fr-green/30 p-4 mb-4">
+            <Text className="text-xs font-semibold text-fr-green mb-1">Render complete!</Text>
+            <Text className="text-xs text-muted-foreground">
+              Your video is ready. Go to the project renders to download.
+            </Text>
+          </View>
+        )}
+
+        {/* Failed banner */}
+        {job?.status === 'failed' && (
+          <View className="bg-fr-surface-3 rounded-xl border border-destructive/30 p-4 mb-4">
+            <Text className="text-xs font-semibold text-destructive mb-1">Render failed</Text>
+            <Text className="text-xs text-muted-foreground">{job.error ?? 'Unknown error'}</Text>
+          </View>
+        )}
+
         {/* Clips header */}
         <View className="flex-row items-center justify-between mb-4">
           <View>
@@ -106,14 +166,12 @@ export default function ProjectScreen() {
           </View>
         </View>
 
-        {/* Loading */}
         {clipsLoading && (
           <View className="items-center py-8">
             <ActivityIndicator color={FR_GOLD} />
           </View>
         )}
 
-        {/* Empty state */}
         {!clipsLoading && clips.length === 0 && (
           <View className="items-center py-10 gap-3">
             <Text className="text-3xl">🎞</Text>
@@ -123,7 +181,6 @@ export default function ProjectScreen() {
           </View>
         )}
 
-        {/* Clip list */}
         {clips.map((clip, i) => (
           <ClipRow
             key={clip.id}
@@ -154,7 +211,6 @@ function ClipRow({ clip, index, onRemove }: { clip: Clip; index: number; onRemov
   const duration = (clip.trim_end - clip.trim_start).toFixed(1)
   return (
     <View className="flex-row items-center bg-card rounded-xl border border-border p-3 mb-2">
-      {/* Thumbnail */}
       {clip.preview_url
         ? (
           <Image
@@ -169,8 +225,6 @@ function ClipRow({ clip, index, onRemove }: { clip: Clip; index: number; onRemov
           </View>
         )
       }
-
-      {/* Info */}
       <View className="flex-1 min-w-0">
         <Text className="text-xs font-medium text-foreground" numberOfLines={1}>
           {clip.source === 'pexels' ? `Pexels #${clip.pexels_id}` : 'Upload'}
@@ -179,8 +233,6 @@ function ClipRow({ clip, index, onRemove }: { clip: Clip; index: number; onRemov
           {duration}s · {clip.width}×{clip.height}
         </Text>
       </View>
-
-      {/* Remove */}
       <Pressable onPress={onRemove} className="p-2 ml-2">
         <Text className="text-muted-foreground text-xs">✕</Text>
       </Pressable>
