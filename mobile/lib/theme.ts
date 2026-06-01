@@ -1,11 +1,17 @@
-// FitPath design tokens for React Native (mirrors web globals.css)
-export const FP_ACCENT = '#aaa8ff';
-export const FP_ACCENT_2 = '#6b69cc';
-export const FP_BLACK = '#030203';
-export const FP_SURFACE = '#111318';
-export const FP_SURFACE_2 = '#2b2e3f';
-export const FP_GREEN = '#7f9ef8';
-export const FP_ERROR = '#f87171';
-export const FP_LIME = '#4ade80';
-export const FP_TEXT = 'rgba(255,255,255,0.81)';
-export const FP_TEXT_MUTED = 'rgba(255,255,255,0.45)';
+// Framed design tokens — cinematic amber-gold palette (mirrors web globals.css fr-* vars)
+export const FR_BLACK = '#090909'
+export const FR_SURFACE = '#0f0f0f'
+export const FR_SURFACE_2 = '#161616'
+export const FR_SURFACE_3 = '#1f1f1f'
+export const FR_WHITE = '#f5f0e8'
+export const FR_GOLD = '#d4a84b'
+export const FR_GOLD_DIM = '#a07832'
+export const FR_SILVER = '#c8c4bc'
+export const FR_GREEN = '#4ade80'
+export const FR_YELLOW = '#fbbf24'
+export const FR_RED = '#f87171'
+export const FR_TEXT = 'rgba(245,240,232,0.88)'
+export const FR_TEXT_MUTED = 'rgba(245,240,232,0.42)'
+export const FR_TEXT_DIM = 'rgba(245,240,232,0.22)'
+export const FR_BORDER = 'rgba(255,255,255,0.09)'
+export const FR_BORDER_2 = 'rgba(255,255,255,0.15)'
