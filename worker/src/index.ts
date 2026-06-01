@@ -50,7 +50,6 @@ async function handleRender(job: PgBoss.Job<RenderJobPayload>) {
     })
 
     // Upload result to Supabase Storage
-    const { data: { user } } = await supabase.auth.getUser()
     const renderPath = `${project_id}/${job_id}.mp4`
     const fileBuffer = fs.readFileSync(outputPath)
 
