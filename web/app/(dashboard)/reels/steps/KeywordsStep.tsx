@@ -10,7 +10,7 @@ export function KeywordsStep() {
   return (
     <div className="space-y-5">
       <div>
-        <h1 className="text-xl font-semibold text-foreground">What&apos;s it about?</h1>
+        <h1 className="text-xl">What&apos;s it about?</h1>
         <p className="text-sm text-muted-foreground mt-1">Add keywords that describe the footage you want.</p>
       </div>
 

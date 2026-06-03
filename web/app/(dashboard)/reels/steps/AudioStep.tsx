@@ -150,7 +150,7 @@ export function AudioStep() {
   return (
     <div className="space-y-5">
       <div>
-        <h1 className="text-xl font-semibold text-foreground">Pick a track</h1>
+        <h1 className="text-xl">Pick a track</h1>
         <p className="text-sm text-muted-foreground mt-1">Choose the audio that will play under your reel.</p>
       </div>
 

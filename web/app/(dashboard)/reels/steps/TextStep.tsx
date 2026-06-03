@@ -130,7 +130,7 @@ export function TextStep() {
     <div className="space-y-5">
       <div className="flex items-start justify-between">
         <div>
-          <h1 className="text-xl font-semibold text-foreground">Text overlay</h1>
+          <h1 className="text-xl">Text overlay</h1>
           <p className="text-sm text-muted-foreground mt-1">Add text on top of your reel — optional.</p>
         </div>
         <motion.button

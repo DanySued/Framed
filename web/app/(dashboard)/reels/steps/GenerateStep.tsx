@@ -198,7 +198,7 @@ export function GenerateStep() {
         <motion.div
           variants={{ hidden: { opacity: 0, y: 12 }, visible: { opacity: 1, y: 0, transition: { duration: 0.3 } } }}
         >
-          <h1 className="text-xl font-semibold text-foreground">Ready to generate</h1>
+          <h1 className="text-xl">Ready to generate</h1>
           <p className="text-sm text-muted-foreground mt-1">Review your settings and hit generate.</p>
         </motion.div>
 
@@ -286,7 +286,7 @@ export function GenerateStep() {
         <div className="flex flex-col items-center gap-5 py-12">
           <Loader2 className="w-12 h-12 animate-spin text-primary" style={{ animationDuration: '3s' }} />
           <div className="text-center">
-            <h2 className="text-base font-semibold text-foreground">
+            <h2 className="text-base">
               {currentPhase === 2
                 ? jobs.length > 1 ? `Rendering ${jobs.length} reels…` : 'Rendering reel…'
                 : jobs.length > 1 ? `Preparing clips for ${jobs.length} reels…` : 'Preparing clips…'}
@@ -330,7 +330,7 @@ export function GenerateStep() {
     return (
       <div className="space-y-6">
         <div className="text-center">
-          <h2 className="text-base font-semibold text-foreground">Review your clips</h2>
+          <h2 className="text-base">Review your clips</h2>
           <p className="text-xs text-muted-foreground mt-1">Watch each clip — replace any you don&apos;t like, then approve to render the reel.</p>
         </div>
 
@@ -418,7 +418,7 @@ export function GenerateStep() {
         >
           <CheckCircle className="w-5 h-5 text-emerald-400" />
         </motion.div>
-        <h2 className="text-base font-semibold text-foreground">
+        <h2 className="text-base">
           {doneJobs.length} of {jobs.length} reel{jobs.length !== 1 ? 's' : ''} ready
         </h2>
       </motion.div>
