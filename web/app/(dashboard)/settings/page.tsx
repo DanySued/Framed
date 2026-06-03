@@ -262,8 +262,8 @@ export default function SettingsPage() {
       <motion.section
         variants={{ hidden: { opacity: 0, y: 16 }, visible: { opacity: 1, y: 0, transition: { duration: 0.4, ease: [0.16, 1, 0.3, 1] } } }}
       >
-        <h2 className="text-sm font-semibold text-foreground mb-1">API Connections</h2>
-        <p className="text-xs text-muted-foreground mb-4">
+        <h2 className="fr-title mb-1">API Connections</h2>
+        <p className="text-sm text-muted-foreground mb-4">
           These keys are stored in the backend and never leave your server.
         </p>
         <div className="space-y-3">
