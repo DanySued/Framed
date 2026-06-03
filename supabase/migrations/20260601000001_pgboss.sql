@@ -19,7 +19,7 @@ BEGIN
     INSERT INTO pgboss.job (name, data)
     VALUES (queue_name, payload::jsonb)
     RETURNING id::text INTO job_id;
-  EXCEPTION WHEN OTHERS THEN
+  EXCEPTION WHEN undefined_schema OR undefined_table OR undefined_object THEN
     -- pg-boss not yet initialised; worker will poll render_jobs instead
     RETURN NULL;
   END;
