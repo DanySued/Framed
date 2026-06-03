@@ -32,7 +32,8 @@ async function updateJob(
   const patch: Record<string, unknown> = { status, progress }
   if (error) patch.error = error
   if (status === 'done' || status === 'failed') patch.completed_at = new Date().toISOString()
-  await supabase.from('render_jobs').update(patch).eq('id', jobId)
+  const { error } = await supabase.from('render_jobs').update(patch).eq('id', jobId)
+  if (error) console.error(`[worker] updateJob ${jobId} failed:`, error.message)
 }
 
 async function handleRender(job: PgBoss.Job<RenderJobPayload>) {
@@ -67,12 +68,13 @@ async function handleRender(job: PgBoss.Job<RenderJobPayload>) {
     if (urlErr) throw new Error(`Signed URL failed: ${urlErr.message}`)
 
     // Save render row
-    await supabase.from('renders').insert({
+    const { error: insertErr } = await supabase.from('renders').insert({
       project_id,
       storage_path: renderPath,
       public_url:   urlData.signedUrl,
       duration:     timeline.reduce((s, seg) => s + (seg.trim_end - seg.trim_start), 0),
     })
+    if (insertErr) throw new Error(`renders.insert failed: ${insertErr.message}`)
 
     // Update project status to done
     await supabase.from('projects').update({ status: 'done' }).eq('id', project_id)
