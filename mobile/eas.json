@@ -23,11 +23,6 @@
       "channel": "production"
     }
   },
-  "deploy": {
-    "production": {
-      "channel": "production"
-    }
-  },
   "submit": {
     "production": {
       "ios": {
