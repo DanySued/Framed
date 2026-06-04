@@ -1,6 +1,7 @@
 import { StartReelSection } from "@/components/dashboard/StartReelSection";
 import { RecentRenders } from "@/components/dashboard/RecentRenders";
 import type { DashboardRender } from "@/app/api/dashboard/renders/route";
+import { getRecentRenders } from "@/lib/dashboard-data";
 
 interface AudioFile {
   id: string;
@@ -22,12 +23,7 @@ async function getAudio(): Promise<AudioFile[]> {
 
 async function getRenders(): Promise<DashboardRender[]> {
   try {
-    const base = process.env.NEXT_PUBLIC_VERCEL_URL
-      ? `https://${process.env.NEXT_PUBLIC_VERCEL_URL}`
-      : process.env.NEXTAUTH_URL || "http://localhost:3000";
-    const res = await fetch(`${base}/api/dashboard/renders`, { cache: "no-store" });
-    if (!res.ok) return [];
-    return await res.json();
+    return await getRecentRenders();
   } catch {
     return [];
   }
