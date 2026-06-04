@@ -29,6 +29,46 @@ function sbFetch(path: string, init?: RequestInit) {
   });
 }
 
+export interface DashboardClip {
+  id: string;
+  pexels_id: string;
+  preview_url: string;
+  width: number;
+  height: number;
+}
+
+export interface ClipLibraryData {
+  clips: DashboardClip[];
+  total: number;
+}
+
+export async function getClipLibrary(): Promise<ClipLibraryData> {
+  const [clipsRes, countRes] = await Promise.all([
+    sbFetch(
+      "/clips?select=id,pexels_id,preview_url,width,height&order=created_at.desc&limit=24"
+    ),
+    sbFetch("/clips?select=id", {
+      headers: { Prefer: "count=exact", Range: "0-0" },
+    }),
+  ]);
+
+  if (!clipsRes.ok) {
+    const msg = await clipsRes.text();
+    throw new Error(msg);
+  }
+
+  const clips: DashboardClip[] = await clipsRes.json();
+
+  let total = clips.length;
+  const range = countRes.headers.get("Content-Range");
+  if (range) {
+    const match = range.match(/\/(\d+)$/);
+    if (match) total = parseInt(match[1], 10);
+  }
+
+  return { clips, total };
+}
+
 export async function getRecentRenders(): Promise<DashboardRender[]> {
   const projRes = await sbFetch(
     "/projects?select=id,title,status,thumbnail_url,created_at&order=created_at.desc&limit=20"
