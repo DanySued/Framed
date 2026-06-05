@@ -1,17 +1,12 @@
 import Link from "next/link";
 import { Music2 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
+import { formatDuration } from "@/lib/utils";
 
 interface AudioCardProps {
   id: string;
   filename: string;
   duration: number; // seconds
-}
-
-function formatDuration(seconds: number): string {
-  const m = Math.floor(seconds / 60);
-  const s = Math.floor(seconds % 60);
-  return `${m}:${s.toString().padStart(2, "0")}`;
 }
 
 export function AudioCard({ id, filename, duration }: AudioCardProps) {
