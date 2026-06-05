@@ -17,7 +17,7 @@ export function RenderRow({ render }: { render: DashboardRender }) {
       className="group flex items-center gap-3 px-4 h-10 border-b border-[rgba(255,255,255,0.05)] hover:bg-[rgba(255,255,255,0.025)] transition-colors cursor-default"
     >
       {/* Status dot */}
-      <span className={`shrink-0 w-2 h-2 rounded-full ${STATUS_DOT[render.status]}`} />
+      <span className={`shrink-0 w-2 h-2 rounded-full ${STATUS[render.status].dot}`} />
 
       {/* Title */}
       <span className="flex-1 truncate text-[13px] text-[rgba(245,240,232,0.85)] leading-none">
