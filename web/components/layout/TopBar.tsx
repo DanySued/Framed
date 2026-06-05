@@ -1,9 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
-import { Settings, LogOut, Clapperboard } from "lucide-react";
+import { Settings, Clapperboard } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import { cn } from "@/lib/utils";
 
@@ -39,7 +39,6 @@ function ApiStatusIndicator({ status }: { status: ApiStatus }) {
 
 export default function TopBar() {
   const pathname = usePathname();
-  const router = useRouter();
   const [apiStatus, setApiStatus] = useState<ApiStatus>("checking");
 
   useEffect(() => {
@@ -101,14 +100,6 @@ export default function TopBar() {
             />
           )}
         </Link>
-        <motion.button
-          whileHover={{ scale: 1.08 }}
-          whileTap={{ scale: 0.93 }}
-          onClick={() => fetch("/api/auth/logout", { method: "POST" }).finally(() => router.push("/login"))}
-          className="flex items-center px-2 h-8 rounded-md transition-colors duration-150 text-muted-foreground hover:text-red-400 hover:bg-red-500/[0.07]"
-        >
-          <LogOut className="w-4 h-4" />
-        </motion.button>
       </div>
     </header>
   );

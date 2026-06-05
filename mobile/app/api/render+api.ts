@@ -1,14 +1,10 @@
-import { createRequestClient, createAdminClient, unauthorized, serverError, badRequest } from '@/lib/server-client'
+import { createServerClient, serverError, badRequest } from '@/lib/server-client'
 
 // POST /api/render — enqueue a render job for a project
 // Body: { project_id: string }
-// The API reads the project's current clips, builds the timeline, and enqueues
-// the job via pg-boss. The worker is notified via the pg-boss Postgres queue.
 
 export async function POST(request: Request) {
-  const db = createRequestClient(request)
-  const { data: { user } } = await db.auth.getUser()
-  if (!user) return unauthorized()
+  const db = createServerClient()
 
   const body = await request.json().catch(() => ({}))
   if (!body.project_id) return badRequest('project_id required')
@@ -39,7 +35,6 @@ export async function POST(request: Request) {
     clips.map(async (clip) => {
       let pexelsDownloadUrl: string | null = null
       if (clip.source === 'pexels' && clip.pexels_id) {
-        // Fetch best MP4 from Pexels (server-side, key is safe here)
         try {
           const res = await fetch(
             `https://api.pexels.com/videos/videos/${clip.pexels_id}`,
@@ -69,8 +64,7 @@ export async function POST(request: Request) {
   )
 
   // Create render_jobs row
-  const admin = createAdminClient()
-  const { data: jobRow, error: jobErr } = await admin
+  const { data: jobRow, error: jobErr } = await db
     .from('render_jobs')
     .insert({ project_id: body.project_id, status: 'pending', progress: 0 })
     .select()
@@ -78,9 +72,7 @@ export async function POST(request: Request) {
 
   if (jobErr) return serverError(jobErr.message)
 
-  // Enqueue via pg-boss using Supabase's pg-boss schema (queued via INSERT into pgboss.job)
-  // We insert directly into the pgboss.job table so no extra worker connection is needed here
-  const { error: qErr } = await admin.rpc('pgboss_send', {
+  const { error: qErr } = await db.rpc('pgboss_send', {
     queue_name: 'render',
     payload: JSON.stringify({
       job_id:     jobRow.id,
@@ -89,13 +81,11 @@ export async function POST(request: Request) {
     }),
   })
 
-  // If pg-boss RPC not available, fall back to a simple status flag the worker polls
   if (qErr) {
     console.warn('[render API] pgboss_send RPC not available, worker will poll directly')
   }
 
-  // Mark project as rendering
-  await admin.from('projects').update({ status: 'rendering' }).eq('id', body.project_id)
+  await db.from('projects').update({ status: 'rendering' }).eq('id', body.project_id)
 
   return Response.json({ job_id: jobRow.id }, { status: 202 })
 }

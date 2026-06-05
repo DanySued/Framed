@@ -3,7 +3,6 @@ import {
   View, Text, Pressable, ScrollView, ActivityIndicator, TextInput, Modal, Alert,
 } from 'react-native'
 import { useRouter } from 'expo-router'
-import { supabase } from '@/lib/supabase'
 import { useProjects, useCreateProject, useDeleteProject } from '@/features/projects/hooks'
 import { usePreferences } from '@/features/preferences/hooks'
 import { useAutoCompile } from '@/features/preferences/hooks'

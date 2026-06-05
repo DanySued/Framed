@@ -1,14 +1,12 @@
-import { createRequestClient, unauthorized, serverError } from '@/lib/server-client'
+import { createServerClient, SINGLE_USER_ID, serverError } from '@/lib/server-client'
 
-export async function GET(request: Request) {
-  const db = createRequestClient(request)
-  const { data: { user } } = await db.auth.getUser()
-  if (!user) return unauthorized()
+export async function GET() {
+  const db = createServerClient()
 
   const { data, error } = await db
     .from('preferences')
     .select('*')
-    .eq('user_id', user.id)
+    .eq('user_id', SINGLE_USER_ID)
     .maybeSingle()
 
   if (error) return serverError(error.message)
@@ -16,13 +14,11 @@ export async function GET(request: Request) {
 }
 
 export async function PUT(request: Request) {
-  const db = createRequestClient(request)
-  const { data: { user } } = await db.auth.getUser()
-  if (!user) return unauthorized()
+  const db = createServerClient()
 
   const body = await request.json().catch(() => ({}))
   const allowed = ['tags', 'tempo', 'mood', 'clip_duration', 'total_duration']
-  const patch: Record<string, unknown> = { user_id: user.id }
+  const patch: Record<string, unknown> = { user_id: SINGLE_USER_ID }
   for (const key of allowed) {
     if (key in body) patch[key] = body[key]
   }

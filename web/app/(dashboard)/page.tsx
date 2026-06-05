@@ -1,6 +1,3 @@
-import { cookies } from "next/headers";
-import { redirect } from "next/navigation";
-import { isValidSession } from "@/lib/auth";
 import { StartReelSection } from "@/components/dashboard/StartReelSection";
 import { RecentRenders } from "@/components/dashboard/RecentRenders";
 import { ClipLibrarySection } from "@/components/dashboard/ClipLibrarySection";
@@ -43,12 +40,6 @@ async function getClips(): Promise<ClipLibraryData> {
 }
 
 export default async function DashboardPage() {
-  const jar = await cookies();
-  const session = jar.get("__session")?.value;
-  if (!isValidSession(session)) {
-    redirect("/login");
-  }
-
   const [audio, renders, clipData] = await Promise.all([
     getAudio(),
     getRenders(),

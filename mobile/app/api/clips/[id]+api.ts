@@ -1,13 +1,11 @@
-import { createRequestClient, unauthorized, serverError, badRequest } from '@/lib/server-client'
+import { createServerClient, serverError, badRequest } from '@/lib/server-client'
 
 function clipId(request: Request) {
   return new URL(request.url).pathname.split('/').pop() ?? ''
 }
 
 export async function PATCH(request: Request) {
-  const db = createRequestClient(request)
-  const { data: { user } } = await db.auth.getUser()
-  if (!user) return unauthorized()
+  const db = createServerClient()
 
   const body = await request.json().catch(() => ({}))
   const allowed = ['trim_start', 'trim_end', 'order_index', 'preview_url']
@@ -29,9 +27,7 @@ export async function PATCH(request: Request) {
 }
 
 export async function DELETE(request: Request) {
-  const db = createRequestClient(request)
-  const { data: { user } } = await db.auth.getUser()
-  if (!user) return unauthorized()
+  const db = createServerClient()
 
   const { error } = await db
     .from('clips')

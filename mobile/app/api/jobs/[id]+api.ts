@@ -1,10 +1,8 @@
-import { createRequestClient, unauthorized, serverError } from '@/lib/server-client'
+import { createServerClient, serverError } from '@/lib/server-client'
 
 // GET /api/jobs/:id — poll render job status
 export async function GET(request: Request) {
-  const db = createRequestClient(request)
-  const { data: { user } } = await db.auth.getUser()
-  if (!user) return unauthorized()
+  const db = createServerClient()
 
   const jobId = new URL(request.url).pathname.split('/').pop() ?? ''
 

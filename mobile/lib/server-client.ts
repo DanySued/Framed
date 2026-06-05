@@ -1,21 +1,12 @@
 import { createClient } from '@supabase/supabase-js'
 
-// Creates a per-request Supabase client that passes the user's JWT in the
-// Authorization header. RLS policies keyed on auth.uid() apply automatically.
-export function createRequestClient(request: Request) {
-  const token = request.headers.get('Authorization')?.replace('Bearer ', '') ?? ''
-  return createClient(
-    process.env.EXPO_PUBLIC_SUPABASE_URL!,
-    process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      global: { headers: { Authorization: `Bearer ${token}` } },
-      auth: { autoRefreshToken: false, persistSession: false },
-    }
-  )
-}
+// Single-user app — no auth. All API routes use the service-role client which
+// bypasses RLS. The fixed SINGLE_USER_ID is used to populate `user_id` columns
+// on tables that still require them (preferences, projects).
+export const SINGLE_USER_ID =
+  process.env.SINGLE_USER_ID ?? '00000000-0000-0000-0000-000000000000'
 
-// Admin client — bypasses RLS. Only used by the render worker (Phase 4).
-export function createAdminClient() {
+export function createServerClient() {
   return createClient(
     process.env.EXPO_PUBLIC_SUPABASE_URL!,
     process.env.SUPABASE_SERVICE_KEY!,
@@ -23,9 +14,8 @@ export function createAdminClient() {
   )
 }
 
-export function unauthorized() {
-  return Response.json({ error: 'Unauthorized' }, { status: 401 })
-}
+// Back-compat alias
+export const createAdminClient = createServerClient
 
 export function badRequest(message: string) {
   return Response.json({ error: message }, { status: 400 })

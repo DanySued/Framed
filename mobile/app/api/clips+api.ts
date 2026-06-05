@@ -1,13 +1,11 @@
-import { createRequestClient, unauthorized, serverError, badRequest } from '@/lib/server-client'
+import { createServerClient, serverError, badRequest } from '@/lib/server-client'
 
 // GET  /api/clips?project_id=<id>   — list clips for a project (ordered)
 // POST /api/clips                   — add a clip to a project
 // DELETE /api/clips/:id is handled in clips/[id]+api.ts
 
 export async function GET(request: Request) {
-  const db = createRequestClient(request)
-  const { data: { user } } = await db.auth.getUser()
-  if (!user) return unauthorized()
+  const db = createServerClient()
 
   const projectId = new URL(request.url).searchParams.get('project_id')
   if (!projectId) return badRequest('project_id required')
@@ -23,9 +21,7 @@ export async function GET(request: Request) {
 }
 
 export async function POST(request: Request) {
-  const db = createRequestClient(request)
-  const { data: { user } } = await db.auth.getUser()
-  if (!user) return unauthorized()
+  const db = createServerClient()
 
   const body = await request.json().catch(() => ({}))
   const required = ['project_id', 'source', 'preview_url', 'original_duration'] as const

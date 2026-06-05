@@ -1,13 +1,11 @@
-import { createRequestClient, unauthorized, serverError, badRequest } from '@/lib/server-client'
+import { createServerClient, SINGLE_USER_ID, serverError, badRequest } from '@/lib/server-client'
 
 // POST /api/upload-url
 // Body: { filename: string, content_type: string, project_id: string }
 // Returns: { path: string, signedUrl: string }
 
 export async function POST(request: Request) {
-  const db = createRequestClient(request)
-  const { data: { user } } = await db.auth.getUser()
-  if (!user) return unauthorized()
+  const db = createServerClient()
 
   const body = await request.json().catch(() => ({}))
   if (!body.filename || !body.content_type || !body.project_id) {
@@ -15,7 +13,7 @@ export async function POST(request: Request) {
   }
 
   const ext = body.filename.split('.').pop() ?? 'mp4'
-  const path = `${user.id}/${body.project_id}/${Date.now()}.${ext}`
+  const path = `${SINGLE_USER_ID}/${body.project_id}/${Date.now()}.${ext}`
 
   const { data, error } = await db.storage
     .from('framed-clips')

@@ -3,7 +3,6 @@ import { StatusBar } from 'expo-status-bar'
 import { QueryClientProvider } from '@tanstack/react-query'
 import * as Sentry from '@sentry/react-native'
 import { queryClient } from '@/lib/query-client'
-import { AuthProvider } from '@/lib/auth-context'
 import '../global.css'
 
 Sentry.init({
@@ -15,10 +14,8 @@ Sentry.init({
 function RootLayout() {
   return (
     <QueryClientProvider client={queryClient}>
-      <AuthProvider>
-        <StatusBar style="light" />
-        <Slot />
-      </AuthProvider>
+      <StatusBar style="light" />
+      <Slot />
     </QueryClientProvider>
   )
 }

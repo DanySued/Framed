@@ -1,9 +1,7 @@
-import { createRequestClient, unauthorized, serverError } from '@/lib/server-client'
+import { createServerClient, SINGLE_USER_ID, serverError } from '@/lib/server-client'
 
-export async function GET(request: Request) {
-  const db = createRequestClient(request)
-  const { data: { user } } = await db.auth.getUser()
-  if (!user) return unauthorized()
+export async function GET() {
+  const db = createServerClient()
 
   const { data, error } = await db
     .from('projects')
@@ -15,16 +13,14 @@ export async function GET(request: Request) {
 }
 
 export async function POST(request: Request) {
-  const db = createRequestClient(request)
-  const { data: { user } } = await db.auth.getUser()
-  if (!user) return unauthorized()
+  const db = createServerClient()
 
   const body = await request.json().catch(() => ({}))
   const title: string = body.title?.trim() || 'Untitled'
 
   const { data, error } = await db
     .from('projects')
-    .insert({ user_id: user.id, title })
+    .insert({ user_id: SINGLE_USER_ID, title })
     .select()
     .single()
 
