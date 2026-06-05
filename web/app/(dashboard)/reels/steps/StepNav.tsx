@@ -25,7 +25,7 @@ export function StepNav({
   const { currentStep, goBack } = useWizard();
 
   return (
-    <div className="flex items-center justify-between pt-8">
+    <div className="flex items-center justify-between w-full pt-8">
       {!hideBack && currentStep > 0 ? (
         <motion.button
           whileHover={{ x: -2 }}
@@ -37,9 +37,9 @@ export function StepNav({
           <ChevronLeft className="w-4 h-4" />
           Back
         </motion.button>
-      ) : (
-        <div />
-      )}
+      ) : null}
+
+      <div className="flex-1" />
 
       <div className="flex items-center gap-2">
         {showSkip && (

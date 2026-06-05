@@ -76,7 +76,7 @@ export function WizardShell() {
       </div>
 
       {/* Step content */}
-      <div className="flex-1 overflow-y-auto">
+      <div className="flex-1 overflow-y-auto flex flex-col items-center justify-center py-12">
         <AnimatePresence mode="wait" custom={direction}>
           <motion.div
             key={currentStep}
@@ -85,7 +85,7 @@ export function WizardShell() {
             initial="enter"
             animate="center"
             exit="exit"
-            className="max-w-lg mx-auto px-6 py-8"
+            className="w-full max-w-2xl px-6"
           >
             <StepComponent />
           </motion.div>
