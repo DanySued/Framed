@@ -33,7 +33,7 @@ export function RenderRow({ render }: { render: DashboardRender }) {
 
       {/* Status label */}
       <span className="text-[11px] text-[rgba(245,240,232,0.35)] leading-none w-16 text-right uppercase tracking-wide">
-        {STATUS_LABEL[render.status]}
+        {STATUS[render.status].label}
       </span>
 
       {/* Timestamp */}
