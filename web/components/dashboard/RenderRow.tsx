@@ -2,35 +2,13 @@
 
 import { Download } from "lucide-react";
 import type { DashboardRender } from "@/app/api/dashboard/renders/route";
+import { formatDuration, relativeTime } from "@/lib/utils";
 
-function relativeTime(iso: string): string {
-  const diff = Date.now() - new Date(iso).getTime();
-  const mins = Math.floor(diff / 60_000);
-  if (mins < 1) return "just now";
-  if (mins < 60) return `${mins}m ago`;
-  const hrs = Math.floor(mins / 60);
-  if (hrs < 24) return `${hrs}h ago`;
-  return `${Math.floor(hrs / 24)}d ago`;
-}
-
-function formatDuration(seconds: number): string {
-  const m = Math.floor(seconds / 60);
-  const s = Math.floor(seconds % 60);
-  return `${m}:${s.toString().padStart(2, "0")}`;
-}
-
-const STATUS_DOT: Record<DashboardRender["status"], string> = {
-  done:      "bg-[#4ade80]",
-  rendering: "bg-[#d4a84b] animate-pulse",
-  failed:    "bg-[#f87171]",
-  draft:     "bg-[rgba(255,255,255,0.25)]",
-};
-
-const STATUS_LABEL: Record<DashboardRender["status"], string> = {
-  done:      "Done",
-  rendering: "Rendering",
-  failed:    "Failed",
-  draft:     "Draft",
+const STATUS: Record<DashboardRender["status"], { dot: string; label: string }> = {
+  done:      { dot: "bg-[var(--fr-green)]",               label: "Done" },
+  rendering: { dot: "bg-[var(--fr-gold)] animate-pulse",  label: "Rendering" },
+  failed:    { dot: "bg-[var(--fr-red)]",                 label: "Failed" },
+  draft:     { dot: "bg-[rgba(255,255,255,0.25)]",        label: "Draft" },
 };
 
 export function RenderRow({ render }: { render: DashboardRender }) {
