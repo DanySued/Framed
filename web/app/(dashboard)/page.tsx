@@ -115,12 +115,11 @@ function StatCell({
   value: number;
   accent?: "green" | "gold";
 }) {
-  const valueColor =
-    accent === "green"
-      ? "text-[#4ade80]"
-      : accent === "gold"
-      ? "text-[var(--fr-gold)]"
-      : "text-[rgba(245,240,232,0.85)]";
+  const accentColor: Record<string, string> = {
+    green: "text-[var(--fr-green)]",
+    gold:  "text-[var(--fr-gold)]",
+  };
+  const valueColor = accentColor[accent ?? ""] ?? "text-[rgba(245,240,232,0.85)]";
 
   return (
     <div className="flex-1 flex flex-col gap-1 px-5 py-4 border-r border-[rgba(255,255,255,0.07)] last:border-r-0">
