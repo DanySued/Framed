@@ -235,6 +235,27 @@ export function AudioStep() {
         </motion.div>
       )}
 
+      <motion.label
+        whileHover={isUploading ? {} : { scale: 1.02, boxShadow: '0 0 12px rgba(212,168,75,0.15)' }}
+        whileTap={isUploading ? {} : { scale: 0.97 }}
+        transition={{ type: 'spring', stiffness: 400, damping: 20 }}
+        className={cn(
+          'inline-flex items-center gap-2 px-4 py-2 border rounded-xl text-sm font-medium transition-colors',
+          isUploading
+            ? 'bg-secondary/60 border-border text-muted-foreground cursor-not-allowed opacity-70'
+            : 'bg-secondary hover:bg-secondary/80 hover:border-primary/30 border-border text-foreground cursor-pointer'
+        )}
+      >
+        {isUploading ? <><Loader2 className="w-3.5 h-3.5 animate-spin" /> Uploading…</> : <><Upload className="w-3.5 h-3.5" /> Upload Audio</>}
+        <input
+          type="file"
+          accept="audio/mpeg,audio/wav,audio/mp4,audio/ogg,audio/x-m4a,audio/mp3,.mp3,.wav,.m4a,.ogg"
+          onChange={handleAudioUpload}
+          className="hidden"
+          disabled={isLoadingAudio || isUploading}
+        />
+      </motion.label>
+
       {selectedAudio && (
         <div className="p-4 bg-secondary/50 rounded-xl border border-border space-y-3">
           <div className="flex items-center justify-between">
@@ -294,27 +315,6 @@ export function AudioStep() {
           />
         </div>
       )}
-
-      <motion.label
-        whileHover={isUploading ? {} : { scale: 1.02, boxShadow: '0 0 12px rgba(212,168,75,0.15)' }}
-        whileTap={isUploading ? {} : { scale: 0.97 }}
-        transition={{ type: 'spring', stiffness: 400, damping: 20 }}
-        className={cn(
-          'inline-flex items-center gap-2 px-4 py-2 border rounded-xl text-sm font-medium transition-colors',
-          isUploading
-            ? 'bg-secondary/60 border-border text-muted-foreground cursor-not-allowed opacity-70'
-            : 'bg-secondary hover:bg-secondary/80 hover:border-primary/30 border-border text-foreground cursor-pointer'
-        )}
-      >
-        {isUploading ? <><Loader2 className="w-3.5 h-3.5 animate-spin" /> Uploading…</> : <><Upload className="w-3.5 h-3.5" /> Upload Audio</>}
-        <input
-          type="file"
-          accept="audio/mpeg,audio/wav,audio/mp4,audio/ogg,audio/x-m4a,audio/mp3,.mp3,.wav,.m4a,.ogg"
-          onChange={handleAudioUpload}
-          className="hidden"
-          disabled={isLoadingAudio || isUploading}
-        />
-      </motion.label>
 
       <StepNav
         onNext={goNext}
