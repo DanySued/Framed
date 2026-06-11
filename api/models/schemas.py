@@ -16,6 +16,12 @@ class TextOverlayItem(BaseModel):
     italic: bool = False
 
 
+class SelectedClip(BaseModel):
+    """A Pexels clip the user picked in the wizard's Select Video step."""
+    url: str
+    duration: float | None = None
+
+
 class ReelGenerateRequest(BaseModel):
     """Request to generate a reel from keywords."""
     keywords: List[str]
@@ -26,6 +32,8 @@ class ReelGenerateRequest(BaseModel):
     overlays: List[TextOverlayItem] = []  # empty list = no text
     count: int = 1
     subtitles_enabled: bool = False  # auto-transcribe audio -> burn subtitles + export .srt
+    # When provided, skip Pexels search/random-pick and use these URLs directly.
+    selected_clips: List[SelectedClip] = []
 
 
 class ReelJobResponse(BaseModel):
