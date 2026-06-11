@@ -53,7 +53,7 @@ export default function PreviewFrame() {
 
       {/* Background / slideshow */}
       <div className="absolute inset-0 overflow-hidden bg-[var(--fr-surface)]">
-        <AnimatePresence mode="crossfade">
+        <AnimatePresence mode="wait">
           {!isEmpty && thumbnails[activeIndex] && (
             <motion.div
               key={thumbnails[activeIndex]}
