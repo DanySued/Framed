@@ -33,9 +33,8 @@ export default function AudioPanel() {
     }
   }, []);
 
-  useEffect(() => {
-    loadTracks();
-  }, [loadTracks]);
+  // eslint-disable-next-line react-hooks/set-state-in-effect
+  useEffect(() => { loadTracks(); }, [loadTracks]);
 
   const uploadFile = useCallback(
     async (file: File) => {
