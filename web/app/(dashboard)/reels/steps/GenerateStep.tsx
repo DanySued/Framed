@@ -184,6 +184,7 @@ export function GenerateStep() {
 
   const summaryRows = [
     { label: 'Keywords', value: keywords.join(', ') },
+    { label: 'Clips', value: selectedClips.length > 0 ? `${selectedClips.length} hand-picked` : 'Auto-pick from Pexels' },
     { label: 'Duration', value: `${duration}s` },
     { label: 'Reels', value: String(isBulk ? reelCount : 1) },
     { label: 'Subtitles', value: subtitlesEnabled ? 'On' : 'Off' },
