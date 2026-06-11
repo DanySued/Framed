@@ -51,6 +51,7 @@ class ReelJobResponse(BaseModel):
     reels_done: int = 0   # how many variations have completed (for bulk jobs)
     reels_total: int = 1  # total variations requested
     srt_path: str | None = None  # path to generated .srt file, present when subtitles were enabled
+    stage: str | None = None  # human-readable label for the current processing stage
 
 
 class ReelResponse(BaseModel):
