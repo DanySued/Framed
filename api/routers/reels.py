@@ -15,6 +15,7 @@ from models.schemas import (
 )
 from models.database import Reel, AudioFile, ReelJob
 from services.job_queue import create_reel_generation_job, get_job_status, approve_clips, replace_clip
+from services.pexels import search_videos
 import subprocess
 import json
 
