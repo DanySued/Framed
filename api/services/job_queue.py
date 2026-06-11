@@ -325,9 +325,7 @@ def _phase2_render_reel(job_id: str, reel_id: str) -> None:
         reel_dir = os.path.join(MEDIA_DIR, "generated", "reels", reel_id)
 
         # Concat clips (60%)
-        job.progress = 60
-        job.save()
-        JOBS[job_id] = {"status": "processing", "progress": 60, "error": None}
+        _set_stage(job, job_id, 60, "assembling sequence")
 
         concat_path = os.path.join(reel_dir, "concat.mp4")
         concatenate_videos(clips, concat_path)
