@@ -47,12 +47,14 @@ export default function ControlBar() {
       style={{
         borderTop: "1px solid var(--fr-line)",
         background: "var(--fr-black)",
-        padding: "0 32px",
+        padding: "0 16px",
         height: 60,
         display: "flex",
         alignItems: "center",
-        gap: 32,
+        gap: 16,
         flexShrink: 0,
+        overflowX: "auto",
+        scrollbarWidth: "none",
       }}
     >
       {/* Duration slider */}
