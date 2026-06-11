@@ -7,7 +7,21 @@ export interface TextOverlay extends TextOverlayItem {
   id: string;
 }
 
+export interface SelectedClip {
+  id: number;
+  url: string;
+  duration: number;
+}
+
 interface WizardState {
+  // Keywords
+  keywords: string[];
+  setKeywords: (kw: string[]) => void;
+
+  // Selected video clips
+  selectedClips: SelectedClip[];
+  setSelectedClips: React.Dispatch<React.SetStateAction<SelectedClip[]>>;
+
   // Audio
   selectedAudioId: string;
   setSelectedAudioId: (id: string) => void;
@@ -16,11 +30,7 @@ interface WizardState {
   selectedAudioDuration: number;
   setSelectedAudioDuration: (d: number) => void;
 
-  // Keywords
-  keywords: string[];
-  setKeywords: (kw: string[]) => void;
-
-  // Settings
+  // Settings (live in side panel, not a step)
   duration: number;
   setDuration: (d: number) => void;
   isBulk: boolean;
@@ -49,7 +59,8 @@ interface WizardState {
 
 const WizardContext = createContext<WizardState | null>(null);
 
-export const STEP_LABELS = ['Audio', 'Keywords', 'Settings', 'Text Overlay', 'Generate'];
+export const STEP_LABELS = ['Keywords', 'Select Video', 'Audio', 'Text Overlay', 'Generate'];
+export const TOTAL_STEPS = STEP_LABELS.length;
 
 export function WizardProvider({ children }: { children: ReactNode }) {
   const [selectedAudioId, setSelectedAudioId] = useState('');
