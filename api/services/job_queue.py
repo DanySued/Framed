@@ -460,6 +460,7 @@ def get_job_status(job_id: str) -> dict:
             "reels_done": 1 if job.status == "done" else 0,
             "reels_total": 1,
             "srt_path": srt_path,
+            "stage": JOBS.get(job_id, {}).get("stage"),
         }
     except Exception:
         if job_id in JOBS:
