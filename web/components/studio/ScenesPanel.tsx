@@ -1,6 +1,6 @@
 "use client";
 
-import { KeyboardEvent, useCallback, useRef, useState } from "react";
+import { KeyboardEvent, useCallback, useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { X } from "lucide-react";
 import { useStudio, SceneKeyword } from "./StudioContext";
