@@ -123,7 +123,11 @@ export function GenerateStep() {
       duration,
       REEL_TITLE,
       effectiveSongStartTime,
-      { overlays: activeOverlays, subtitlesEnabled }
+      {
+        overlays: activeOverlays,
+        subtitlesEnabled,
+        selectedClips: selectedClips.map((c) => ({ url: c.url, duration: c.duration })),
+      }
     );
   };
 
