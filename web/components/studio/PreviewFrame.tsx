@@ -4,17 +4,21 @@ import { useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { useStudio } from "./StudioContext";
 import TextOverlayLayer from "./TextOverlayLayer";
+import GenerationOverlay from "./GenerationOverlay";
 
 const KEN_BURNS_DURATION = 7000; // ms per slide
 
 export default function PreviewFrame() {
-  const { keywords, overlays } = useStudio();
+  const { keywords, overlays, phase, jobs, previewOverride, subtitlesEnabled, onReset } = useStudio();
   const thumbnails = keywords
     .map((k) => k.thumbnail)
     .filter((t): t is string => Boolean(t));
 
   const [activeIndex, setActiveIndex] = useState(0);
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  // Gold border pulse on done
+  const [showGoldPulse, setShowGoldPulse] = useState(false);
+  const prevPhase = useRef<string>("");
 
   useEffect(() => {
     if (thumbnails.length < 2) return;
@@ -26,22 +30,52 @@ export default function PreviewFrame() {
     };
   }, [activeIndex, thumbnails.length]);
 
-  // Reset index when thumbnails change
   useEffect(() => {
     setActiveIndex(0);
   }, [thumbnails.length]);
 
+  // Trigger gold pulse once when phase transitions to "done"
+  useEffect(() => {
+    if (phase === "done" && prevPhase.current !== "done") {
+      setShowGoldPulse(true);
+      const t = setTimeout(() => setShowGoldPulse(false), 700);
+      return () => clearTimeout(t);
+    }
+    prevPhase.current = phase;
+  }, [phase]);
+
   const isEmpty = thumbnails.length === 0;
+
+  // Find the final reel_id from done jobs
+  const doneJob = jobs.find((j) => j.status?.status === "done" && j.status.reel_id);
+  const reelId = doneJob?.status?.reel_id;
+  const finalVideoSrc = reelId ? `/api/reels/download/${reelId}` : null;
+  const srtSrc = reelId ? `/api/reels/download/${reelId}/srt` : null;
+
+  const showFinal = phase === "done" && finalVideoSrc;
 
   return (
     <div
       className="relative mx-auto select-none"
       style={{
-        // 9:16 aspect ratio, max height ~70vh
         width: "min(calc(70vh * 9/16), 100%)",
         aspectRatio: "9 / 16",
       }}
     >
+      {/* Gold pulse border on done */}
+      {showGoldPulse && (
+        <div
+          style={{
+            position: "absolute",
+            inset: 0,
+            zIndex: 30,
+            pointerEvents: "none",
+            boxShadow: "0 0 0 1px var(--fr-gold), 0 0 16px 2px var(--fr-gold)",
+            animation: "goldPulse 600ms ease-out forwards",
+          }}
+        />
+      )}
+
       {/* Hairline border frame */}
       <div
         className="absolute inset-0"
@@ -53,64 +87,205 @@ export default function PreviewFrame() {
 
       {/* Background / slideshow */}
       <div className="absolute inset-0 overflow-hidden bg-[var(--fr-surface)]">
-        <AnimatePresence mode="wait">
-          {!isEmpty && thumbnails[activeIndex] && (
-            <motion.div
-              key={thumbnails[activeIndex]}
-              className="absolute inset-0"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.8, ease: "easeInOut" }}
-              style={{ willChange: "opacity" }}
-            >
-              <motion.img
-                src={thumbnails[activeIndex]}
-                alt=""
-                className="absolute inset-0 w-full h-full object-cover"
-                initial={{ scale: 1 }}
-                animate={{ scale: 1.06 }}
-                transition={{
-                  duration: KEN_BURNS_DURATION / 1000,
-                  ease: "linear",
-                }}
-                style={{ willChange: "transform" }}
-              />
-              {/* subtle vignette */}
-              <div
-                className="absolute inset-0"
-                style={{
-                  background:
-                    "radial-gradient(ellipse at center, transparent 40%, rgba(13,11,8,0.7) 100%)",
-                  pointerEvents: "none",
-                }}
-              />
-            </motion.div>
-          )}
-        </AnimatePresence>
+        {/* Override: clip preview or final film */}
+        {(previewOverride || showFinal) ? (
+          <video
+            key={previewOverride ?? finalVideoSrc ?? ""}
+            src={previewOverride ?? finalVideoSrc ?? ""}
+            autoPlay={!!showFinal}
+            controls={!!showFinal}
+            loop={!showFinal}
+            muted={!showFinal}
+            playsInline
+            style={{
+              position: "absolute",
+              inset: 0,
+              width: "100%",
+              height: "100%",
+              objectFit: "cover",
+            }}
+          />
+        ) : (
+          <>
+            <AnimatePresence mode="wait">
+              {!isEmpty && thumbnails[activeIndex] && (
+                <motion.div
+                  key={thumbnails[activeIndex]}
+                  className="absolute inset-0"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: 0.8, ease: "easeInOut" }}
+                  style={{ willChange: "opacity" }}
+                >
+                  <motion.img
+                    src={thumbnails[activeIndex]}
+                    alt=""
+                    className="absolute inset-0 w-full h-full object-cover"
+                    initial={{ scale: 1 }}
+                    animate={{ scale: 1.06 }}
+                    transition={{
+                      duration: KEN_BURNS_DURATION / 1000,
+                      ease: "linear",
+                    }}
+                    style={{ willChange: "transform" }}
+                  />
+                  {/* subtle vignette */}
+                  <div
+                    className="absolute inset-0"
+                    style={{
+                      background:
+                        "radial-gradient(ellipse at center, transparent 40%, rgba(13,11,8,0.7) 100%)",
+                      pointerEvents: "none",
+                    }}
+                  />
+                </motion.div>
+              )}
+            </AnimatePresence>
 
-        {/* Empty state */}
-        {isEmpty && (
-          <div className="absolute inset-0 flex items-center justify-center">
-            <p
-              style={{
-                fontFamily: "var(--font-display), Georgia, serif",
-                fontSize: "0.8125rem",
-                letterSpacing: "0.12em",
-                color: "var(--fr-muted)",
-                textAlign: "center",
-                padding: "0 2rem",
-                fontStyle: "italic",
-              }}
-            >
-              your scenes will appear here
-            </p>
-          </div>
+            {/* Empty state */}
+            {isEmpty && phase === "compose" && (
+              <div className="absolute inset-0 flex items-center justify-center">
+                <p
+                  style={{
+                    fontFamily: "var(--font-display), Georgia, serif",
+                    fontSize: "0.8125rem",
+                    letterSpacing: "0.12em",
+                    color: "var(--fr-muted)",
+                    textAlign: "center",
+                    padding: "0 2rem",
+                    fontStyle: "italic",
+                  }}
+                >
+                  your scenes will appear here
+                </p>
+              </div>
+            )}
+          </>
         )}
       </div>
 
-      {/* Text overlays */}
-      <TextOverlayLayer overlays={overlays} />
+      {/* Generation / rendering overlay */}
+      <GenerationOverlay />
+
+      {/* Text overlays (hide during generation/approval/done) */}
+      {(phase === "compose" || phase === "approval") && (
+        <TextOverlayLayer overlays={overlays} />
+      )}
+
+      {/* Done state actions (shown outside the 9:16 frame, below) */}
+      {phase === "done" && (
+        <DoneActions
+          reelId={reelId ?? null}
+          srtSrc={srtSrc}
+          subtitlesEnabled={subtitlesEnabled}
+          onReset={onReset}
+        />
+      )}
+
+      {/* Keyframes */}
+      <style>{`
+        @keyframes goldPulse {
+          0%   { opacity: 1; }
+          60%  { opacity: 0.6; }
+          100% { opacity: 0; }
+        }
+      `}</style>
+    </div>
+  );
+}
+
+function DoneActions({
+  reelId,
+  srtSrc,
+  subtitlesEnabled,
+  onReset,
+}: {
+  reelId: string | null;
+  srtSrc: string | null;
+  subtitlesEnabled: boolean;
+  onReset: () => void;
+}) {
+  if (!reelId) return null;
+
+  return (
+    <div
+      style={{
+        position: "absolute",
+        bottom: -56,
+        left: 0,
+        right: 0,
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        gap: 16,
+        zIndex: 15,
+      }}
+    >
+      <a
+        href={`/api/reels/download/${reelId}`}
+        download
+        style={{
+          fontFamily: "var(--font-display), Georgia, serif",
+          fontSize: "0.8125rem",
+          letterSpacing: "0.04em",
+          color: "var(--fr-gold)",
+          border: "1px solid var(--fr-gold)",
+          padding: "6px 18px",
+          textDecoration: "none",
+          transition: "background 150ms ease, color 150ms ease",
+          whiteSpace: "nowrap",
+        }}
+        onMouseEnter={(e) => {
+          e.currentTarget.style.background = "var(--fr-gold)";
+          e.currentTarget.style.color = "#0a0800";
+        }}
+        onMouseLeave={(e) => {
+          e.currentTarget.style.background = "transparent";
+          e.currentTarget.style.color = "var(--fr-gold)";
+        }}
+      >
+        download film
+      </a>
+
+      {subtitlesEnabled && srtSrc && (
+        <a
+          href={srtSrc}
+          download
+          style={{
+            fontFamily: "var(--font-display), Georgia, serif",
+            fontSize: "0.8125rem",
+            letterSpacing: "0.04em",
+            color: "var(--fr-muted)",
+            border: "1px solid var(--fr-line)",
+            padding: "6px 18px",
+            textDecoration: "none",
+            transition: "color 150ms ease",
+            whiteSpace: "nowrap",
+          }}
+        >
+          subtitles (.srt)
+        </a>
+      )}
+
+      <button
+        onClick={onReset}
+        style={{
+          background: "transparent",
+          border: "none",
+          fontFamily: "var(--font-display), Georgia, serif",
+          fontSize: "0.8125rem",
+          letterSpacing: "0.04em",
+          color: "var(--fr-muted)",
+          cursor: "pointer",
+          padding: "6px 12px",
+          transition: "color 150ms ease",
+        }}
+        onMouseEnter={(e) => { e.currentTarget.style.color = "var(--fr-ivory)"; }}
+        onMouseLeave={(e) => { e.currentTarget.style.color = "var(--fr-muted)"; }}
+      >
+        new film
+      </button>
     </div>
   );
 }
