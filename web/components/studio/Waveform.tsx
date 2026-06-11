@@ -23,7 +23,9 @@ export default function Waveform({ audioId }: Props) {
   // Decode audio and compute bar amplitudes
   useEffect(() => {
     let cancelled = false;
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setError(false);
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setAmplitudes([]);
 
     const decode = async () => {
