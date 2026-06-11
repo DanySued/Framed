@@ -225,7 +225,7 @@ export default function AudioPanel() {
       >
         <Upload
           size={13}
-          style={{ color: uploading ? "var(--fr-gold)" : "var(--fr-muted)", shrink: 0 }}
+          style={{ color: uploading ? "var(--fr-gold)" : "var(--fr-muted)", flexShrink: 0 }}
         />
         <span
           className="fr-overline"
