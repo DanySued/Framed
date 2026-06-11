@@ -71,6 +71,7 @@ async def search_videos(keywords: List[str], per_page: int = 10) -> List[dict]:
             "duration": video.get("duration"),
             "width": best_file.get("width"),
             "height": best_file.get("height"),
+            "image": video.get("image"),
         })
 
     return video_list
