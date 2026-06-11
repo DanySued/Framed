@@ -58,7 +58,7 @@ export default function ControlBar() {
       }}
     >
       {/* Duration slider */}
-      <div style={{ display: "flex", alignItems: "center", gap: 12, flex: "0 0 auto" }}>
+      <div style={{ display: "flex", alignItems: "center", gap: 10, flex: "0 0 auto" }}>
         <label
           className="fr-overline"
           style={{ fontSize: "0.6375rem", whiteSpace: "nowrap" }}
