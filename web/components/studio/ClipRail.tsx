@@ -34,7 +34,10 @@ export default function ClipRail() {
       fetch(`/api/reels/clips/${jobId}`)
         .then((r) => r.ok ? r.json() : null)
         .then((data) => {
-          if (!data) return;
+          if (!data) {
+            toast.error("Couldn't load clips — retry in a moment");
+            return;
+          }
           // data could be an array or { clips: [] }
           const list: { index?: number; duration?: number }[] = Array.isArray(data)
             ? data
