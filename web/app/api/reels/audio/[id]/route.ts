@@ -60,6 +60,7 @@ export async function GET(
       headers: responseHeaders,
     });
   } catch (error) {
-    return NextResponse.json({ error: `Failed to stream audio: ${error}` }, { status: 500 });
+    console.error('[reels/audio GET]', error);
+    return NextResponse.json({ error: 'upstream error' }, { status: 500 });
   }
 }
