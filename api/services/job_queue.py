@@ -335,9 +335,7 @@ def _phase2_render_reel(job_id: str, reel_id: str) -> None:
             shutil.rmtree(clips_dir, ignore_errors=True)
 
         # Scale to Instagram Reels format (75%)
-        job.progress = 75
-        job.save()
-        JOBS[job_id]["progress"] = 75
+        _set_stage(job, job_id, 75, "framing 9:16")
 
         scaled_path = os.path.join(reel_dir, "scaled.mp4")
         scale_to_instagram_reels(concat_path, scaled_path)
