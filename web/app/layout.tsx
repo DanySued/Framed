@@ -1,43 +1,45 @@
 import type { Metadata } from "next";
-import { DM_Sans, Instrument_Serif } from "next/font/google";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { Toaster } from "sonner";
+import { fraunces, inter } from "@/lib/fonts";
+import { Grain } from "@/components/fx/Grain";
 import "./globals.css";
-
-const dmSans = DM_Sans({
-  variable: "--font-dm-sans",
-  subsets: ["latin"],
-  weight: ["300", "400", "500", "600", "700"],
-  style: ["normal", "italic"],
-  display: "swap",
-});
-
-const instrumentSerif = Instrument_Serif({
-  variable: "--font-instrument-serif",
-  subsets: ["latin"],
-  weight: ["400"],
-  style: ["normal", "italic"],
-  display: "swap",
-});
 
 export const metadata: Metadata = {
   title: "Framed",
-  description: "AI-powered video reels creator",
+  description: "Cinematic reels from keywords and music.",
   icons: {
-    icon: [
-      { url: "/favicon.svg", type: "image/svg+xml" },
-    ],
+    icon: [{ url: "/favicon.svg", type: "image/svg+xml" }],
     shortcut: "/favicon.svg",
   },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={`${dmSans.variable} ${instrumentSerif.variable} dark h-full`}>
-      <body className="h-full antialiased">
+    <html
+      lang="en"
+      className={`${fraunces.variable} ${inter.variable} h-full`}
+    >
+      <body
+        className="h-full antialiased"
+        style={{ backgroundColor: "var(--fr-black)", color: "var(--fr-ivory)" }}
+      >
+        <Grain />
         <TooltipProvider delayDuration={200}>
           {children}
-          <Toaster richColors position="bottom-right" />
+          <Toaster
+            richColors={false}
+            position="bottom-right"
+            toastOptions={{
+              style: {
+                background: "var(--fr-surface)",
+                border: "1px solid var(--fr-line)",
+                color: "var(--fr-ivory)",
+                borderRadius: "var(--radius)",
+                fontSize: "0.875rem",
+              },
+            }}
+          />
         </TooltipProvider>
       </body>
     </html>
