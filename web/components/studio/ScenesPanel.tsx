@@ -118,7 +118,7 @@ function SceneChip({ kw, onRemove, onThumbnailLoaded }: ChipProps) {
   const fetched = useRef(false);
 
   // Fetch Pexels thumbnail once
-  useState(() => {
+  useEffect(() => {
     if (fetched.current || kw.thumbnail) return;
     fetched.current = true;
 
