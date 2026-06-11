@@ -5,6 +5,8 @@ export async function DELETE(
   _request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  const unauth = await requireSession();
+  if (unauth) return unauth;
   try {
     const { id } = await params;
     const apiUrl = process.env.API_URL || 'http://localhost:8000';
