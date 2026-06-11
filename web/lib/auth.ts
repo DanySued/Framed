@@ -1,8 +1,10 @@
 import { createHmac } from "crypto";
 import { cookies } from "next/headers";
+import { NextResponse } from "next/server";
 
 const AUTH_SECRET = process.env.AUTH_SECRET ?? "dev-secret-change-me";
 const COOKIE_NAME = "__session";
+const MAX_AGE_MS = 7 * 24 * 60 * 60 * 1000;
 
 export function verifyToken(token: string): boolean {
   try {
@@ -15,7 +17,14 @@ export function verifyToken(token: string): boolean {
     if (sig.length !== expected.length) return false;
     let diff = 0;
     for (let i = 0; i < sig.length; i++) diff |= sig.charCodeAt(i) ^ expected.charCodeAt(i);
-    return diff === 0;
+    if (diff !== 0) return false;
+    // Check embedded timestamp for expiry (format: "payload:timestamp")
+    const colonIdx = msg.lastIndexOf(":");
+    if (colonIdx !== -1) {
+      const ts = parseInt(msg.slice(colonIdx + 1), 10);
+      if (!isNaN(ts) && Date.now() - ts > MAX_AGE_MS) return false;
+    }
+    return true;
   } catch {
     return false;
   }
@@ -26,4 +35,12 @@ export async function getSession(): Promise<boolean> {
   const token = cookieStore.get(COOKIE_NAME)?.value;
   if (!token) return false;
   return verifyToken(token);
+}
+
+export async function requireSession(): Promise<NextResponse | null> {
+  const valid = await getSession();
+  if (!valid) {
+    return NextResponse.json({ error: "unauthorized" }, { status: 401 });
+  }
+  return null;
 }
