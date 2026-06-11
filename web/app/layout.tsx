@@ -19,6 +19,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html
       lang="en"
       className={`${fraunces.variable} ${inter.variable} h-full`}
+      data-scroll-behavior="smooth"
     >
       <body
         className="h-full antialiased"
