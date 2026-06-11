@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { requireSession } from '@/lib/auth';
 
 export async function GET(request: NextRequest) {
+  const unauth = await requireSession();
+  if (unauth) return unauth;
   try {
     const apiUrl = process.env.API_URL || 'http://localhost:8000';
 
