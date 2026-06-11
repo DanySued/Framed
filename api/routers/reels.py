@@ -60,6 +60,28 @@ async def generate_reel(request: ReelGenerateRequest):
     return get_job_status(job_id)
 
 
+@router.get("/pexels/search")
+async def pexels_search(keywords: str, per_page: int = 20):
+    """
+    Search Pexels for portrait stock videos matching the given keywords.
+
+    Used by the wizard so the user can pick clips up-front, before render.
+    `keywords` is a comma-separated string.
+    """
+    kw_list = [k.strip() for k in keywords.split(",") if k.strip()]
+    if not kw_list:
+        raise HTTPException(status_code=400, detail="At least one keyword required")
+
+    try:
+        videos = await search_videos(kw_list, per_page=per_page)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Pexels search failed: {str(e)}")
+
+    return {"videos": videos}
+
+
 @router.get("/job/{job_id}", response_model=ReelJobResponse)
 async def get_job(job_id: str):
     """
