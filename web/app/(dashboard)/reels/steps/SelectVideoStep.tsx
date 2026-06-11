@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { motion } from 'motion/react';
-import { Check, Loader2, RefreshCw, Film } from 'lucide-react';
+import { Check, RefreshCw, Film } from 'lucide-react';
 import { ErrorBanner } from '@/components/ui/error-banner';
 import { Skeleton } from '@/components/ui/skeleton';
 import { cn } from '@/lib/utils';
