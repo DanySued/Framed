@@ -1,6 +1,9 @@
 import { NextResponse } from "next/server";
+import { requireSession } from "@/lib/auth";
 
 export async function GET() {
+  const unauth = await requireSession();
+  if (unauth) return unauth;
   try {
     const apiUrl = process.env.API_URL ?? "http://localhost:8000";
     const res = await fetch(`${apiUrl}/reels/clips`, { cache: "no-store" });
@@ -8,6 +11,7 @@ export async function GET() {
     const data = await res.json();
     return NextResponse.json(data);
   } catch (err) {
-    return NextResponse.json({ error: String(err) }, { status: 500 });
+    console.error("[dashboard/clips]", err);
+    return NextResponse.json({ error: "upstream error" }, { status: 500 });
   }
 }
