@@ -33,8 +33,10 @@ export default function AudioPanel() {
     }
   }, []);
 
-  // eslint-disable-next-line react-hooks/set-state-in-effect
-  useEffect(() => { loadTracks(); }, [loadTracks]);
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    loadTracks();
+  }, [loadTracks]);
 
   const uploadFile = useCallback(
     async (file: File) => {
