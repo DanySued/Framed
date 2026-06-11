@@ -31,6 +31,16 @@ scheduler: BackgroundScheduler | None = None
 JOBS: dict = {}  # In-memory job tracking
 
 
+def _set_stage(job, job_id: str, progress: int, stage: str, status: str = "processing") -> None:
+    """Update job progress/status in DB and in-memory JOBS dict with a stage label."""
+    job.progress = progress
+    job.status = status
+    job.save()
+    mem = JOBS.get(job_id) or {}
+    mem.update({"status": status, "progress": progress, "stage": stage, "error": None})
+    JOBS[job_id] = mem
+
+
 def init_scheduler():
     """Initialize the background scheduler."""
     global scheduler
