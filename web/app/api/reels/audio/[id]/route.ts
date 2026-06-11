@@ -19,7 +19,8 @@ export async function DELETE(
     }
     return new NextResponse(null, { status: 204 });
   } catch (error) {
-    return NextResponse.json({ error: `Delete failed: ${error}` }, { status: 500 });
+    console.error('[reels/audio DELETE]', error);
+    return NextResponse.json({ error: 'upstream error' }, { status: 500 });
   }
 }
 
@@ -27,6 +28,8 @@ export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  const unauth = await requireSession();
+  if (unauth) return unauth;
   try {
     const { id } = await params;
     const apiUrl = process.env.API_URL || 'http://localhost:8000';
