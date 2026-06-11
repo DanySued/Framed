@@ -368,16 +368,12 @@ def _phase2_render_reel(job_id: str, reel_id: str) -> None:
         # Auto-subtitles: transcribe → burn → keep .srt (96–99%)
         srt_path = None
         if request.subtitles_enabled:
-            job.progress = 96
-            job.save()
-            JOBS[job_id]["progress"] = 96
+            _set_stage(job, job_id, 96, "transcribing subtitles")
 
             # Whisper transcribes the video's audio track directly
             srt_path = transcribe_audio_to_srt(overlays_path, reel_dir)
 
-            job.progress = 98
-            job.save()
-            JOBS[job_id]["progress"] = 98
+            _set_stage(job, job_id, 98, "burning subtitles")
 
             # Burn the subtitles into a new file, then replace
             subtitled_path = os.path.join(reel_dir, "final_subtitled.mp4")
