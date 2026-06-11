@@ -27,7 +27,7 @@ export default async function StudioLayout({ children }: { children: React.React
 
         <nav className="flex items-center gap-6">
           <Link
-            href="/studio"
+            href="/films"
             className="text-[0.75rem] tracking-[0.12em] uppercase transition-colors"
             style={{ color: "var(--fr-muted)" }}
           >
