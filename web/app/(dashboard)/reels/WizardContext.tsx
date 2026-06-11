@@ -63,11 +63,12 @@ export const STEP_LABELS = ['Keywords', 'Select Video', 'Audio', 'Text Overlay',
 export const TOTAL_STEPS = STEP_LABELS.length;
 
 export function WizardProvider({ children }: { children: ReactNode }) {
+  const [keywords, setKeywords] = useState<string[]>([]);
+  const [selectedClips, setSelectedClips] = useState<SelectedClip[]>([]);
+
   const [selectedAudioId, setSelectedAudioId] = useState('');
   const [songStartTime, setSongStartTime] = useState(0);
   const [selectedAudioDuration, setSelectedAudioDuration] = useState(0);
-
-  const [keywords, setKeywords] = useState<string[]>([]);
 
   const [duration, setDuration] = useState(15);
   const [isBulk, setIsBulk] = useState(false);
@@ -86,7 +87,7 @@ export function WizardProvider({ children }: { children: ReactNode }) {
 
   const goNext = () => {
     setDirection(1);
-    setCurrentStep((s) => Math.min(s + 1, 4));
+    setCurrentStep((s) => Math.min(s + 1, TOTAL_STEPS - 1));
   };
 
   const goBack = () => {
@@ -101,10 +102,11 @@ export function WizardProvider({ children }: { children: ReactNode }) {
 
   return (
     <WizardContext.Provider value={{
+      keywords, setKeywords,
+      selectedClips, setSelectedClips,
       selectedAudioId, setSelectedAudioId,
       songStartTime, setSongStartTime,
       selectedAudioDuration, setSelectedAudioDuration,
-      keywords, setKeywords,
       duration, setDuration,
       isBulk, setIsBulk,
       reelCount, setReelCount,
