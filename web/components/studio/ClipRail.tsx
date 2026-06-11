@@ -26,6 +26,7 @@ export default function ClipRail() {
   useEffect(() => {
     if (phase !== "approval" || !jobId) return;
     if (clipCount > 0) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setClips(
         Array.from({ length: clipCount }, (_, i) => ({ index: i, duration: null }))
       );
