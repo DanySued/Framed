@@ -25,8 +25,8 @@ export default function ScenesPanel() {
 
   return (
     <aside
-      className="flex flex-col h-full overflow-hidden"
-      style={{ borderLeft: "1px solid var(--fr-line)" }}
+      className="flex flex-col min-h-[320px] lg:h-full overflow-hidden"
+      style={{ borderLeft: "1px solid var(--fr-line)", borderBottom: "1px solid var(--fr-line)" }}
     >
       {/* Header */}
       <div
