@@ -393,7 +393,7 @@ def _phase2_render_reel(job_id: str, reel_id: str) -> None:
         reel.save()
         job.save()
 
-        JOBS[job_id] = {"status": "done", "progress": 100, "error": None, "srt_path": srt_path}
+        JOBS[job_id] = {"status": "done", "progress": 100, "stage": "done", "error": None, "srt_path": srt_path}
 
     except Exception as e:
         job = ReelJob.get_by_id(job_id)
