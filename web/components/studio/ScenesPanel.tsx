@@ -145,7 +145,8 @@ function SceneChip({ kw, onRemove, onThumbnailLoaded }: ChipProps) {
         setThumbState("error");
         onThumbnailLoaded(null, null);
       });
-  });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return (
     <motion.div
