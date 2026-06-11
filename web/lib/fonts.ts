@@ -3,7 +3,7 @@ import { Fraunces, Inter } from "next/font/google";
 export const fraunces = Fraunces({
   subsets: ["latin"],
   weight: "variable",
-  axes: ["opsz", "wght"],
+  axes: ["opsz"],
   variable: "--font-display",
   display: "swap",
 });
