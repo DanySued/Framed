@@ -342,9 +342,7 @@ def _phase2_render_reel(job_id: str, reel_id: str) -> None:
         os.remove(concat_path)
 
         # Mix audio (90%)
-        job.progress = 90
-        job.save()
-        JOBS[job_id]["progress"] = 90
+        _set_stage(job, job_id, 90, "mixing audio")
 
         reel = Reel.get_by_id(reel_id)
         audio_mixed_path = os.path.join(reel_dir, "audio_mixed.mp4")
