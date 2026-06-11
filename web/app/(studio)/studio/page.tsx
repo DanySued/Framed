@@ -4,6 +4,8 @@ import PreviewFrame from "@/components/studio/PreviewFrame";
 import ScenesPanel from "@/components/studio/ScenesPanel";
 import TextPanel from "@/components/studio/TextPanel";
 import ControlBar from "@/components/studio/ControlBar";
+import ClipRail from "@/components/studio/ClipRail";
+import StudioPhaseGate from "@/components/studio/StudioPhaseGate";
 
 export default function StudioPage() {
   return (
@@ -12,33 +14,42 @@ export default function StudioPage() {
         className="flex flex-col"
         style={{ height: "calc(100vh - 3rem)" /* below 48px header */ }}
       >
-        {/* Work area: single column on mobile, three columns on lg+ */}
+        {/* Work area */}
         <div className="flex-1 min-h-0 grid lg:grid lg:grid-cols-[minmax(260px,320px)_1fr_minmax(260px,320px)]">
-          {/* Mobile: PreviewFrame first; on lg it sits in the center column */}
+          {/* Center column: preview + text panel */}
           <div
             className="flex flex-col overflow-hidden lg:order-2"
             style={{ borderLeft: "1px solid var(--fr-line)", borderRight: "1px solid var(--fr-line)" }}
           >
-            {/* Preview area */}
+            {/* Preview area — extra bottom margin for done state actions */}
             <div
               className="flex-1 flex items-center justify-center overflow-hidden"
-              style={{ padding: "24px 20px 20px" }}
+              style={{ padding: "24px 20px 64px" }}
             >
               <PreviewFrame />
             </div>
 
-            {/* Text panel pinned to bottom of center column */}
-            <TextPanel />
+            {/* Text panel pinned to bottom of center column (hidden during generation) */}
+            <StudioPhaseGate phases={["compose"]}>
+              <TextPanel />
+            </StudioPhaseGate>
           </div>
 
-          {/* Audio — left column on lg */}
-          <div className="lg:order-1">
-            <AudioPanel />
+          {/* Left column: Audio (compose) or hidden during generation */}
+          <div className="lg:order-1 overflow-hidden">
+            <StudioPhaseGate phases={["compose"]}>
+              <AudioPanel />
+            </StudioPhaseGate>
           </div>
 
-          {/* Scenes — right column on lg */}
-          <div className="lg:order-3">
-            <ScenesPanel />
+          {/* Right column: Scenes (compose) or ClipRail (approval) */}
+          <div className="lg:order-3 overflow-hidden flex flex-col">
+            <StudioPhaseGate phases={["compose"]}>
+              <ScenesPanel />
+            </StudioPhaseGate>
+            <StudioPhaseGate phases={["approval"]}>
+              <ClipRail />
+            </StudioPhaseGate>
           </div>
         </div>
 
