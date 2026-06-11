@@ -25,8 +25,9 @@ export async function GET(request: NextRequest) {
     const data = await response.json();
     return NextResponse.json(data);
   } catch (error) {
+    console.error('[reels/audio GET]', error);
     return NextResponse.json(
-      { error: `Failed to list audio: ${error}` },
+      { error: 'upstream error' },
       { status: 500 }
     );
   }
