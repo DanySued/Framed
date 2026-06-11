@@ -40,10 +40,6 @@ export default function ControlBar() {
     [canGenerate, prefersReducedMotion]
   );
 
-  const handleMouseLeave = useCallback(() => {
-    setMagnetic({ x: 0, y: 0 });
-  }, []);
-
   const formatDuration = (s: number) => `${s}s`;
 
   return (
