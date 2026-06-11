@@ -1,17 +1,15 @@
 'use client';
 
 import { AnimatePresence, motion } from 'motion/react';
-import { STEP_LABELS, useWizard } from './WizardContext';
-import { AudioStep } from './steps/AudioStep';
+import { useWizard } from './WizardContext';
 import { KeywordsStep } from './steps/KeywordsStep';
-import { SettingsStep } from './steps/SettingsStep';
+import { SelectVideoStep } from './steps/SelectVideoStep';
+import { AudioStep } from './steps/AudioStep';
 import { TextStep } from './steps/TextStep';
 import { GenerateStep } from './steps/GenerateStep';
+import { WizardSidePanel } from './WizardSidePanel';
 
-const STEPS = [AudioStep, KeywordsStep, SettingsStep, TextStep, GenerateStep];
-
-const STEP_DOT_GLOW = '0 0 0 4px rgba(212,168,75,0.2)';
-const STEP_DOT_NONE = '0 0 0 0px rgba(212,168,75,0)';
+const STEPS = [KeywordsStep, SelectVideoStep, AudioStep, TextStep, GenerateStep];
 
 const slideVariants = {
   enter: (direction: number) => ({
@@ -35,47 +33,9 @@ export function WizardShell() {
   const StepComponent = STEPS[currentStep];
 
   return (
-    <div className="flex flex-col min-h-[calc(100vh-56px)]">
-      {/* Progress header */}
-      <div className="px-6 pt-6 pb-5 border-b border-border">
-        <div className="max-w-lg mx-auto space-y-3">
-          <div className="flex items-center gap-1.5">
-            {STEP_LABELS.map((_, i) => (
-              <div key={i} className="flex items-center gap-1.5 flex-1 last:flex-none">
-                <motion.div
-                  animate={{
-                    scale: i === currentStep ? 1.25 : i < currentStep ? 0.9 : 1,
-                    backgroundColor: i <= currentStep ? 'var(--primary)' : 'var(--border)',
-                    boxShadow: i === currentStep ? STEP_DOT_GLOW : STEP_DOT_NONE,
-                  }}
-                  transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
-                  className="w-2 h-2 rounded-full shrink-0"
-                />
-                {i < STEP_LABELS.length - 1 && (
-                  <div className="flex-1 h-px bg-border overflow-hidden rounded-full">
-                    <motion.div
-                      className="h-full bg-primary rounded-full origin-left"
-                      animate={{ scaleX: i < currentStep ? 1 : 0 }}
-                      transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
-                    />
-                  </div>
-                )}
-              </div>
-            ))}
-          </div>
-          <motion.p
-            key={currentStep}
-            initial={{ opacity: 0, y: 4 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.25 }}
-            className="text-xs text-foreground font-medium"
-          >
-            {STEP_LABELS[currentStep]}
-          </motion.p>
-        </div>
-      </div>
+    <div className="flex flex-col md:flex-row min-h-[calc(100vh-56px)]">
+      <WizardSidePanel />
 
-      {/* Step content */}
       <div className="flex-1 overflow-y-auto flex flex-col items-center justify-center py-12">
         <AnimatePresence mode="wait" custom={direction}>
           <motion.div
