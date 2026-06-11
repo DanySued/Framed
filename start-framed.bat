@@ -8,5 +8,5 @@ if not exist node_modules (
 start "framed dev server" cmd /k "npm run dev"
 echo Waiting for dev server to boot...
 timeout /t 6 /nobreak >nul
-start "" http://localhost:3000/lab/dashboard
+start "" http://localhost:3000/
 exit
