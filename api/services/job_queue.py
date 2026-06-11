@@ -224,6 +224,7 @@ def _phase1_prepare_clips(
         JOBS[job_id] = {
             "status": "awaiting_clip_approval",
             "progress": 50,
+            "stage": "awaiting your approval",
             "clip_count": len(clips),
             "error": None,
         }
