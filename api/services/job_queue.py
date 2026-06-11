@@ -355,9 +355,7 @@ def _phase2_render_reel(job_id: str, reel_id: str) -> None:
         os.remove(scaled_path)
 
         # Burn text overlays (95%)
-        job.progress = 95
-        job.save()
-        JOBS[job_id]["progress"] = 95
+        _set_stage(job, job_id, 95, "burning titles")
 
         overlays_path = os.path.join(reel_dir, "final.mp4")
         active_overlays = [ov for ov in request.overlays if ov.text.strip()]
