@@ -251,7 +251,7 @@ def approve_clips(job_id: str) -> None:
     job.progress = 55
     job.save()
 
-    JOBS[job_id] = {"status": "processing", "progress": 55, "error": None}
+    JOBS[job_id] = {"status": "processing", "progress": 55, "stage": "resuming render", "error": None}
 
     init_scheduler()
     scheduler.add_job(
