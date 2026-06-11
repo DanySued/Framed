@@ -30,8 +30,9 @@ export async function GET(request: NextRequest) {
     const data = await res.json();
     return NextResponse.json(data);
   } catch (error) {
+    console.error(error);
     return NextResponse.json(
-      { error: `Pexels search failed: ${error}` },
+      { error: "Pexels search failed" },
       { status: 500 }
     );
   }

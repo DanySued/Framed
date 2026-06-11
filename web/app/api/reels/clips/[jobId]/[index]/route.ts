@@ -19,6 +19,7 @@ export async function GET(
       headers: { 'Content-Type': 'video/mp4' },
     });
   } catch (error) {
-    return NextResponse.json({ error: `Failed to stream clip: ${error}` }, { status: 500 });
+    console.error(error);
+    return NextResponse.json({ error: "Failed to stream clip" }, { status: 500 });
   }
 }

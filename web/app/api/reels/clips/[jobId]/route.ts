@@ -17,6 +17,7 @@ export async function GET(
     }
     return NextResponse.json(await response.json());
   } catch (error) {
-    return NextResponse.json({ error: `Failed to get clips: ${error}` }, { status: 500 });
+    console.error(error);
+    return NextResponse.json({ error: "Failed to get clips" }, { status: 500 });
   }
 }

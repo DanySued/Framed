@@ -35,8 +35,9 @@ export async function GET(
     const data = await response.json();
     return NextResponse.json(data);
   } catch (error) {
+    console.error(error);
     return NextResponse.json(
-      { error: `Failed to get job status: ${error}` },
+      { error: "Failed to get job status" },
       { status: 500 }
     );
   }

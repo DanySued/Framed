@@ -17,6 +17,7 @@ export async function POST(
     }
     return NextResponse.json(await response.json());
   } catch (error) {
-    return NextResponse.json({ error: `Failed to replace clip: ${error}` }, { status: 500 });
+    console.error(error);
+    return NextResponse.json({ error: "Failed to replace clip" }, { status: 500 });
   }
 }
