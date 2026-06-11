@@ -127,11 +127,13 @@ function SceneChip({ kw, onRemove, onThumbnailLoaded }: ChipProps) {
         if (!r.ok) throw new Error("fetch failed");
         return r.json();
       })
-      .then((data: { videos: Array<{ id: number; url: string }> }) => {
+      .then((data: { videos: Array<{ id: number; url: string; image?: string }> }) => {
         const first = data.videos?.[0];
         if (first?.id) {
-          // Use Pexels CDN thumbnail pattern
-          const thumb = `https://images.pexels.com/videos/${first.id}/pictures/preview-0.jpg`;
+          // Prefer the `image` field from Pexels; fall back to CDN pattern
+          const thumb =
+            first.image ||
+            `https://images.pexels.com/videos/${first.id}/pictures/preview-0.jpg`;
           onThumbnailLoaded(thumb, first.id);
           setThumbState("loaded");
         } else {
