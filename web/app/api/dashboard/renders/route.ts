@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { requireSession } from "@/lib/auth";
 
 export interface DashboardRender {
   id: string;
