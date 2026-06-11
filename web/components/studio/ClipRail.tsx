@@ -49,7 +49,9 @@ export default function ClipRail() {
             }))
           );
         })
-        .catch(() => {});
+        .catch(() => {
+          toast.error("Couldn't load clips — retry in a moment");
+        });
     }
   }, [phase, jobId, clipCount]);
 
