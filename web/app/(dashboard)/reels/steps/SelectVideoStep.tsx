@@ -29,10 +29,7 @@ export function SelectVideoStep() {
   const targetCount = Math.max(1, Math.round(duration / 4));
 
   useEffect(() => {
-    if (keywords.length === 0) {
-      setVideos([]);
-      return;
-    }
+    if (keywords.length === 0) return;
 
     let cancelled = false;
     const load = async () => {
