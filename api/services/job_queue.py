@@ -111,18 +111,15 @@ def _phase1_prepare_clips(
     """
     try:
         job = ReelJob.get_by_id(job_id)
-        job.status = "processing"
         job.started_at = datetime.now()
-        job.progress = 10
-        job.save()
+        _set_stage(job, job_id, 10, "searching scenes")
 
         MEDIA_DIR = os.getenv("MEDIA_DIR", "/media")
         reel_dir = os.path.join(MEDIA_DIR, "generated", "reels", reel_id)
         os.makedirs(reel_dir, exist_ok=True)
 
         # Search and download videos (20%)
-        job.progress = 20
-        job.save()
+        _set_stage(job, job_id, 20, "downloading clips")
 
         estimated_clips = max(1, round(request.duration / 4))
         download_count = estimated_clips + 2
