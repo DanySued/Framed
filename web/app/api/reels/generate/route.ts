@@ -18,6 +18,7 @@ export async function POST(request: NextRequest) {
         song_start_time: body.songStartTime ?? 0,
         overlays: body.overlays ?? [],
         subtitles_enabled: body.subtitlesEnabled ?? false,
+        selected_clips: body.selectedClips ?? [],
       }),
     });
 
