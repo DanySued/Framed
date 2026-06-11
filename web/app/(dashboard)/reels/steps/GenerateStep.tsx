@@ -82,7 +82,7 @@ export function GenerateStep() {
   const {
     selectedAudioId, songStartTime, selectedAudioDuration,
     keywords, duration, isBulk, reelCount, subtitlesEnabled,
-    overlays, noText,
+    overlays, noText, selectedClips,
     goBack, goToStep,
   } = useWizard();
 
