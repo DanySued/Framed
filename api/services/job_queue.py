@@ -119,20 +119,36 @@ def _phase1_prepare_clips(
 
         video_paths = []
         try:
-            fetch_pool = min(max(download_count * 3, 15), 80)
+            # If the user pre-selected clips in the wizard's Select Video step, skip
+            # Pexels search and download those URLs directly.
+            if request.selected_clips:
+                async def _download_selected() -> list[str]:
+                    paths = [
+                        os.path.join(reel_dir, f"video_{i}.mp4")
+                        for i in range(len(request.selected_clips))
+                    ]
+                    await asyncio.gather(*[
+                        download_video(clip.url, path)
+                        for clip, path in zip(request.selected_clips, paths)
+                    ])
+                    return paths
 
-            async def _search_and_download() -> list[str]:
-                video_list = await search_videos(request.keywords, per_page=fetch_pool)
-                random.shuffle(video_list)
-                candidates = video_list[:download_count]
-                paths = [os.path.join(reel_dir, f"video_{i}.mp4") for i in range(len(candidates))]
-                await asyncio.gather(*[
-                    download_video(meta["url"], path)
-                    for meta, path in zip(candidates, paths)
-                ])
-                return paths
+                video_paths = asyncio_run(_download_selected())
+            else:
+                fetch_pool = min(max(download_count * 3, 15), 80)
 
-            video_paths = asyncio_run(_search_and_download())
+                async def _search_and_download() -> list[str]:
+                    video_list = await search_videos(request.keywords, per_page=fetch_pool)
+                    random.shuffle(video_list)
+                    candidates = video_list[:download_count]
+                    paths = [os.path.join(reel_dir, f"video_{i}.mp4") for i in range(len(candidates))]
+                    await asyncio.gather(*[
+                        download_video(meta["url"], path)
+                        for meta, path in zip(candidates, paths)
+                    ])
+                    return paths
+
+                video_paths = asyncio_run(_search_and_download())
         except Exception as e:
             raise ValueError(f"Pexels integration failed: {str(e)}")
 
