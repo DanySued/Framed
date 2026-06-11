@@ -482,6 +482,7 @@ def get_job_status(job_id: str) -> dict:
                 "reels_done": 1 if mem_status == "done" else 0,
                 "reels_total": 1,
                 "srt_path": mem.get("srt_path"),
+                "stage": mem.get("stage"),
             }
         return {"status": "not_found", "error": "Job not found"}
 
