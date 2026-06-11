@@ -163,8 +163,7 @@ def _phase1_prepare_clips(
             raise ValueError("Could not download any videos from Pexels")
 
         # Trim clips in parallel (40%)
-        job.progress = 40
-        job.save()
+        _set_stage(job, job_id, 40, "cutting clips")
 
         clips_dir = os.path.join(reel_dir, "clips")
         os.makedirs(clips_dir, exist_ok=True)
