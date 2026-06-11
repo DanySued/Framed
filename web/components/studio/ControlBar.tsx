@@ -251,7 +251,7 @@ export default function ControlBar() {
           el.style.background = "var(--fr-gold)";
           el.style.color = "#0a0800";
         }}
-        onMouseOut={(e) => {
+        onMouseLeave={(e) => {
           const el = e.currentTarget;
           el.style.background = "transparent";
           el.style.color = canGenerate ? "var(--fr-gold)" : "var(--fr-muted)";
