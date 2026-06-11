@@ -225,7 +225,6 @@ export default function ControlBar() {
         onClick={canGenerate ? onGenerate : undefined}
         disabled={!canGenerate}
         onMouseMove={handleMouseMove}
-        onMouseLeave={handleMouseLeave}
         style={{
           fontFamily: "var(--font-display), Georgia, serif",
           fontSize: "0.9375rem",
