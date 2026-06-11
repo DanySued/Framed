@@ -32,9 +32,15 @@ export interface TextOverlayItem {
   italic: boolean;
 }
 
+export interface GenerationClip {
+  url: string;
+  duration?: number;
+}
+
 interface OverlayOptions {
   overlays?: TextOverlayItem[];
   subtitlesEnabled?: boolean;
+  selectedClips?: GenerationClip[];
 }
 
 interface ReelGenerationContextValue {
