@@ -148,6 +148,7 @@ export function ReelGenerationProvider({ children }: { children: ReactNode }) {
               songStartTime,
               overlays: overlay.overlays ?? [],
               subtitlesEnabled: overlay.subtitlesEnabled ?? false,
+              selectedClips: overlay.selectedClips ?? [],
             }),
           })
         );
