@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { requireSession } from '@/lib/auth';
 
 export async function POST(request: NextRequest) {
+  const unauth = await requireSession();
+  if (unauth) return unauth;
   try {
     const body = await request.json();
 
