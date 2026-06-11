@@ -1,6 +1,7 @@
 "use client";
 
-import React, { createContext, useCallback, useContext, useState } from "react";
+import React, { createContext, useCallback, useContext, useEffect, useRef, useState } from "react";
+import { toast } from "sonner";
 
 // Matches TextOverlayItem in api/models/schemas.py exactly
 export interface TextOverlay {
@@ -25,6 +26,26 @@ export type StudioPhase =
   | "rendering"
   | "done";
 
+export interface JobStatus {
+  job_id: string;
+  reel_id: string | null;
+  status: "queued" | "processing" | "awaiting_clip_approval" | "done" | "failed";
+  progress: number;
+  phase: number;
+  phase_progress: number;
+  error_message: string | null;
+  clip_count: number | null;
+  stage: string | null;
+  reels_done: number;
+  reels_total: number;
+  srt_path: string | null;
+}
+
+export interface JobEntry {
+  jobId: string;
+  status: JobStatus | null;
+}
+
 interface StudioState {
   // Audio
   audioFileId: string | null;
@@ -44,6 +65,13 @@ interface StudioState {
 
   // Workflow phase
   phase: StudioPhase;
+
+  // Generation jobs
+  jobs: JobEntry[];
+  // Index of the job currently shown in approval UI
+  approvalJobIndex: number;
+  // Override media shown in PreviewFrame (clip preview or final video)
+  previewOverride: string | null;
 }
 
 interface StudioActions {
@@ -65,9 +93,11 @@ interface StudioActions {
   removeOverlay: (index: number) => void;
 
   setPhase: (p: StudioPhase) => void;
+  setPreviewOverride: (src: string | null) => void;
 
-  /** Called by ControlBar Generate button — stub for Task 4 */
   onGenerate: () => void;
+  onApproveClips: (jobId: string) => Promise<void>;
+  onReset: () => void;
 }
 
 type StudioContextValue = StudioState & StudioActions;
@@ -93,6 +123,98 @@ export function StudioProvider({ children }: { children: React.ReactNode }) {
   const [bulkCount, setBulkCount] = useState(1);
   const [overlays, setOverlays] = useState<TextOverlay[]>([{ ...DEFAULT_OVERLAY }]);
   const [phase, setPhase] = useState<StudioPhase>("compose");
+  const [jobs, setJobs] = useState<JobEntry[]>([]);
+  const [approvalJobIndex, setApprovalJobIndex] = useState(0);
+  const [previewOverride, setPreviewOverride] = useState<string | null>(null);
+
+  const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  const stopPolling = useCallback(() => {
+    if (pollRef.current) {
+      clearInterval(pollRef.current);
+      pollRef.current = null;
+    }
+  }, []);
+
+  // Poll all active jobs
+  const pollJobs = useCallback(async (jobIds: string[]) => {
+    const results = await Promise.all(
+      jobIds.map(async (jobId) => {
+        try {
+          const res = await fetch(`/api/reels/job/${jobId}`);
+          if (!res.ok) return null;
+          return (await res.json()) as JobStatus;
+        } catch {
+          return null;
+        }
+      })
+    );
+
+    setJobs((prev) =>
+      prev.map((j, i) => ({
+        ...j,
+        status: results[i] ?? j.status,
+      }))
+    );
+
+    return results;
+  }, []);
+
+  // Derive phase from job statuses
+  const derivePhase = useCallback((statuses: (JobStatus | null)[]): StudioPhase => {
+    const valid = statuses.filter(Boolean) as JobStatus[];
+    if (!valid.length) return "generating";
+
+    const anyFailed = valid.some((s) => s.status === "failed");
+    if (anyFailed) return "compose";
+
+    const allDone = valid.every((s) => s.status === "done");
+    if (allDone) return "done";
+
+    const anyApproval = valid.some((s) => s.status === "awaiting_clip_approval");
+    if (anyApproval) return "approval";
+
+    const anyPhase2 = valid.some(
+      (s) => s.status === "processing" && s.phase === 2
+    );
+    if (anyPhase2) return "rendering";
+
+    return "generating";
+  }, []);
+
+  // Start polling after jobs are created
+  const startPolling = useCallback(
+    (jobIds: string[]) => {
+      stopPolling();
+      pollRef.current = setInterval(async () => {
+        const results = await pollJobs(jobIds);
+        const newPhase = derivePhase(results);
+
+        setPhase(newPhase);
+
+        if (newPhase === "approval") {
+          // Find first job awaiting approval
+          const awaitingIdx = results.findIndex(
+            (s) => s?.status === "awaiting_clip_approval"
+          );
+          if (awaitingIdx >= 0) setApprovalJobIndex(awaitingIdx);
+        }
+
+        if (newPhase === "done" || newPhase === "compose") {
+          stopPolling();
+          if (newPhase === "compose") {
+            // Failed — show error
+            const failed = results.find((s) => s?.status === "failed");
+            toast.error(failed?.error_message ?? "Generation failed");
+          }
+        }
+      }, 1500);
+    },
+    [stopPolling, pollJobs, derivePhase]
+  );
+
+  // Cleanup on unmount
+  useEffect(() => () => stopPolling(), [stopPolling]);
 
   const setAudio = useCallback((id: string, name: string) => {
     setAudioFileId(id);
@@ -141,10 +263,95 @@ export function StudioProvider({ children }: { children: React.ReactNode }) {
     setOverlays((prev) => prev.filter((_, i) => i !== index));
   }, []);
 
-  const onGenerate = useCallback(() => {
-    // Task 4 will implement this
-    console.log("[Studio] onGenerate stub — wired in Task 4");
-  }, []);
+  const onGenerate = useCallback(async () => {
+    if (!audioFileId || keywords.length < 1) return;
+
+    const title = keywords.map((k) => k.keyword).join(", ");
+
+    try {
+      setPhase("generating");
+      setJobs([]);
+      setPreviewOverride(null);
+
+      // Fire N generate requests for bulk
+      const requests = Array.from({ length: bulkCount }, () =>
+        fetch("/api/reels/generate", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            keywords: keywords.map((k) => k.keyword),
+            audioFileId,
+            duration,
+            title,
+            songStartTime,
+            overlays,
+            subtitlesEnabled,
+          }),
+        }).then(async (res) => {
+          if (!res.ok) {
+            const err = await res.json().catch(() => ({}));
+            throw new Error(err.error || "Generation failed");
+          }
+          return res.json() as Promise<{ job_id: string }>;
+        })
+      );
+
+      const responses = await Promise.all(requests);
+      const jobIds = responses.map((r) => r.job_id);
+
+      setJobs(jobIds.map((jobId) => ({ jobId, status: null })));
+      setApprovalJobIndex(0);
+      startPolling(jobIds);
+    } catch (err) {
+      setPhase("compose");
+      toast.error(err instanceof Error ? err.message : "Generation failed");
+    }
+  }, [
+    audioFileId,
+    keywords,
+    duration,
+    subtitlesEnabled,
+    bulkCount,
+    overlays,
+    songStartTime,
+    startPolling,
+  ]);
+
+  const onApproveClips = useCallback(
+    async (jobId: string) => {
+      try {
+        const res = await fetch(`/api/reels/clips/${jobId}/approve`, { method: "POST" });
+        if (!res.ok) throw new Error("Approve failed");
+
+        // Check if there are more jobs awaiting approval
+        setJobs((prev) => {
+          const nextAwaitingIdx = prev.findIndex(
+            (j, i) =>
+              i !== prev.findIndex((jj) => jj.jobId === jobId) &&
+              j.status?.status === "awaiting_clip_approval"
+          );
+          if (nextAwaitingIdx >= 0) {
+            setApprovalJobIndex(nextAwaitingIdx);
+            setPhase("approval");
+          } else {
+            setPhase("rendering");
+          }
+          return prev;
+        });
+      } catch {
+        toast.error("Failed to approve clips");
+      }
+    },
+    []
+  );
+
+  const onReset = useCallback(() => {
+    stopPolling();
+    setPhase("compose");
+    setJobs([]);
+    setApprovalJobIndex(0);
+    setPreviewOverride(null);
+  }, [stopPolling]);
 
   const value: StudioContextValue = {
     audioFileId,
@@ -156,6 +363,9 @@ export function StudioProvider({ children }: { children: React.ReactNode }) {
     bulkCount,
     overlays,
     phase,
+    jobs,
+    approvalJobIndex,
+    previewOverride,
 
     setAudio,
     clearAudio,
@@ -171,7 +381,10 @@ export function StudioProvider({ children }: { children: React.ReactNode }) {
     addOverlay,
     removeOverlay,
     setPhase,
+    setPreviewOverride,
     onGenerate,
+    onApproveClips,
+    onReset,
   };
 
   return (
