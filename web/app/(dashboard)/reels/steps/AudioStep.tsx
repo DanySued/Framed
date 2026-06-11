@@ -320,7 +320,6 @@ export function AudioStep() {
         onNext={goNext}
         nextDisabled={!selectedAudioId}
         nextLabel="Next →"
-        hideBack
       />
     </div>
   );
