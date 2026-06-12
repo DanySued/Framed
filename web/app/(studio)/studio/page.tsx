@@ -44,10 +44,10 @@ export default function StudioPage() {
             </StudioPhaseGate>
           </div>
 
-          {/* Right column: Scenes (compose) or ClipRail (approval) */}
+          {/* Right column: Audio (compose) or ClipRail (approval) */}
           <div className="lg:overflow-hidden flex flex-col">
             <StudioPhaseGate phases={["compose"]}>
-              <ScenesPanel />
+              <AudioPanel />
             </StudioPhaseGate>
             <StudioPhaseGate phases={["approval"]}>
               <ClipRail />
