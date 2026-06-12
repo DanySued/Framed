@@ -19,6 +19,14 @@ export interface SceneKeyword {
   videoId: number | null;
 }
 
+export interface PickedClip {
+  id: number;
+  url: string;            // direct video file URL (Pexels)
+  image: string | null;
+  duration: number | null;
+  keyword: string;
+}
+
 export type StudioPhase =
   | "compose"
   | "generating"
