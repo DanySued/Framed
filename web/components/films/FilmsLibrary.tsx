@@ -322,7 +322,7 @@ function FilmFocus({ reel, onClose }: { reel: ReelItem; onClose: () => void }) {
         }}
       >
         <div>
-          <p
+          <h2
             style={{
               fontFamily: "var(--font-display), Georgia, serif",
               fontSize: "1.125rem",
@@ -332,7 +332,7 @@ function FilmFocus({ reel, onClose }: { reel: ReelItem; onClose: () => void }) {
             }}
           >
             {reel.title || "untitled"}
-          </p>
+          </h2>
           {date && (
             <p style={{ fontFamily: "monospace", fontSize: "0.625rem", color: "var(--fr-muted)", margin: 0 }}>
               {date}
