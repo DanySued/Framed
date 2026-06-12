@@ -352,6 +352,7 @@ function FilmFocus({ reel, onClose }: { reel: ReelItem; onClose: () => void }) {
         </div>
 
         <a
+          ref={downloadRef}
           href={src}
           download
           style={{
