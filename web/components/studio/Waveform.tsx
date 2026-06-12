@@ -93,7 +93,7 @@ export default function Waveform({ audioId }: Props) {
       const x = i * (barW + 1);
       const y = (H - barH) / 2;
 
-      ctx.fillStyle = i <= playedBar ? "var(--fr-gold, #c9a45c)" : "rgba(138,130,118,0.35)";
+      ctx.fillStyle = i <= playedBar ? accent : "rgba(255,255,255,0.18)";
       ctx.fillRect(x, y, barW, barH);
     }
   }, [amplitudes, songStartTime, duration]);
