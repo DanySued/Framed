@@ -391,6 +391,7 @@ export function StudioProvider({ children }: { children: React.ReactNode }) {
     audioName,
     songStartTime,
     keywords,
+    selectedClips,
     duration,
     subtitlesEnabled,
     bulkCount,
