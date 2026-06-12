@@ -144,10 +144,12 @@ function FilmCard({
     >
       {/* Poster */}
       <div
+        className="fr-card-hover"
         style={{
           aspectRatio: "9 / 16",
           background: "var(--fr-surface)",
-          border: "1px solid var(--fr-line)",
+          border: "1px solid var(--fr-line-2)",
+          borderRadius: "var(--radius)",
           overflow: "hidden",
           position: "relative",
         }}
