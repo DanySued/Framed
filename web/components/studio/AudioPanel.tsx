@@ -124,7 +124,7 @@ export default function AudioPanel() {
             gap: 8,
           }}
         >
-          <span style={{ fontFamily: "var(--font-mono), monospace", fontSize: "0.6875rem", color: "var(--fr-gold)" }}>01</span>
+          <span style={{ fontFamily: "var(--font-mono), monospace", fontSize: "0.6875rem", color: "var(--fr-gold)" }}>02</span>
           Audio
         </h2>
       </div>
