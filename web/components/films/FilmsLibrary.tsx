@@ -266,11 +266,14 @@ function FilmFocus({ reel, onClose }: { reel: ReelItem; onClose: () => void }) {
       exit={{ opacity: 0 }}
       transition={{ duration: 0.18 }}
       onClick={handleBackdrop}
+      role="dialog"
+      aria-modal="true"
+      aria-label={reel.title || "untitled film"}
       style={{
         position: "fixed",
         inset: 0,
         zIndex: 50,
-        background: "rgba(13,11,8,0.88)",
+        background: "rgba(6,9,11,0.88)",
         backdropFilter: "blur(6px)",
         display: "flex",
         alignItems: "center",
