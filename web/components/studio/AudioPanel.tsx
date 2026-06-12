@@ -236,7 +236,12 @@ export default function AudioPanel() {
         onClick={() => fileInputRef.current?.click()}
         role="button"
         tabIndex={0}
-        onKeyDown={(e) => e.key === "Enter" && fileInputRef.current?.click()}
+        onKeyDown={(e) => {
+          if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault();
+            fileInputRef.current?.click();
+          }
+        }}
         className="shrink-0 transition-colors cursor-pointer"
         style={{
           borderTop: "1px solid var(--fr-line)",
