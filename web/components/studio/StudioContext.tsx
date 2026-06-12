@@ -131,6 +131,7 @@ export function StudioProvider({ children }: { children: React.ReactNode }) {
   const [audioName, setAudioName] = useState<string | null>(null);
   const [songStartTime, setSongStartTime] = useState(0);
   const [keywords, setKeywords] = useState<SceneKeyword[]>([]);
+  const [selectedClips, setSelectedClips] = useState<PickedClip[]>([]);
   const [duration, setDuration] = useState(30);
   const [subtitlesEnabled, setSubtitlesEnabled] = useState(false);
   const [bulkCount, setBulkCount] = useState(1);
