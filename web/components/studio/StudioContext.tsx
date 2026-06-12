@@ -314,6 +314,10 @@ export function StudioProvider({ children }: { children: React.ReactNode }) {
             songStartTime,
             overlays,
             subtitlesEnabled,
+            selectedClips: selectedClips.map((c) => ({
+              url: c.url,
+              duration: c.duration,
+            })),
           }),
         }).then(async (res) => {
           if (!res.ok) {
