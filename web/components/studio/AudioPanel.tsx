@@ -145,7 +145,7 @@ export default function AudioPanel() {
                         ? "2px solid var(--fr-gold)"
                         : "2px solid transparent",
                       background: selected
-                        ? "rgba(201,164,92,0.06)"
+                        ? "rgba(82,214,196,0.06)"
                         : "transparent",
                       display: "flex",
                       alignItems: "center",
@@ -220,7 +220,7 @@ export default function AudioPanel() {
           alignItems: "center",
           gap: 8,
           background: draggingOver
-            ? "rgba(201,164,92,0.08)"
+            ? "rgba(82,214,196,0.08)"
             : "transparent",
         }}
       >

@@ -130,7 +130,7 @@ export default function ControlBar() {
               width: 14,
               height: 14,
               borderRadius: "50%",
-              background: subtitlesEnabled ? "#0a0800" : "var(--fr-muted)",
+              background: subtitlesEnabled ? "#04110e" : "var(--fr-muted)",
               transition: "left 200ms ease",
             }}
           />
@@ -246,7 +246,7 @@ export default function ControlBar() {
           if (!canGenerate) return;
           const el = e.currentTarget;
           el.style.background = "var(--fr-gold)";
-          el.style.color = "#0a0800";
+          el.style.color = "#04110e";
         }}
         onMouseLeave={(e) => {
           const el = e.currentTarget;

@@ -350,7 +350,7 @@ function FilmFocus({ reel, onClose }: { reel: ReelItem; onClose: () => void }) {
           }}
           onMouseEnter={(e) => {
             e.currentTarget.style.background = "var(--fr-gold)";
-            e.currentTarget.style.color = "#0a0800";
+            e.currentTarget.style.color = "#04110e";
           }}
           onMouseLeave={(e) => {
             e.currentTarget.style.background = "transparent";

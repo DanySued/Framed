@@ -82,6 +82,11 @@ export default function Waveform({ audioId }: Props) {
     const playedBar = Math.floor(playedRatio * BAR_COUNT);
     const barW = (W - BAR_COUNT + 1) / BAR_COUNT;
 
+    // Canvas can't resolve CSS variables — read the accent token off :root.
+    const accent =
+      getComputedStyle(document.documentElement).getPropertyValue("--fr-gold").trim() ||
+      "#52d6c4";
+
     for (let i = 0; i < BAR_COUNT; i++) {
       const amp = amplitudes[i] ?? 0;
       const barH = Math.max(2, amp * (H - 8));

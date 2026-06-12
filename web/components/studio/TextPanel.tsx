@@ -122,7 +122,7 @@ function OverlayEditor({ overlay, onUpdate, onRemove }: EditorProps) {
         <button
           onClick={() => onUpdate({ bold: !overlay.bold })}
           style={{
-            background: overlay.bold ? "rgba(201,164,92,0.12)" : "transparent",
+            background: overlay.bold ? "rgba(82,214,196,0.12)" : "transparent",
             border: `1px solid ${overlay.bold ? "var(--fr-gold)" : "var(--fr-line)"}`,
             color: overlay.bold ? "var(--fr-gold)" : "var(--fr-muted)",
             fontWeight: 700,
@@ -146,7 +146,7 @@ function OverlayEditor({ overlay, onUpdate, onRemove }: EditorProps) {
         <button
           onClick={() => onUpdate({ italic: !overlay.italic })}
           style={{
-            background: overlay.italic ? "rgba(201,164,92,0.12)" : "transparent",
+            background: overlay.italic ? "rgba(82,214,196,0.12)" : "transparent",
             border: `1px solid ${overlay.italic ? "var(--fr-gold)" : "var(--fr-line)"}`,
             color: overlay.italic ? "var(--fr-gold)" : "var(--fr-muted)",
             fontStyle: "italic",
