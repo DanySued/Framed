@@ -18,7 +18,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html
       lang="en"
-      className={`${fraunces.variable} ${inter.variable} h-full`}
+      className={`${dmSans.variable} ${instrumentSerif.variable} ${geistMono.variable} h-full`}
       data-scroll-behavior="smooth"
     >
       <body
