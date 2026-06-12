@@ -21,7 +21,21 @@ export default function TextPanel() {
           marginBottom: 12,
         }}
       >
-        <h4>Title</h4>
+        <h2
+          style={{
+            fontSize: "0.8125rem",
+            fontWeight: 600,
+            letterSpacing: "0.06em",
+            textTransform: "uppercase",
+            color: "var(--fr-muted)",
+            display: "flex",
+            alignItems: "baseline",
+            gap: 8,
+          }}
+        >
+          <span style={{ fontFamily: "var(--font-mono), monospace", fontSize: "0.6875rem", color: "var(--fr-gold)" }}>03</span>
+          Title
+        </h2>
         <button
           onClick={addOverlay}
           style={{
