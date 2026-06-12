@@ -11,6 +11,8 @@ WORKDIR /app
 COPY requirements.txt .
 # Install CPU-only torch before the rest — prevents openai-whisper from pulling the
 # 2 GB CUDA build, which exceeds Render free tier build limits.
+# setuptools provides pkg_resources, required by openai-whisper's sdist build
+RUN pip install --no-cache-dir setuptools
 RUN pip install --no-cache-dir torch --index-url https://download.pytorch.org/whl/cpu
 RUN pip install --no-cache-dir -r requirements.txt
 
