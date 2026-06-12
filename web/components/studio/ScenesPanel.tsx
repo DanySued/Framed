@@ -61,6 +61,7 @@ export default function ScenesPanel() {
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={handleKeyDown}
           placeholder="add keyword, press enter"
+          aria-label="Add scene keyword"
           style={{
             width: "100%",
             background: "transparent",
