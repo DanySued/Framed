@@ -96,6 +96,7 @@ function OverlayEditor({ overlay, onUpdate, onRemove }: EditorProps) {
         value={overlay.text}
         onChange={(e) => onUpdate({ text: e.target.value })}
         placeholder="overlay text…"
+        aria-label="Overlay text"
         style={{
           width: "100%",
           background: "transparent",
