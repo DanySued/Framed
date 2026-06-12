@@ -7,6 +7,7 @@ export default function ControlBar() {
   const {
     audioFileId,
     keywords,
+    selectedClips,
     duration,
     setDuration,
     subtitlesEnabled,
