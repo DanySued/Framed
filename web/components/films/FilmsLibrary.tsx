@@ -31,7 +31,7 @@ export default function FilmsLibrary() {
   return (
     <div
       style={{
-        minHeight: "calc(100vh - 3rem)",
+        minHeight: "calc(100vh - 60px)",
         background: "var(--fr-black)",
         padding: "40px 32px 64px",
       }}
