@@ -291,9 +291,10 @@ export function StudioProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const onGenerate = useCallback(async () => {
-    if (!audioFileId || keywords.length < 1) return;
+    if (!audioFileId || (keywords.length < 1 && selectedClips.length < 1)) return;
 
-    const title = keywords.map((k) => k.keyword).join(", ");
+    const title =
+      keywords.map((k) => k.keyword).join(", ") || "selected scenes";
 
     try {
       setPhase("generating");
