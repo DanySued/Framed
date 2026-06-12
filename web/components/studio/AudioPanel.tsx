@@ -146,27 +146,37 @@ export default function AudioPanel() {
             {tracks.map((track) => {
               const selected = track.id === audioFileId;
               return (
-                <li key={track.id}>
+                <li
+                  key={track.id}
+                  className="group"
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 8,
+                    padding: "10px 20px",
+                    borderLeft: selected
+                      ? "2px solid var(--fr-gold)"
+                      : "2px solid transparent",
+                    background: selected
+                      ? "rgba(82,214,196,0.06)"
+                      : "transparent",
+                    borderBottom: "1px solid var(--fr-line)",
+                  }}
+                >
                   <button
                     onClick={() => {
                       if (selected) clearAudio();
                       else setAudio(track.id, track.filename);
                     }}
-                    className="group w-full text-left transition-colors"
+                    data-no-lift
+                    className="flex-1 flex items-center gap-2 min-w-0 text-left"
                     style={{
-                      padding: "10px 20px",
-                      borderLeft: selected
-                        ? "2px solid var(--fr-gold)"
-                        : "2px solid transparent",
-                      background: selected
-                        ? "rgba(82,214,196,0.06)"
-                        : "transparent",
-                      display: "flex",
-                      alignItems: "center",
-                      gap: 8,
+                      background: "none",
+                      border: "none",
+                      padding: 0,
                       cursor: "pointer",
-                      borderBottom: "1px solid var(--fr-line)",
                     }}
+                    aria-pressed={selected}
                   >
                     <span
                       className="flex-1 truncate"
@@ -187,21 +197,22 @@ export default function AudioPanel() {
                         {formatDuration(track.duration)}
                       </span>
                     )}
-                    <button
-                      onClick={(e) => handleDelete(track.id, e)}
-                      className="opacity-0 group-hover:opacity-100 transition-opacity shrink-0"
-                      style={{
-                        color: "var(--fr-muted)",
-                        lineHeight: 1,
-                        background: "none",
-                        border: "none",
-                        cursor: "pointer",
-                        padding: 2,
-                      }}
-                      aria-label="Delete track"
-                    >
-                      <X size={12} />
-                    </button>
+                  </button>
+                  <button
+                    onClick={(e) => handleDelete(track.id, e)}
+                    data-no-lift
+                    className="opacity-0 group-hover:opacity-100 focus-visible:opacity-100 transition-opacity shrink-0"
+                    style={{
+                      color: "var(--fr-muted)",
+                      lineHeight: 1,
+                      background: "none",
+                      border: "none",
+                      cursor: "pointer",
+                      padding: 2,
+                    }}
+                    aria-label={`Delete ${track.filename}`}
+                  >
+                    <X size={12} />
                   </button>
                 </li>
               );
