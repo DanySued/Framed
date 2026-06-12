@@ -80,14 +80,7 @@ export default function FilmsLibrary() {
       ) : reels.length === 0 ? (
         <EmptyState />
       ) : (
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(2, 1fr)",
-            gap: 16,
-          }}
-          className="sm:grid-cols-3 lg:grid-cols-4"
-        >
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
           {reels.map((reel, i) => (
             <FilmCard
               key={reel.id}
