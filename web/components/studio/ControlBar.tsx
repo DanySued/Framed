@@ -227,6 +227,21 @@ export default function ControlBar() {
       {/* Spacer */}
       <div style={{ flex: 1 }} />
 
+      {/* Readiness hint */}
+      <span
+        style={{
+          fontFamily: "var(--font-display), Georgia, serif",
+          fontStyle: "italic",
+          fontSize: "0.75rem",
+          letterSpacing: "0.04em",
+          color: canGenerate ? "var(--fr-gold)" : "var(--fr-muted)",
+          whiteSpace: "nowrap",
+          transition: "color 200ms ease",
+        }}
+      >
+        {missingHint}
+      </span>
+
       {/* Generate button */}
       <button
         ref={btnRef}
