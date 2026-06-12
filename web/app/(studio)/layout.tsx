@@ -4,27 +4,35 @@ export default async function StudioLayout({ children }: { children: React.React
   // Auth temporarily disabled.
   return (
     <div className="flex flex-col min-h-screen" style={{ backgroundColor: "var(--fr-black)" }}>
-      {/* Top bar */}
+      {/* Top bar — frosted sticky nav */}
       <header
-        className="flex items-center justify-between px-8 h-12 shrink-0"
-        style={{ borderBottom: "1px solid var(--fr-line)" }}
+        className="sticky top-0 z-50 flex items-center justify-between px-6 h-[60px] shrink-0"
+        style={{
+          background: "color-mix(in oklab, var(--fr-black) 78%, transparent)",
+          backdropFilter: "blur(14px) saturate(160%)",
+          WebkitBackdropFilter: "blur(14px) saturate(160%)",
+          borderBottom: "1px solid var(--fr-line)",
+        }}
       >
-        <Link
-          href="/studio"
-          className="text-[0.75rem] tracking-[0.3em] uppercase transition-opacity hover:opacity-70"
-          style={{
-            fontFamily: "var(--font-display), Georgia, serif",
-            color: "var(--fr-ivory)",
-            letterSpacing: "0.3em",
-          }}
-        >
-          Framed
+        <Link href="/studio" className="flex items-center gap-2.5">
+          <span
+            className="flex items-center justify-center w-[26px] h-[26px] rounded-[8px] text-[0.6875rem] font-extrabold"
+            style={{ background: "var(--fr-gold)", color: "var(--fr-black)" }}
+          >
+            fr
+          </span>
+          <span
+            className="text-[0.9375rem] font-semibold tracking-[-0.01em]"
+            style={{ color: "#ffffff" }}
+          >
+            Framed
+          </span>
         </Link>
 
         <nav className="flex items-center gap-6">
           <Link
             href="/films"
-            className="text-[0.75rem] tracking-[0.12em] uppercase transition-colors"
+            className="text-[0.8125rem] font-medium"
             style={{ color: "var(--fr-muted)" }}
           >
             Films
