@@ -1,32 +1,85 @@
 "use client";
 
-import { KeyboardEvent, useCallback, useEffect, useRef, useState } from "react";
+import { KeyboardEvent, useCallback, useState } from "react";
 import { motion, AnimatePresence } from "motion/react";
-import { X } from "lucide-react";
-import { useStudio, SceneKeyword } from "./StudioContext";
+import { X, Search } from "lucide-react";
+import { toast } from "sonner";
+import { useStudio, PickedClip } from "./StudioContext";
+
+interface SearchResult {
+  id: number;
+  url: string;
+  image: string | null;
+  duration: number | null;
+}
 
 export default function ScenesPanel() {
-  const { keywords, addKeyword, removeKeyword, setKeywordThumbnail } = useStudio();
+  const {
+    keywords,
+    addKeyword,
+    removeKeyword,
+    setKeywordThumbnail,
+    selectedClips,
+    toggleClip,
+    removeClip,
+    duration,
+  } = useStudio();
+
   const [input, setInput] = useState("");
+  const [activeKeyword, setActiveKeyword] = useState<string | null>(null);
+  const [results, setResults] = useState<SearchResult[]>([]);
+  const [searching, setSearching] = useState(false);
+
+  const search = useCallback(
+    async (kw: string) => {
+      setSearching(true);
+      setActiveKeyword(kw);
+      setResults([]);
+      try {
+        const res = await fetch(
+          `/api/reels/pexels/search?keywords=${encodeURIComponent(kw)}&per_page=10`
+        );
+        if (!res.ok) throw new Error();
+        const data: { videos: SearchResult[] } = await res.json();
+        const videos = data.videos ?? [];
+        setResults(videos);
+        if (videos[0]) {
+          setKeywordThumbnail(kw, videos[0].image, videos[0].id);
+        }
+        if (!videos.length) toast.error(`No clips found for “${kw}”`);
+      } catch {
+        toast.error("Clip search failed — try again");
+      } finally {
+        setSearching(false);
+      }
+    },
+    [setKeywordThumbnail]
+  );
+
+  const submit = useCallback(() => {
+    const val = input.trim().toLowerCase().replace(/,$/, "");
+    if (!val) return;
+    addKeyword(val);
+    setInput("");
+    search(val);
+  }, [input, addKeyword, search]);
 
   const handleKeyDown = useCallback(
     (e: KeyboardEvent<HTMLInputElement>) => {
       if (e.key === "Enter" || e.key === ",") {
         e.preventDefault();
-        const val = input.trim().toLowerCase().replace(/,$/, "");
-        if (val) {
-          addKeyword(val);
-          setInput("");
-        }
+        submit();
       }
     },
-    [input, addKeyword]
+    [submit]
   );
+
+  const targetClips = Math.max(1, Math.round(duration / 4));
 
   return (
     <aside
-      className="flex flex-col min-h-[320px] lg:h-full overflow-hidden"
-      style={{ borderLeft: "1px solid var(--fr-line)", borderBottom: "1px solid var(--fr-line)" }}
+      className="flex flex-col min-h-[420px] lg:h-full overflow-hidden"
+      style={{ borderRight: "1px solid var(--fr-line)", borderBottom: "1px solid var(--fr-line)" }}
     >
       {/* Header */}
       <div
@@ -45,9 +98,12 @@ export default function ScenesPanel() {
             gap: 8,
           }}
         >
-          <span style={{ fontFamily: "var(--font-mono), monospace", fontSize: "0.6875rem", color: "var(--fr-gold)" }}>02</span>
+          <span style={{ fontFamily: "var(--font-mono), monospace", fontSize: "0.6875rem", color: "var(--fr-gold)" }}>01</span>
           Scenes
         </h2>
+        <p className="fr-caption" style={{ fontSize: "0.625rem", marginTop: 4, letterSpacing: "0.06em" }}>
+          start here — search a mood, pick your clips
+        </p>
       </div>
 
       {/* Keyword input */}
@@ -55,201 +111,260 @@ export default function ScenesPanel() {
         className="px-5 py-3 shrink-0"
         style={{ borderBottom: "1px solid var(--fr-line)" }}
       >
-        <input
-          type="text"
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-          onKeyDown={handleKeyDown}
-          placeholder="add keyword, press enter"
-          aria-label="Add scene keyword"
-          style={{
-            width: "100%",
-            background: "transparent",
-            border: "none",
-            borderBottom: "1px solid var(--fr-line)",
-            outline: "none",
-            color: "var(--fr-ivory)",
-            fontFamily: "var(--font-sans)",
-            fontSize: "0.8125rem",
-            padding: "6px 0",
-            caretColor: "var(--fr-gold)",
-          }}
-        />
-        <p
-          className="fr-caption"
-          style={{ fontSize: "0.625rem", marginTop: 4, letterSpacing: "0.06em" }}
-        >
-          press enter to add
-        </p>
+        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+          <Search size={12} style={{ color: "var(--fr-muted)", flexShrink: 0 }} />
+          <input
+            type="text"
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            onKeyDown={handleKeyDown}
+            placeholder="ocean, neon city, rain…"
+            aria-label="Search scene clips"
+            style={{
+              width: "100%",
+              background: "transparent",
+              border: "none",
+              borderBottom: "1px solid var(--fr-line)",
+              outline: "none",
+              color: "var(--fr-ivory)",
+              fontFamily: "var(--font-sans)",
+              fontSize: "0.8125rem",
+              padding: "6px 0",
+              caretColor: "var(--fr-gold)",
+            }}
+          />
+        </div>
+
+        {/* Keyword chips */}
+        {keywords.length > 0 && (
+          <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginTop: 8 }}>
+            {keywords.map((kw) => {
+              const active = kw.keyword === activeKeyword;
+              return (
+                <span
+                  key={kw.keyword}
+                  style={{
+                    display: "inline-flex",
+                    alignItems: "center",
+                    gap: 5,
+                    fontSize: "0.625rem",
+                    letterSpacing: "0.06em",
+                    padding: "2px 7px",
+                    border: `1px solid ${active ? "var(--fr-gold)" : "var(--fr-line)"}`,
+                    color: active ? "var(--fr-gold)" : "var(--fr-muted)",
+                    cursor: "pointer",
+                  }}
+                  onClick={() => search(kw.keyword)}
+                  role="button"
+                >
+                  {kw.keyword}
+                  <X
+                    size={8}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      removeKeyword(kw.keyword);
+                      if (kw.keyword === activeKeyword) {
+                        setActiveKeyword(null);
+                        setResults([]);
+                      }
+                    }}
+                  />
+                </span>
+              );
+            })}
+          </div>
+        )}
       </div>
 
-      {/* Scene chips */}
-      <div className="flex-1 overflow-y-auto px-4 py-3">
-        {keywords.length === 0 ? (
+      {/* Selected clips strip */}
+      {selectedClips.length > 0 && (
+        <div
+          className="px-4 py-3 shrink-0"
+          style={{ borderBottom: "1px solid var(--fr-line)" }}
+        >
           <p
-            className="fr-caption"
-            style={{ textAlign: "center", marginTop: 24, fontStyle: "italic" }}
+            className="fr-overline"
+            style={{ fontSize: "0.5625rem", marginBottom: 6, color: "var(--fr-gold)" }}
           >
-            no scenes yet
+            your cut · {selectedClips.length} clip{selectedClips.length > 1 ? "s" : ""}
+            {selectedClips.length < targetClips ? ` · ~${targetClips} fills ${duration}s` : ""}
           </p>
-        ) : (
-          <motion.div
-            layout
+          <div style={{ display: "flex", gap: 6, overflowX: "auto", paddingBottom: 2 }}>
+            <AnimatePresence mode="popLayout">
+              {selectedClips.map((clip, i) => (
+                <motion.div
+                  key={clip.id}
+                  layout
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.85 }}
+                  transition={{ duration: 0.15 }}
+                  className="group relative shrink-0"
+                  style={{
+                    width: 42,
+                    aspectRatio: "9 / 16",
+                    border: "1px solid var(--fr-gold)",
+                    overflow: "hidden",
+                    background: "var(--fr-surface)",
+                  }}
+                >
+                  {clip.image && (
+                    <img
+                      src={clip.image}
+                      alt=""
+                      className="absolute inset-0 w-full h-full object-cover"
+                      style={{ opacity: 0.8 }}
+                    />
+                  )}
+                  <span
+                    style={{
+                      position: "absolute",
+                      top: 2,
+                      left: 3,
+                      fontFamily: "monospace",
+                      fontSize: "0.5rem",
+                      color: "var(--fr-gold)",
+                      textShadow: "0 1px 2px rgba(0,0,0,0.9)",
+                    }}
+                  >
+                    {String(i + 1).padStart(2, "0")}
+                  </span>
+                  <button
+                    onClick={() => removeClip(clip.id)}
+                    className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center"
+                    style={{
+                      background: "rgba(6,9,11,0.65)",
+                      border: "none",
+                      color: "var(--fr-ivory)",
+                      cursor: "pointer",
+                    }}
+                    aria-label="Remove clip"
+                  >
+                    <X size={11} />
+                  </button>
+                </motion.div>
+              ))}
+            </AnimatePresence>
+          </div>
+        </div>
+      )}
+
+      {/* Results grid */}
+      <div className="flex-1 overflow-y-auto px-4 py-3">
+        {searching ? (
+          <div
             style={{
               display: "grid",
               gridTemplateColumns: "1fr 1fr",
               gap: 8,
             }}
           >
-            <AnimatePresence mode="popLayout">
-              {keywords.map((kw) => (
-                <SceneChip
-                  key={kw.keyword}
-                  kw={kw}
-                  onRemove={() => removeKeyword(kw.keyword)}
-                  onThumbnailLoaded={(thumb, id) =>
-                    setKeywordThumbnail(kw.keyword, thumb, id)
-                  }
-                />
-              ))}
-            </AnimatePresence>
-          </motion.div>
+            {Array.from({ length: 6 }).map((_, i) => (
+              <div
+                key={i}
+                style={{
+                  aspectRatio: "9 / 16",
+                  background:
+                    "linear-gradient(90deg, var(--fr-surface) 25%, rgba(255,255,255,0.06) 50%, var(--fr-surface) 75%)",
+                  backgroundSize: "200% 100%",
+                  animation: "shimmer 1.4s infinite",
+                  border: "1px solid var(--fr-line)",
+                }}
+              />
+            ))}
+          </div>
+        ) : results.length === 0 ? (
+          <p
+            className="fr-caption"
+            style={{ textAlign: "center", marginTop: 32, fontStyle: "italic", lineHeight: 1.7, padding: "0 12px" }}
+          >
+            {keywords.length === 0
+              ? "search a keyword above to browse clips — or just add keywords and let framed pick for you"
+              : "click a keyword chip to browse its clips"}
+          </p>
+        ) : (
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns: "1fr 1fr",
+              gap: 8,
+            }}
+          >
+            {results.map((r) => {
+              const picked = selectedClips.some((c) => c.id === r.id);
+              const clip: PickedClip = {
+                id: r.id,
+                url: r.url,
+                image: r.image,
+                duration: r.duration,
+                keyword: activeKeyword ?? "",
+              };
+              return (
+                <button
+                  key={r.id}
+                  onClick={() => toggleClip(clip)}
+                  className="relative"
+                  style={{
+                    aspectRatio: "9 / 16",
+                    border: `1px solid ${picked ? "var(--fr-gold)" : "var(--fr-line)"}`,
+                    boxShadow: picked ? "0 0 0 1px var(--fr-gold)" : "none",
+                    overflow: "hidden",
+                    background: "var(--fr-surface)",
+                    cursor: "pointer",
+                    padding: 0,
+                    transition: "border-color 150ms ease, box-shadow 150ms ease",
+                  }}
+                  aria-pressed={picked}
+                  aria-label={picked ? "Deselect clip" : "Select clip"}
+                >
+                  {r.image && (
+                    <img
+                      src={r.image}
+                      alt=""
+                      className="absolute inset-0 w-full h-full object-cover"
+                      style={{ opacity: picked ? 0.95 : 0.7, transition: "opacity 150ms ease" }}
+                    />
+                  )}
+                  {/* duration badge */}
+                  {r.duration != null && (
+                    <span
+                      style={{
+                        position: "absolute",
+                        bottom: 4,
+                        right: 5,
+                        fontFamily: "monospace",
+                        fontSize: "0.5625rem",
+                        color: "var(--fr-ivory)",
+                        background: "rgba(6,9,11,0.7)",
+                        padding: "1px 4px",
+                      }}
+                    >
+                      {r.duration}s
+                    </span>
+                  )}
+                  {/* pick order */}
+                  {picked && (
+                    <span
+                      style={{
+                        position: "absolute",
+                        top: 4,
+                        left: 5,
+                        fontFamily: "monospace",
+                        fontSize: "0.625rem",
+                        color: "#04110e",
+                        background: "var(--fr-gold)",
+                        padding: "1px 5px",
+                      }}
+                    >
+                      {String(selectedClips.findIndex((c) => c.id === r.id) + 1).padStart(2, "0")}
+                    </span>
+                  )}
+                </button>
+              );
+            })}
+          </div>
         )}
       </div>
     </aside>
-  );
-}
-
-interface ChipProps {
-  kw: SceneKeyword;
-  onRemove: () => void;
-  onThumbnailLoaded: (thumbnail: string | null, videoId: number | null) => void;
-}
-
-function SceneChip({ kw, onRemove, onThumbnailLoaded }: ChipProps) {
-  const [thumbState, setThumbState] = useState<"loading" | "loaded" | "error">(
-    kw.thumbnail ? "loaded" : "loading"
-  );
-  const fetched = useRef(false);
-
-  // Fetch Pexels thumbnail once
-  useEffect(() => {
-    if (fetched.current || kw.thumbnail) return;
-    fetched.current = true;
-
-    fetch(`/api/reels/pexels/search?keywords=${encodeURIComponent(kw.keyword)}&per_page=1`)
-      .then((r) => {
-        if (!r.ok) throw new Error("fetch failed");
-        return r.json();
-      })
-      .then((data: { videos: Array<{ id: number; url: string; image?: string }> }) => {
-        const first = data.videos?.[0];
-        if (first?.id) {
-          // Prefer the `image` field from Pexels; fall back to CDN pattern
-          const thumb =
-            first.image ||
-            `https://images.pexels.com/videos/${first.id}/pictures/preview-0.jpg`;
-          onThumbnailLoaded(thumb, first.id);
-          setThumbState("loaded");
-        } else {
-          setThumbState("error");
-          onThumbnailLoaded(null, null);
-        }
-      })
-      .catch(() => {
-        setThumbState("error");
-        onThumbnailLoaded(null, null);
-      });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  return (
-    <motion.div
-      layout
-      initial={{ opacity: 0, scale: 0.9 }}
-      animate={{ opacity: 1, scale: 1 }}
-      exit={{ opacity: 0, scale: 0.85 }}
-      transition={{ duration: 0.18, ease: "easeOut" }}
-      className="group relative"
-      style={{
-        aspectRatio: "16 / 9",
-        border: "1px solid var(--fr-line)",
-        overflow: "hidden",
-        background: "var(--fr-surface)",
-        cursor: "default",
-      }}
-    >
-      {/* Thumbnail / shimmer */}
-      {thumbState === "loading" && (
-        <div
-          className="absolute inset-0"
-          style={{
-            background: "linear-gradient(90deg, var(--fr-surface) 25%, rgba(255,255,255,0.06) 50%, var(--fr-surface) 75%)",
-            backgroundSize: "200% 100%",
-            animation: "shimmer 1.4s infinite",
-          }}
-        />
-      )}
-      {thumbState === "loaded" && kw.thumbnail && (
-        <img
-          src={kw.thumbnail}
-          alt={kw.keyword}
-          className="absolute inset-0 w-full h-full object-cover"
-          style={{ opacity: 0.7 }}
-        />
-      )}
-      {thumbState === "error" && (
-        <div className="absolute inset-0 flex items-center justify-center">
-          <span style={{ fontSize: "0.6rem", color: "var(--fr-muted)" }}>—</span>
-        </div>
-      )}
-
-      {/* Dark gradient for readability */}
-      <div
-        className="absolute inset-0"
-        style={{
-          background: "linear-gradient(to top, rgba(6,9,11,0.85) 0%, transparent 60%)",
-          pointerEvents: "none",
-        }}
-      />
-
-      {/* Keyword label */}
-      <span
-        className="absolute bottom-0 left-0 px-2 py-1"
-        style={{
-          fontFamily: "var(--font-sans)",
-          fontSize: "0.625rem",
-          letterSpacing: "0.08em",
-          color: "var(--fr-ivory)",
-          zIndex: 2,
-          textTransform: "lowercase",
-        }}
-      >
-        {kw.keyword}
-      </span>
-
-      {/* Remove button */}
-      <button
-        onClick={onRemove}
-        className="absolute top-1 right-1 opacity-0 group-hover:opacity-100 transition-opacity"
-        style={{
-          background: "rgba(6,9,11,0.7)",
-          border: "1px solid var(--fr-line)",
-          color: "var(--fr-muted)",
-          cursor: "pointer",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          width: 18,
-          height: 18,
-          borderRadius: 2,
-          padding: 0,
-          zIndex: 3,
-        }}
-        aria-label={`Remove ${kw.keyword}`}
-      >
-        <X size={9} />
-      </button>
-    </motion.div>
   );
 }
