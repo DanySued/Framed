@@ -10,6 +10,9 @@ function looksLikeToken(token: string): boolean {
 }
 
 export function middleware(req: NextRequest) {
+  // Auth temporarily disabled — everything is public.
+  return NextResponse.next();
+
   const { pathname } = req.nextUrl;
 
   if (PUBLIC_PATHS.includes(pathname) || pathname.startsWith("/api/")) {
