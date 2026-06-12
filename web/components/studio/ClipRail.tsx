@@ -112,10 +112,11 @@ export default function ClipRail() {
             flexShrink: 0,
           }}
         >
-          <p
+          <h2
             style={{
               fontFamily: "var(--font-display), Georgia, serif",
               fontSize: "0.75rem",
+              fontWeight: 400,
               letterSpacing: "0.1em",
               color: "var(--fr-muted)",
               fontStyle: "italic",
@@ -123,7 +124,7 @@ export default function ClipRail() {
             }}
           >
             review clips
-          </p>
+          </h2>
         </div>
 
         {/* Clip cards */}
