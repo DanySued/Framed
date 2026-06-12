@@ -184,7 +184,7 @@ function FilmCard({
             left: 10,
             fontFamily: "monospace",
             fontSize: "0.5625rem",
-            color: "rgba(242,237,227,0.4)",
+            color: "rgba(255,255,255,0.4)",
             fontVariantNumeric: "tabular-nums",
             pointerEvents: "none",
           }}
