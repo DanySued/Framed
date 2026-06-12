@@ -128,9 +128,23 @@ function FilmCard({
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.22, delay: index * 0.04, ease: "easeOut" }}
       style={{ cursor: "pointer" }}
+      role="button"
+      tabIndex={0}
+      aria-label={`Play ${reel.title || "untitled"}`}
       onClick={onClick}
+      onKeyDown={(e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          onClick();
+        }
+      }}
       onMouseEnter={() => videoRef.current?.play().catch(() => {})}
       onMouseLeave={() => {
+        const v = videoRef.current;
+        if (v) { v.pause(); v.currentTime = 0; }
+      }}
+      onFocus={() => videoRef.current?.play().catch(() => {})}
+      onBlur={() => {
         const v = videoRef.current;
         if (v) { v.pause(); v.currentTime = 0; }
       }}
