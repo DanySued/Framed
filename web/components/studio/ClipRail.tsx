@@ -306,7 +306,7 @@ function ClipCard({ jobId, index, isReplacing, cacheBust, onReplace, onSelect }:
             bottom: 8,
             right: 8,
             zIndex: 5,
-            background: "rgba(13,11,8,0.8)",
+            background: "rgba(6,9,11,0.8)",
             border: "1px solid var(--fr-line)",
             color: "var(--fr-gold)",
             fontFamily: "var(--font-display), Georgia, serif",

@@ -136,7 +136,7 @@ export default function PreviewFrame() {
                     className="absolute inset-0"
                     style={{
                       background:
-                        "radial-gradient(ellipse at center, transparent 40%, rgba(13,11,8,0.7) 100%)",
+                        "radial-gradient(ellipse at center, transparent 40%, rgba(6,9,11,0.7) 100%)",
                       pointerEvents: "none",
                     }}
                   />

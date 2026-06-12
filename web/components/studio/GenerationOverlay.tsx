@@ -28,7 +28,7 @@ export default function GenerationOverlay() {
         justifyContent: "center",
         gap: 24,
         // Dim the backdrop
-        background: "rgba(13,11,8,0.72)",
+        background: "rgba(6,9,11,0.72)",
         backdropFilter: "blur(1px)",
         pointerEvents: "none",
       }}

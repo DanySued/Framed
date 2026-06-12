@@ -183,7 +183,7 @@ function SceneChip({ kw, onRemove, onThumbnailLoaded }: ChipProps) {
         <div
           className="absolute inset-0"
           style={{
-            background: "linear-gradient(90deg, var(--fr-surface) 25%, rgba(42,37,28,0.8) 50%, var(--fr-surface) 75%)",
+            background: "linear-gradient(90deg, var(--fr-surface) 25%, rgba(255,255,255,0.06) 50%, var(--fr-surface) 75%)",
             backgroundSize: "200% 100%",
             animation: "shimmer 1.4s infinite",
           }}
@@ -207,7 +207,7 @@ function SceneChip({ kw, onRemove, onThumbnailLoaded }: ChipProps) {
       <div
         className="absolute inset-0"
         style={{
-          background: "linear-gradient(to top, rgba(13,11,8,0.85) 0%, transparent 60%)",
+          background: "linear-gradient(to top, rgba(6,9,11,0.85) 0%, transparent 60%)",
           pointerEvents: "none",
         }}
       />
@@ -232,7 +232,7 @@ function SceneChip({ kw, onRemove, onThumbnailLoaded }: ChipProps) {
         onClick={onRemove}
         className="absolute top-1 right-1 opacity-0 group-hover:opacity-100 transition-opacity"
         style={{
-          background: "rgba(13,11,8,0.7)",
+          background: "rgba(6,9,11,0.7)",
           border: "1px solid var(--fr-line)",
           color: "var(--fr-muted)",
           cursor: "pointer",

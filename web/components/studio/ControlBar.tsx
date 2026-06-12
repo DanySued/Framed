@@ -109,6 +109,7 @@ export default function ControlBar() {
         <button
           role="switch"
           aria-checked={subtitlesEnabled}
+          aria-label="Subtitles"
           onClick={() => setSubtitlesEnabled(!subtitlesEnabled)}
           style={{
             width: 32,
