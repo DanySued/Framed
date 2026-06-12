@@ -159,7 +159,8 @@ export default function PreviewFrame() {
                     fontStyle: "italic",
                   }}
                 >
-                  your scenes will appear here
+                  begin by choosing your clips —<br />
+                  search a scene on the left
                 </p>
               </div>
             )}
