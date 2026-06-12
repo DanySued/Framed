@@ -235,6 +235,12 @@ function FilmCard({
 
 function FilmFocus({ reel, onClose }: { reel: ReelItem; onClose: () => void }) {
   const src = `/api/reels/download/${reel.id}`;
+  const downloadRef = useRef<HTMLAnchorElement>(null);
+
+  // Move focus into the dialog when it opens
+  useEffect(() => {
+    downloadRef.current?.focus();
+  }, []);
 
   // Close on backdrop click
   const handleBackdrop = useCallback(
