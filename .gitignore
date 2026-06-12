@@ -32,3 +32,5 @@ google-service-account.json
 .playwright-mcp/
 "Screenshot*.png"
 Screenshot*.png
+
+.vercel
