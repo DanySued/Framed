@@ -38,6 +38,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                 color: "var(--fr-ivory)",
                 borderRadius: "var(--radius)",
                 fontSize: "0.875rem",
+                animation: "fr-slide-in 0.3s ease-out",
               },
             }}
           />
