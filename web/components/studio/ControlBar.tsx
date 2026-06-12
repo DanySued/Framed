@@ -17,7 +17,15 @@ export default function ControlBar() {
     onGenerate,
   } = useStudio();
 
-  const canGenerate = Boolean(audioFileId) && keywords.length >= 1;
+  const hasScenes = selectedClips.length >= 1 || keywords.length >= 1;
+  const canGenerate = Boolean(audioFileId) && hasScenes;
+  const missingHint = !hasScenes
+    ? "choose your clips first"
+    : !audioFileId
+      ? "now pick a track"
+      : selectedClips.length > 0
+        ? `${selectedClips.length} clip${selectedClips.length > 1 ? "s" : ""} · your cut`
+        : "framed will pick clips for you";
 
   // Magnetic button effect
   const btnRef = useRef<HTMLButtonElement>(null);
