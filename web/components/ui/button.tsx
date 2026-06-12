@@ -7,27 +7,27 @@ const buttonVariants = cva(
   {
     variants: {
       variant: {
-        /** Primary — amber gold fill */
+        /** Primary — accent fill with shine sweep */
         default:
-          "bg-primary text-primary-foreground shadow-sm shadow-primary/25 hover:bg-primary/90 active:scale-[0.98]",
+          "fr-shine bg-primary text-primary-foreground font-bold shadow-[0_4px_14px_-6px_rgba(82,214,196,0.55)] hover:shadow-[0_10px_26px_-10px_rgba(82,214,196,0.7)]",
         /** Destructive */
         destructive:
-          "bg-destructive text-white shadow-sm hover:bg-destructive/85 active:scale-[0.98]",
+          "bg-destructive text-black font-bold shadow-sm hover:bg-destructive/85",
         /** Outlined — uses border token */
         outline:
-          "border border-border bg-transparent text-foreground hover:bg-secondary hover:border-border/60 active:scale-[0.98]",
+          "border border-fr-line-2 bg-transparent text-foreground hover:border-primary/50 hover:bg-primary/[0.06]",
         /** Subtle fill */
         secondary:
-          "bg-secondary text-secondary-foreground hover:bg-secondary/70 active:scale-[0.98]",
+          "bg-secondary text-secondary-foreground hover:bg-secondary/70",
         /** Borderless ghost */
         ghost:
-          "text-muted-foreground hover:text-foreground hover:bg-white/[0.06] active:scale-[0.98]",
+          "text-muted-foreground hover:text-foreground hover:bg-white/[0.06]",
         /** Text link */
         link:
           "text-primary underline-offset-4 hover:underline p-0 h-auto",
-        /** Cinematic gold outline — for premium CTAs */
+        /** Accent outline — for premium CTAs */
         "gold-outline":
-          "border border-primary/50 bg-primary/[0.08] text-primary hover:bg-primary/[0.14] hover:border-primary/70 active:scale-[0.98] shadow-sm shadow-primary/10",
+          "border border-primary/50 bg-primary/[0.08] text-primary hover:bg-primary/[0.14] hover:border-primary/70 shadow-sm shadow-primary/10",
       },
       size: {
         default: "h-9 px-4 py-2",
