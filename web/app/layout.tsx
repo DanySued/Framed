@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { Toaster } from "sonner";
-import { fraunces, inter } from "@/lib/fonts";
+import { dmSans, instrumentSerif, geistMono } from "@/lib/fonts";
 import { Grain } from "@/components/fx/Grain";
 import "./globals.css";
 
