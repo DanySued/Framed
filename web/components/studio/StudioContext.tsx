@@ -252,6 +252,19 @@ export function StudioProvider({ children }: { children: React.ReactNode }) {
 
   const removeKeyword = useCallback((kw: string) => {
     setKeywords((prev) => prev.filter((k) => k.keyword !== kw));
+    setSelectedClips((prev) => prev.filter((c) => c.keyword !== kw));
+  }, []);
+
+  const toggleClip = useCallback((clip: PickedClip) => {
+    setSelectedClips((prev) =>
+      prev.some((c) => c.id === clip.id)
+        ? prev.filter((c) => c.id !== clip.id)
+        : [...prev, clip]
+    );
+  }, []);
+
+  const removeClip = useCallback((id: number) => {
+    setSelectedClips((prev) => prev.filter((c) => c.id !== id));
   }, []);
 
   const setKeywordThumbnail = useCallback(
