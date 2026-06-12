@@ -93,6 +93,9 @@ interface StudioActions {
   removeKeyword: (kw: string) => void;
   setKeywordThumbnail: (kw: string, thumbnail: string | null, videoId: number | null) => void;
 
+  toggleClip: (clip: PickedClip) => void;
+  removeClip: (id: number) => void;
+
   setDuration: (d: number) => void;
   setSubtitlesEnabled: (v: boolean) => void;
   setBulkCount: (n: number) => void;
