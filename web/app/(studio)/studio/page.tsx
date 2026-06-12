@@ -16,12 +16,12 @@ export default function StudioPage() {
       >
         <h1 className="sr-only">Studio</h1>
 
-        {/* Work area — DOM order matches visual + workflow order: audio → preview/title → scenes */}
+        {/* Work area — DOM order matches visual + workflow order: scenes/clips → preview/title → audio */}
         <div className="flex-1 min-h-0 grid lg:grid-cols-[minmax(260px,320px)_1fr_minmax(260px,320px)]">
-          {/* Left column: Audio (compose) or hidden during generation */}
+          {/* Left column: Scenes/clip picker (compose) or hidden during generation */}
           <div className="lg:overflow-hidden">
             <StudioPhaseGate phases={["compose"]}>
-              <AudioPanel />
+              <ScenesPanel />
             </StudioPhaseGate>
           </div>
 
