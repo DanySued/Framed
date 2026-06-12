@@ -112,7 +112,21 @@ export default function AudioPanel() {
         className="px-5 py-4 shrink-0"
         style={{ borderBottom: "1px solid var(--fr-line)" }}
       >
-        <h4 style={{ fontFamily: "inherit" }}>Audio</h4>
+        <h2
+          style={{
+            fontSize: "0.8125rem",
+            fontWeight: 600,
+            letterSpacing: "0.06em",
+            textTransform: "uppercase",
+            color: "var(--fr-muted)",
+            display: "flex",
+            alignItems: "baseline",
+            gap: 8,
+          }}
+        >
+          <span style={{ fontFamily: "var(--font-mono), monospace", fontSize: "0.6875rem", color: "var(--fr-gold)" }}>01</span>
+          Audio
+        </h2>
       </div>
 
       {/* Track list */}
