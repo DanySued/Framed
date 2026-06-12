@@ -12,13 +12,22 @@ export default function StudioPage() {
     <StudioProvider>
       {/* Desktop: fixed viewport height layout. Mobile: natural scroll. */}
       <div
-        className="flex flex-col lg:h-[calc(100vh-3rem)]"
+        className="flex flex-col lg:h-[calc(100vh-60px)]"
       >
-        {/* Work area */}
+        <h1 className="sr-only">Studio</h1>
+
+        {/* Work area — DOM order matches visual + workflow order: audio → preview/title → scenes */}
         <div className="flex-1 min-h-0 grid lg:grid-cols-[minmax(260px,320px)_1fr_minmax(260px,320px)]">
+          {/* Left column: Audio (compose) or hidden during generation */}
+          <div className="lg:overflow-hidden">
+            <StudioPhaseGate phases={["compose"]}>
+              <AudioPanel />
+            </StudioPhaseGate>
+          </div>
+
           {/* Center column: preview + text panel */}
           <div
-            className="flex flex-col lg:overflow-hidden lg:order-2"
+            className="flex flex-col lg:overflow-hidden"
             style={{ borderLeft: "1px solid var(--fr-line)", borderRight: "1px solid var(--fr-line)" }}
           >
             {/* Preview area */}
@@ -35,15 +44,8 @@ export default function StudioPage() {
             </StudioPhaseGate>
           </div>
 
-          {/* Left column: Audio (compose) or hidden during generation */}
-          <div className="lg:order-1 lg:overflow-hidden">
-            <StudioPhaseGate phases={["compose"]}>
-              <AudioPanel />
-            </StudioPhaseGate>
-          </div>
-
           {/* Right column: Scenes (compose) or ClipRail (approval) */}
-          <div className="lg:order-3 lg:overflow-hidden flex flex-col">
+          <div className="lg:overflow-hidden flex flex-col">
             <StudioPhaseGate phases={["compose"]}>
               <ScenesPanel />
             </StudioPhaseGate>
@@ -56,14 +58,6 @@ export default function StudioPage() {
         {/* Bottom control bar — full width */}
         <ControlBar />
       </div>
-
-      {/* Shimmer keyframe */}
-      <style>{`
-        @keyframes shimmer {
-          0%   { background-position: 200% 0; }
-          100% { background-position: -200% 0; }
-        }
-      `}</style>
     </StudioProvider>
   );
 }
