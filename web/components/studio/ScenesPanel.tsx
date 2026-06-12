@@ -33,7 +33,21 @@ export default function ScenesPanel() {
         className="px-5 py-4 shrink-0"
         style={{ borderBottom: "1px solid var(--fr-line)" }}
       >
-        <h4>Scenes</h4>
+        <h2
+          style={{
+            fontSize: "0.8125rem",
+            fontWeight: 600,
+            letterSpacing: "0.06em",
+            textTransform: "uppercase",
+            color: "var(--fr-muted)",
+            display: "flex",
+            alignItems: "baseline",
+            gap: 8,
+          }}
+        >
+          <span style={{ fontFamily: "var(--font-mono), monospace", fontSize: "0.6875rem", color: "var(--fr-gold)" }}>02</span>
+          Scenes
+        </h2>
       </div>
 
       {/* Keyword input */}
