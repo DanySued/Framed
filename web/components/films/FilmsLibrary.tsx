@@ -50,7 +50,7 @@ export default function FilmsLibrary() {
         <h1
           style={{
             fontFamily: "var(--font-display), Georgia, serif",
-            fontSize: "1.25rem",
+            fontSize: "2rem",
             fontWeight: 400,
             fontStyle: "italic",
             color: "var(--fr-ivory)",
