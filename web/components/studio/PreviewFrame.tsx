@@ -9,10 +9,11 @@ import GenerationOverlay from "./GenerationOverlay";
 const KEN_BURNS_DURATION = 7000; // ms per slide
 
 export default function PreviewFrame() {
-  const { keywords, overlays, phase, jobs, previewOverride, subtitlesEnabled, onReset } = useStudio();
-  const thumbnails = keywords
-    .map((k) => k.thumbnail)
-    .filter((t): t is string => Boolean(t));
+  const { keywords, selectedClips, overlays, phase, jobs, previewOverride, subtitlesEnabled, onReset } = useStudio();
+  const thumbnails =
+    selectedClips.length > 0
+      ? selectedClips.map((c) => c.image).filter((t): t is string => Boolean(t))
+      : keywords.map((k) => k.thumbnail).filter((t): t is string => Boolean(t));
 
   const [activeIndex, setActiveIndex] = useState(0);
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
