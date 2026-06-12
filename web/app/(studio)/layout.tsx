@@ -1,11 +1,7 @@
 import Link from "next/link";
-import { redirect } from "next/navigation";
-import { getSession } from "@/lib/auth";
 
 export default async function StudioLayout({ children }: { children: React.ReactNode }) {
-  const authed = await getSession();
-  if (!authed) redirect("/");
-
+  // Auth temporarily disabled.
   return (
     <div className="flex flex-col min-h-screen" style={{ backgroundColor: "var(--fr-black)" }}>
       {/* Top bar */}
