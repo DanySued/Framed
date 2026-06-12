@@ -407,6 +407,8 @@ export function StudioProvider({ children }: { children: React.ReactNode }) {
     addKeyword,
     removeKeyword,
     setKeywordThumbnail,
+    toggleClip,
+    removeClip,
     setDuration,
     setSubtitlesEnabled,
     setBulkCount,
