@@ -62,6 +62,8 @@ interface StudioState {
 
   // Scenes
   keywords: SceneKeyword[];
+  // Clips the user hand-picked (clip-first flow). Empty = let the API pick.
+  selectedClips: PickedClip[];
 
   // Reel settings
   duration: number; // 15–60
