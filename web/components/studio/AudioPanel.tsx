@@ -109,7 +109,7 @@ export default function AudioPanel() {
     >
       {/* Header */}
       <div
-        className="px-5 py-4 shrink-0"
+        className="px-5 py-4 shrink-0 flex items-center justify-between"
         style={{ borderBottom: "1px solid var(--fr-line)" }}
       >
         <h2
@@ -127,6 +127,25 @@ export default function AudioPanel() {
           <span style={{ fontFamily: "var(--font-mono), monospace", fontSize: "0.6875rem", color: "var(--fr-gold)" }}>02</span>
           Audio
         </h2>
+        <button
+          onClick={() => fileInputRef.current?.click()}
+          style={{
+            background: "none",
+            border: "none",
+            cursor: "pointer",
+            color: "var(--fr-muted)",
+            display: "flex",
+            alignItems: "center",
+            gap: 3,
+            padding: 0,
+          }}
+          aria-label="Upload audio track"
+        >
+          <Plus size={12} />
+          <span className="fr-caption" style={{ fontSize: "0.625rem", letterSpacing: "0.08em" }}>
+            add
+          </span>
+        </button>
       </div>
 
       {/* Track list */}
