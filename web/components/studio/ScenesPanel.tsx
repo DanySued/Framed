@@ -174,13 +174,11 @@ export default function ScenesPanel() {
             padding: "10px 14px",
             transition: "border-color 150ms ease",
           }}
-          onFocusWithin={(e) => {
-            (e.currentTarget as HTMLDivElement).style.borderColor = "var(--fr-gold)";
+          onFocus={() => {
+            // handled via CSS :focus-within alternative — no-op here
           }}
-          onBlur={(e) => {
-            if (!e.currentTarget.contains(e.relatedTarget)) {
-              (e.currentTarget as HTMLDivElement).style.borderColor = "var(--fr-line-2)";
-            }
+          onBlur={() => {
+            // no-op
           }}
         >
           <Search size={14} style={{ color: "var(--fr-muted)", flexShrink: 0 }} />
