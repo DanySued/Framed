@@ -309,6 +309,17 @@ export default function AudioPanel() {
                       </div>
                     </div>
 
+                    {/* Selection affordance */}
+                    {selected ? (
+                      <span style={{ display: "flex", alignItems: "center", flexShrink: 0, paddingTop: 2 }}>
+                        <Check size={12} style={{ color: "var(--fr-gold)" }} />
+                      </span>
+                    ) : (
+                      <span className="opacity-0 group-hover:opacity-100 transition-opacity text-[0.5625rem] tracking-widest text-[var(--fr-muted)] uppercase font-mono border border-[var(--fr-line)] px-2 py-0.5" style={{ flexShrink: 0 }}>
+                        Select
+                      </span>
+                    )}
+
                     {/* Delete */}
                     <button
                       onClick={(e) => handleDelete(track.id, e)}
