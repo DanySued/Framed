@@ -108,6 +108,8 @@ interface StudioActions {
   addOverlay: () => void;
   removeOverlay: (index: number) => void;
 
+  setVibePreset: (v: string | null) => void;
+
   setPhase: (p: StudioPhase) => void;
   setPreviewOverride: (src: string | null) => void;
 
