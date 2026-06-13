@@ -1,8 +1,8 @@
 "use client";
 
-import { KeyboardEvent, useCallback, useState } from "react";
+import { KeyboardEvent, useCallback, useState, useMemo } from "react";
 import { motion, AnimatePresence } from "motion/react";
-import { X, Search } from "lucide-react";
+import { X, Search, SlidersHorizontal } from "lucide-react";
 import { toast } from "sonner";
 import { useStudio, PickedClip } from "./StudioContext";
 
@@ -11,6 +11,36 @@ interface SearchResult {
   url: string;
   image: string | null;
   duration: number | null;
+}
+
+const TAG_CHIPS = [
+  { label: "Nature", query: "nature" },
+  { label: "City", query: "city night" },
+  { label: "People", query: "people lifestyle" },
+  { label: "Abstract", query: "abstract motion" },
+  { label: "Aerial", query: "aerial drone" },
+  { label: "Ocean", query: "ocean waves" },
+  { label: "Golden Hour", query: "golden hour sunset" },
+  { label: "Slow Mo", query: "slow motion" },
+  { label: "Rain", query: "rain cinematic" },
+  { label: "Architecture", query: "architecture modern" },
+];
+
+type OrientationFilter = "all" | "portrait" | "landscape";
+type DurationFilter = "all" | "short" | "medium" | "long";
+
+function matchesOrientation(r: SearchResult, f: OrientationFilter): boolean {
+  // We don't have dimension data from the API, so we pass all through for now
+  // (Pexels API can be extended later with orientation param)
+  return true;
+}
+
+function matchesDuration(r: SearchResult, f: DurationFilter): boolean {
+  if (f === "all" || r.duration == null) return true;
+  if (f === "short") return r.duration <= 8;
+  if (f === "medium") return r.duration > 8 && r.duration <= 20;
+  if (f === "long") return r.duration > 20;
+  return true;
 }
 
 export default function ScenesPanel() {
@@ -29,6 +59,17 @@ export default function ScenesPanel() {
   const [activeKeyword, setActiveKeyword] = useState<string | null>(null);
   const [results, setResults] = useState<SearchResult[]>([]);
   const [searching, setSearching] = useState(false);
+  const [showFilters, setShowFilters] = useState(false);
+  const [orientationFilter, setOrientationFilter] = useState<OrientationFilter>("all");
+  const [durationFilter, setDurationFilter] = useState<DurationFilter>("all");
+
+  const filteredResults = useMemo(() => {
+    return results.filter(
+      (r) =>
+        matchesOrientation(r, orientationFilter) &&
+        matchesDuration(r, durationFilter)
+    );
+  }, [results, orientationFilter, durationFilter]);
 
   const search = useCallback(
     async (kw: string) => {
@@ -37,7 +78,7 @@ export default function ScenesPanel() {
       setResults([]);
       try {
         const res = await fetch(
-          `/api/reels/pexels/search?keywords=${encodeURIComponent(kw)}&per_page=10`
+          `/api/reels/pexels/search?keywords=${encodeURIComponent(kw)}&per_page=18`
         );
         if (!res.ok) throw new Error();
         const data: { videos: SearchResult[] } = await res.json();
@@ -46,7 +87,7 @@ export default function ScenesPanel() {
         if (videos[0]) {
           setKeywordThumbnail(kw, videos[0].image, videos[0].id);
         }
-        if (!videos.length) toast.error(`No clips found for “${kw}”`);
+        if (!videos.length) toast.error(`No clips found for "${kw}"`);
       } catch {
         toast.error("Clip search failed — try again");
       } finally {
@@ -54,6 +95,14 @@ export default function ScenesPanel() {
       }
     },
     [setKeywordThumbnail]
+  );
+
+  const handleTagClick = useCallback(
+    (query: string, label: string) => {
+      addKeyword(label.toLowerCase());
+      search(query);
+    },
+    [addKeyword, search]
   );
 
   const submit = useCallback(() => {
@@ -75,69 +124,238 @@ export default function ScenesPanel() {
   );
 
   const targetClips = Math.max(1, Math.round(duration / 4));
+  const hasActiveFilters = orientationFilter !== "all" || durationFilter !== "all";
 
   return (
-    <aside
-      className="flex flex-col min-h-[420px] lg:h-full overflow-hidden"
-      style={{ borderRight: "1px solid var(--fr-line)", borderBottom: "1px solid var(--fr-line)" }}
+    <section
+      className="flex flex-col w-full"
+      aria-label="Clip browser"
     >
-      {/* Header */}
+      {/* ── Hero search bar ─────────────────────────────────────── */}
       <div
-        className="px-5 py-4 shrink-0"
-        style={{ borderBottom: "1px solid var(--fr-line)" }}
+        style={{
+          borderBottom: "1px solid var(--fr-line)",
+          padding: "20px 24px 16px",
+        }}
       >
-        <h2
+        {/* Section label */}
+        <div style={{ display: "flex", alignItems: "baseline", gap: 8, marginBottom: 14 }}>
+          <span
+            style={{
+              fontFamily: "var(--font-mono), monospace",
+              fontSize: "0.625rem",
+              color: "var(--fr-gold)",
+              letterSpacing: "0.06em",
+            }}
+          >
+            01
+          </span>
+          <h2
+            style={{
+              fontSize: "0.75rem",
+              fontWeight: 600,
+              letterSpacing: "0.08em",
+              textTransform: "uppercase",
+              color: "var(--fr-muted)",
+            }}
+          >
+            Choose your clips
+          </h2>
+        </div>
+
+        {/* Search input */}
+        <div
           style={{
-            fontSize: "0.8125rem",
-            fontWeight: 600,
-            letterSpacing: "0.06em",
-            textTransform: "uppercase",
-            color: "var(--fr-muted)",
             display: "flex",
-            alignItems: "baseline",
-            gap: 8,
+            alignItems: "center",
+            gap: 10,
+            background: "var(--fr-surface-2)",
+            border: "1px solid var(--fr-line-2)",
+            padding: "10px 14px",
+            transition: "border-color 150ms ease",
+          }}
+          onFocusWithin={(e) => {
+            (e.currentTarget as HTMLDivElement).style.borderColor = "var(--fr-gold)";
+          }}
+          onBlur={(e) => {
+            if (!e.currentTarget.contains(e.relatedTarget)) {
+              (e.currentTarget as HTMLDivElement).style.borderColor = "var(--fr-line-2)";
+            }
           }}
         >
-          <span style={{ fontFamily: "var(--font-mono), monospace", fontSize: "0.6875rem", color: "var(--fr-gold)" }}>01</span>
-          Scenes
-        </h2>
-        <p className="fr-caption" style={{ fontSize: "0.625rem", marginTop: 4, letterSpacing: "0.06em" }}>
-          start here — search a mood, pick your clips
-        </p>
-      </div>
-
-      {/* Keyword input */}
-      <div
-        className="px-5 py-3 shrink-0"
-        style={{ borderBottom: "1px solid var(--fr-line)" }}
-      >
-        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-          <Search size={12} style={{ color: "var(--fr-muted)", flexShrink: 0 }} />
+          <Search size={14} style={{ color: "var(--fr-muted)", flexShrink: 0 }} />
           <input
             type="text"
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={handleKeyDown}
-            placeholder="ocean, neon city, rain…"
-            aria-label="Search scene clips"
+            placeholder="search a mood, place, or feeling…"
+            aria-label="Search clips"
             style={{
-              width: "100%",
+              flex: 1,
               background: "transparent",
               border: "none",
-              borderBottom: "1px solid var(--fr-line)",
               outline: "none",
               color: "var(--fr-ivory)",
               fontFamily: "var(--font-sans)",
-              fontSize: "0.8125rem",
-              padding: "6px 0",
+              fontSize: "0.9375rem",
               caretColor: "var(--fr-gold)",
             }}
           />
+          {input && (
+            <button
+              onClick={submit}
+              style={{
+                background: "var(--fr-gold)",
+                color: "#04110e",
+                border: "none",
+                padding: "3px 10px",
+                fontFamily: "var(--font-sans)",
+                fontSize: "0.6875rem",
+                fontWeight: 600,
+                letterSpacing: "0.04em",
+                cursor: "pointer",
+                flexShrink: 0,
+              }}
+            >
+              Search
+            </button>
+          )}
         </div>
 
-        {/* Keyword chips */}
+        {/* Tag chips */}
+        <div
+          style={{
+            display: "flex",
+            flexWrap: "wrap",
+            gap: 6,
+            marginTop: 12,
+          }}
+        >
+          {TAG_CHIPS.map((tag) => {
+            const isActive = activeKeyword === tag.query || keywords.some((k) => k.keyword === tag.label.toLowerCase());
+            return (
+              <button
+                key={tag.label}
+                onClick={() => handleTagClick(tag.query, tag.label)}
+                style={{
+                  background: isActive ? "rgba(82,214,196,0.12)" : "var(--fr-surface-2)",
+                  border: `1px solid ${isActive ? "var(--fr-gold)" : "var(--fr-line-2)"}`,
+                  color: isActive ? "var(--fr-gold)" : "var(--fr-muted)",
+                  fontFamily: "var(--font-sans)",
+                  fontSize: "0.6875rem",
+                  letterSpacing: "0.04em",
+                  padding: "4px 10px",
+                  cursor: "pointer",
+                  transition: "all 150ms ease",
+                  whiteSpace: "nowrap",
+                }}
+                onMouseEnter={(e) => {
+                  if (!isActive) {
+                    e.currentTarget.style.borderColor = "rgba(82,214,196,0.4)";
+                    e.currentTarget.style.color = "var(--fr-ivory)";
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  if (!isActive) {
+                    e.currentTarget.style.borderColor = "var(--fr-line-2)";
+                    e.currentTarget.style.color = "var(--fr-muted)";
+                  }
+                }}
+              >
+                {tag.label}
+              </button>
+            );
+          })}
+
+          {/* Filter toggle */}
+          <button
+            onClick={() => setShowFilters((v) => !v)}
+            style={{
+              background: showFilters || hasActiveFilters ? "rgba(82,214,196,0.12)" : "transparent",
+              border: `1px solid ${showFilters || hasActiveFilters ? "var(--fr-gold)" : "var(--fr-line)"}`,
+              color: showFilters || hasActiveFilters ? "var(--fr-gold)" : "var(--fr-muted)",
+              fontFamily: "var(--font-sans)",
+              fontSize: "0.6875rem",
+              letterSpacing: "0.04em",
+              padding: "4px 10px",
+              cursor: "pointer",
+              transition: "all 150ms ease",
+              display: "flex",
+              alignItems: "center",
+              gap: 5,
+              whiteSpace: "nowrap",
+            }}
+            aria-pressed={showFilters}
+          >
+            <SlidersHorizontal size={11} />
+            Filters{hasActiveFilters ? " ·" : ""}
+          </button>
+        </div>
+
+        {/* Filters row */}
+        <AnimatePresence>
+          {showFilters && (
+            <motion.div
+              initial={{ opacity: 0, height: 0, marginTop: 0 }}
+              animate={{ opacity: 1, height: "auto", marginTop: 10 }}
+              exit={{ opacity: 0, height: 0, marginTop: 0 }}
+              transition={{ duration: 0.18, ease: "easeOut" }}
+              style={{ overflow: "hidden" }}
+            >
+              <div
+                style={{
+                  display: "flex",
+                  flexWrap: "wrap",
+                  gap: 16,
+                  padding: "10px 12px",
+                  background: "var(--fr-surface-2)",
+                  border: "1px solid var(--fr-line)",
+                }}
+              >
+                {/* Duration filter */}
+                <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                  <span
+                    style={{
+                      fontSize: "0.5625rem",
+                      letterSpacing: "0.08em",
+                      textTransform: "uppercase",
+                      color: "var(--fr-muted)",
+                      fontFamily: "var(--font-mono), monospace",
+                      minWidth: 52,
+                    }}
+                  >
+                    Duration
+                  </span>
+                  {(["all", "short", "medium", "long"] as DurationFilter[]).map((opt) => (
+                    <button
+                      key={opt}
+                      onClick={() => setDurationFilter(opt)}
+                      style={{
+                        background: durationFilter === opt ? "var(--fr-gold)" : "transparent",
+                        color: durationFilter === opt ? "#04110e" : "var(--fr-muted)",
+                        border: `1px solid ${durationFilter === opt ? "var(--fr-gold)" : "var(--fr-line)"}`,
+                        fontFamily: "var(--font-sans)",
+                        fontSize: "0.625rem",
+                        letterSpacing: "0.04em",
+                        padding: "3px 9px",
+                        cursor: "pointer",
+                        transition: "all 120ms ease",
+                        textTransform: "capitalize",
+                      }}
+                    >
+                      {opt === "short" ? "≤8s" : opt === "medium" ? "9–20s" : opt === "long" ? ">20s" : "All"}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* User keyword chips */}
         {keywords.length > 0 && (
-          <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginTop: 8 }}>
+          <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginTop: 10 }}>
             {keywords.map((kw) => {
               const active = kw.keyword === activeKeyword;
               return (
@@ -149,10 +367,12 @@ export default function ScenesPanel() {
                     gap: 5,
                     fontSize: "0.625rem",
                     letterSpacing: "0.06em",
-                    padding: "2px 7px",
+                    padding: "3px 8px",
                     border: `1px solid ${active ? "var(--fr-gold)" : "var(--fr-line)"}`,
                     color: active ? "var(--fr-gold)" : "var(--fr-muted)",
                     cursor: "pointer",
+                    background: active ? "rgba(82,214,196,0.08)" : "transparent",
+                    transition: "all 120ms ease",
                   }}
                   onClick={() => search(kw.keyword)}
                   role="button"
@@ -176,90 +396,106 @@ export default function ScenesPanel() {
         )}
       </div>
 
-      {/* Selected clips strip */}
-      {selectedClips.length > 0 && (
-        <div
-          className="px-4 py-3 shrink-0"
-          style={{ borderBottom: "1px solid var(--fr-line)" }}
-        >
-          <p
-            className="fr-overline"
-            style={{ fontSize: "0.5625rem", marginBottom: 6, color: "var(--fr-gold)" }}
+      {/* ── Selected clips strip ────────────────────────────────── */}
+      <AnimatePresence>
+        {selectedClips.length > 0 && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: "auto" }}
+            exit={{ opacity: 0, height: 0 }}
+            transition={{ duration: 0.2 }}
+            style={{
+              borderBottom: "1px solid var(--fr-line)",
+              overflow: "hidden",
+            }}
           >
-            your cut · {selectedClips.length} clip{selectedClips.length > 1 ? "s" : ""}
-            {selectedClips.length < targetClips ? ` · ~${targetClips} fills ${duration}s` : ""}
-          </p>
-          <div style={{ display: "flex", gap: 6, overflowX: "auto", paddingBottom: 2 }}>
-            <AnimatePresence mode="popLayout">
-              {selectedClips.map((clip, i) => (
-                <motion.div
-                  key={clip.id}
-                  layout
-                  initial={{ opacity: 0, scale: 0.9 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  exit={{ opacity: 0, scale: 0.85 }}
-                  transition={{ duration: 0.15 }}
-                  className="group relative shrink-0"
-                  style={{
-                    width: 42,
-                    aspectRatio: "9 / 16",
-                    border: "1px solid var(--fr-gold)",
-                    overflow: "hidden",
-                    background: "var(--fr-surface)",
-                  }}
-                >
-                  {clip.image && (
-                    <img
-                      src={clip.image}
-                      alt=""
-                      className="absolute inset-0 w-full h-full object-cover"
-                      style={{ opacity: 0.8 }}
-                    />
-                  )}
-                  <span
-                    style={{
-                      position: "absolute",
-                      top: 2,
-                      left: 3,
-                      fontFamily: "monospace",
-                      fontSize: "0.5rem",
-                      color: "var(--fr-gold)",
-                      textShadow: "0 1px 2px rgba(0,0,0,0.9)",
-                    }}
-                  >
-                    {String(i + 1).padStart(2, "0")}
-                  </span>
-                  <button
-                    onClick={() => removeClip(clip.id)}
-                    className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center"
-                    style={{
-                      background: "rgba(6,9,11,0.65)",
-                      border: "none",
-                      color: "var(--fr-ivory)",
-                      cursor: "pointer",
-                    }}
-                    aria-label="Remove clip"
-                  >
-                    <X size={11} />
-                  </button>
-                </motion.div>
-              ))}
-            </AnimatePresence>
-          </div>
-        </div>
-      )}
+            <div style={{ padding: "10px 24px" }}>
+              <p
+                style={{
+                  fontSize: "0.5625rem",
+                  letterSpacing: "0.08em",
+                  textTransform: "uppercase",
+                  color: "var(--fr-gold)",
+                  fontFamily: "var(--font-mono), monospace",
+                  marginBottom: 8,
+                }}
+              >
+                your cut · {selectedClips.length} clip{selectedClips.length > 1 ? "s" : ""}
+                {selectedClips.length < targetClips ? ` · ~${targetClips} fills ${duration}s` : ""}
+              </p>
+              <div style={{ display: "flex", gap: 6, overflowX: "auto", paddingBottom: 4 }}>
+                <AnimatePresence mode="popLayout">
+                  {selectedClips.map((clip, i) => (
+                    <motion.div
+                      key={clip.id}
+                      layout
+                      initial={{ opacity: 0, scale: 0.9 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      exit={{ opacity: 0, scale: 0.85 }}
+                      transition={{ duration: 0.15 }}
+                      className="group relative shrink-0"
+                      style={{
+                        width: 44,
+                        aspectRatio: "9 / 16",
+                        border: "1px solid var(--fr-gold)",
+                        overflow: "hidden",
+                        background: "var(--fr-surface)",
+                      }}
+                    >
+                      {clip.image && (
+                        <img
+                          src={clip.image}
+                          alt=""
+                          className="absolute inset-0 w-full h-full object-cover"
+                          style={{ opacity: 0.8 }}
+                        />
+                      )}
+                      <span
+                        style={{
+                          position: "absolute",
+                          top: 2,
+                          left: 3,
+                          fontFamily: "monospace",
+                          fontSize: "0.5rem",
+                          color: "var(--fr-gold)",
+                          textShadow: "0 1px 2px rgba(0,0,0,0.9)",
+                        }}
+                      >
+                        {String(i + 1).padStart(2, "0")}
+                      </span>
+                      <button
+                        onClick={() => removeClip(clip.id)}
+                        className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center"
+                        style={{
+                          background: "rgba(6,9,11,0.65)",
+                          border: "none",
+                          color: "var(--fr-ivory)",
+                          cursor: "pointer",
+                        }}
+                        aria-label="Remove clip"
+                      >
+                        <X size={11} />
+                      </button>
+                    </motion.div>
+                  ))}
+                </AnimatePresence>
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
-      {/* Results grid */}
-      <div className="flex-1 overflow-y-auto px-4 py-3">
+      {/* ── Results grid ────────────────────────────────────────── */}
+      <div style={{ padding: "16px 24px", flex: 1 }}>
         {searching ? (
           <div
             style={{
               display: "grid",
-              gridTemplateColumns: "1fr 1fr",
+              gridTemplateColumns: "repeat(auto-fill, minmax(120px, 1fr))",
               gap: 8,
             }}
           >
-            {Array.from({ length: 6 }).map((_, i) => (
+            {Array.from({ length: 12 }).map((_, i) => (
               <div
                 key={i}
                 style={{
@@ -273,24 +509,60 @@ export default function ScenesPanel() {
               />
             ))}
           </div>
-        ) : results.length === 0 ? (
-          <p
-            className="fr-caption"
-            style={{ textAlign: "center", marginTop: 32, fontStyle: "italic", lineHeight: 1.7, padding: "0 12px" }}
+        ) : filteredResults.length === 0 && results.length === 0 ? (
+          <div
+            style={{
+              textAlign: "center",
+              padding: "48px 24px",
+            }}
           >
-            {keywords.length === 0
-              ? "search a keyword above to browse clips — or just add keywords and let framed pick for you"
-              : "click a keyword chip to browse its clips"}
+            <p
+              style={{
+                fontFamily: "var(--font-display), Georgia, serif",
+                fontSize: "1rem",
+                fontStyle: "italic",
+                color: "var(--fr-muted)",
+                lineHeight: 1.7,
+                marginBottom: 8,
+              }}
+            >
+              {keywords.length === 0
+                ? "pick a mood above, or search for a scene"
+                : "click a keyword chip to browse its clips"}
+            </p>
+            {keywords.length === 0 && (
+              <p
+                style={{
+                  fontSize: "0.6875rem",
+                  color: "rgba(255,255,255,0.25)",
+                  letterSpacing: "0.04em",
+                }}
+              >
+                ocean · golden hour · city night · …
+              </p>
+            )}
+          </div>
+        ) : filteredResults.length === 0 ? (
+          <p
+            style={{
+              textAlign: "center",
+              padding: "32px 0",
+              fontStyle: "italic",
+              fontSize: "0.8125rem",
+              color: "var(--fr-muted)",
+            }}
+          >
+            No clips match the current filters
           </p>
         ) : (
           <div
             style={{
               display: "grid",
-              gridTemplateColumns: "1fr 1fr",
+              gridTemplateColumns: "repeat(auto-fill, minmax(120px, 1fr))",
               gap: 8,
             }}
           >
-            {results.map((r) => {
+            {filteredResults.map((r) => {
               const picked = selectedClips.some((c) => c.id === r.id);
               const clip: PickedClip = {
                 id: r.id,
@@ -300,10 +572,13 @@ export default function ScenesPanel() {
                 keyword: activeKeyword ?? "",
               };
               return (
-                <button
+                <motion.button
                   key={r.id}
                   onClick={() => toggleClip(clip)}
-                  className="relative"
+                  layout
+                  initial={{ opacity: 0, scale: 0.97 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ duration: 0.18 }}
                   style={{
                     aspectRatio: "9 / 16",
                     border: `1px solid ${picked ? "var(--fr-gold)" : "var(--fr-line)"}`,
@@ -313,6 +588,7 @@ export default function ScenesPanel() {
                     cursor: "pointer",
                     padding: 0,
                     transition: "border-color 150ms ease, box-shadow 150ms ease",
+                    position: "relative",
                   }}
                   aria-pressed={picked}
                   aria-label={picked ? "Deselect clip" : "Select clip"}
@@ -322,7 +598,10 @@ export default function ScenesPanel() {
                       src={r.image}
                       alt=""
                       className="absolute inset-0 w-full h-full object-cover"
-                      style={{ opacity: picked ? 0.95 : 0.7, transition: "opacity 150ms ease" }}
+                      style={{
+                        opacity: picked ? 0.95 : 0.7,
+                        transition: "opacity 150ms ease",
+                      }}
                     />
                   )}
                   {/* duration badge */}
@@ -359,12 +638,12 @@ export default function ScenesPanel() {
                       {String(selectedClips.findIndex((c) => c.id === r.id) + 1).padStart(2, "0")}
                     </span>
                   )}
-                </button>
+                </motion.button>
               );
             })}
           </div>
         )}
       </div>
-    </aside>
+    </section>
   );
 }
