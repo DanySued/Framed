@@ -9,7 +9,7 @@ import GenerationOverlay from "./GenerationOverlay";
 const KEN_BURNS_DURATION = 7000; // ms per slide
 
 export default function PreviewFrame() {
-  const { keywords, selectedClips, overlays, phase, jobs, previewOverride, subtitlesEnabled, onReset } = useStudio();
+  const { keywords, selectedClips, overlays, phase, jobs, previewOverride, subtitlesEnabled, onReset, vibePreset } = useStudio();
   const videoUrls =
     selectedClips.map((c) => c.url).filter((u): u is string => Boolean(u));
   const thumbnails =
