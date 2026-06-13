@@ -321,39 +321,3 @@ function DoneActions({
   );
 }
 
-function CornerMarks() {
-  const markStyle: React.CSSProperties = {
-    position: "absolute",
-    width: 14,
-    height: 14,
-    zIndex: 11,
-    pointerEvents: "none",
-  };
-  const lineColor = "var(--fr-gold)";
-  const thickness = "1px";
-
-  return (
-    <>
-      {/* top-left */}
-      <div style={{ ...markStyle, top: 8, left: 8 }}>
-        <div style={{ position: "absolute", top: 0, left: 0, width: "100%", height: thickness, background: lineColor }} />
-        <div style={{ position: "absolute", top: 0, left: 0, width: thickness, height: "100%", background: lineColor }} />
-      </div>
-      {/* top-right */}
-      <div style={{ ...markStyle, top: 8, right: 8 }}>
-        <div style={{ position: "absolute", top: 0, right: 0, width: "100%", height: thickness, background: lineColor }} />
-        <div style={{ position: "absolute", top: 0, right: 0, width: thickness, height: "100%", background: lineColor }} />
-      </div>
-      {/* bottom-left */}
-      <div style={{ ...markStyle, bottom: 8, left: 8 }}>
-        <div style={{ position: "absolute", bottom: 0, left: 0, width: "100%", height: thickness, background: lineColor }} />
-        <div style={{ position: "absolute", bottom: 0, left: 0, width: thickness, height: "100%", background: lineColor }} />
-      </div>
-      {/* bottom-right */}
-      <div style={{ ...markStyle, bottom: 8, right: 8 }}>
-        <div style={{ position: "absolute", bottom: 0, right: 0, width: "100%", height: thickness, background: lineColor }} />
-        <div style={{ position: "absolute", bottom: 0, right: 0, width: thickness, height: "100%", background: lineColor }} />
-      </div>
-    </>
-  );
-}
