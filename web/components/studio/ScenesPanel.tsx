@@ -311,7 +311,7 @@ export default function ScenesPanel() {
       >
       <div style={{ maxWidth: 720, margin: "0 auto" }}>
         {/* Section label */}
-        <div style={{ display: "flex", alignItems: "baseline", gap: 8, marginBottom: 14 }}>
+        <div style={{ display: "flex", alignItems: "baseline", gap: 8, marginBottom: 22 }}>
           <span
             style={{
               fontFamily: "var(--font-mono), monospace",
