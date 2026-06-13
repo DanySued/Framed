@@ -1,10 +1,10 @@
 "use client";
 
-import { useStudio, TextOverlay } from "./StudioContext";
+import { useStudio, VIBE_PRESETS, TextOverlay } from "./StudioContext";
 import { Plus, Minus } from "lucide-react";
 
 export default function TextPanel() {
-  const { overlays, updateOverlay, addOverlay, removeOverlay } = useStudio();
+  const { overlays, updateOverlay, addOverlay, removeOverlay, vibePreset, setVibePreset } = useStudio();
 
   return (
     <div style={{ padding: "20px", display: "flex", flexDirection: "column", gap: 16 }}>
