@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { X, Upload } from "lucide-react";
+import { X, Upload, Plus } from "lucide-react";
 import { toast } from "sonner";
 import { useStudio } from "./StudioContext";
 import Waveform from "./Waveform";
