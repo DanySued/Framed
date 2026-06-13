@@ -35,7 +35,7 @@ function StudioLayout() {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 16 }}
             transition={{ duration: 0.32, ease: [0.22, 1, 0.36, 1] }}
-            className="flex-1 min-h-0 grid lg:grid-cols-[minmax(260px,320px)_1fr_minmax(260px,320px)]"
+            className="flex-1 min-h-0 grid lg:grid-cols-[minmax(260px,320px)_1fr_minmax(260px,320px)] items-start"
           >
             {/* Left: TextPanel in compose; ClipRail in approval */}
             <div className="lg:overflow-y-auto flex flex-col">
