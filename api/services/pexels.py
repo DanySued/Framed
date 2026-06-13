@@ -5,7 +5,7 @@ import os
 from typing import List
 
 
-async def search_videos(keywords: List[str], per_page: int = 10) -> List[dict]:
+async def search_videos(keywords: List[str], per_page: int = 10, page: int = 1) -> List[dict]:
     """
     Search Pexels for videos matching keywords.
 
