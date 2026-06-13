@@ -625,7 +625,7 @@ export default function ScenesPanel() {
                 }}
               >
                 your cut · {selectedClips.length} clip{selectedClips.length > 1 ? "s" : ""}
-                {selectedClips.length < targetClips ? ` · ~${targetClips} fills ${duration}s` : ""}
+                {selectedClips.length < targetClips ? ` · ~${targetClips} clips for ${duration}s` : ""}
               </p>
               <div style={{ display: "flex", gap: 6, overflowX: "auto", paddingBottom: 4 }}>
                 <AnimatePresence mode="popLayout">
