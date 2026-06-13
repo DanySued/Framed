@@ -610,7 +610,6 @@ export default function ScenesPanel() {
             exit={{ opacity: 0, height: 0 }}
             transition={{ duration: 0.2 }}
             style={{
-              borderBottom: "1px solid var(--fr-line)",
               overflow: "hidden",
             }}
           >
