@@ -1,8 +1,8 @@
 "use client";
 
-import { KeyboardEvent, useCallback, useState, useMemo } from "react";
+import { KeyboardEvent, useCallback, useState, useMemo, useRef } from "react";
 import { motion, AnimatePresence } from "motion/react";
-import { X, Search, SlidersHorizontal } from "lucide-react";
+import { X, Search, SlidersHorizontal, Plus } from "lucide-react";
 import { toast } from "sonner";
 import { useStudio, PickedClip } from "./StudioContext";
 
