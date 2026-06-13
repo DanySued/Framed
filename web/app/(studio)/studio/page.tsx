@@ -48,7 +48,7 @@ function StudioLayout() {
             </div>
 
             {/* Center: preview */}
-            <div className="flex flex-col lg:overflow-hidden">
+            <div className="flex flex-col lg:sticky lg:top-[52px] lg:self-start lg:max-h-[calc(100vh-52px)] lg:overflow-hidden">
               <div
                 className="flex items-center justify-center flex-1 lg:overflow-hidden"
                 style={{ padding: "24px 20px 48px" }}
