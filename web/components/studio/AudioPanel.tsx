@@ -157,7 +157,6 @@ export default function AudioPanel() {
   return (
     <aside
       className="flex flex-col lg:h-full overflow-hidden"
-      style={{ borderBottom: "1px solid var(--fr-line)" }}
     >
       {/* Header */}
       <div
