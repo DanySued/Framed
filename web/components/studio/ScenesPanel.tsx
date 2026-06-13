@@ -717,7 +717,7 @@ export default function ScenesPanel() {
           <div
             style={{
               display: "grid",
-              gridTemplateColumns: "repeat(auto-fill, minmax(120px, 1fr))",
+              gridTemplateColumns: "repeat(auto-fill, minmax(140px, 1fr))",
               gap: 8,
             }}
           >
@@ -731,75 +731,76 @@ export default function ScenesPanel() {
                 keyword: activeKeyword ?? "",
               };
               return (
-                <motion.button
+                <ClipCard
                   key={r.id}
-                  onClick={() => toggleClip(clip)}
-                  layout
-                  initial={{ opacity: 0, scale: 0.97 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  transition={{ duration: 0.18 }}
-                  style={{
-                    aspectRatio: "9 / 16",
-                    border: `1px solid ${picked ? "var(--fr-gold)" : "var(--fr-line)"}`,
-                    boxShadow: picked ? "0 0 0 1px var(--fr-gold)" : "none",
-                    overflow: "hidden",
-                    background: "var(--fr-surface)",
-                    cursor: "pointer",
-                    padding: 0,
-                    transition: "border-color 150ms ease, box-shadow 150ms ease",
-                    position: "relative",
-                  }}
-                  aria-pressed={picked}
-                  aria-label={picked ? "Deselect clip" : "Select clip"}
-                >
-                  {r.image && (
-                    <img
-                      src={r.image}
-                      alt=""
-                      className="absolute inset-0 w-full h-full object-cover"
-                      style={{
-                        opacity: picked ? 0.95 : 0.7,
-                        transition: "opacity 150ms ease",
-                      }}
-                    />
-                  )}
-                  {/* duration badge */}
-                  {r.duration != null && (
-                    <span
-                      style={{
-                        position: "absolute",
-                        bottom: 4,
-                        right: 5,
-                        fontFamily: "monospace",
-                        fontSize: "0.5625rem",
-                        color: "var(--fr-ivory)",
-                        background: "rgba(6,9,11,0.7)",
-                        padding: "1px 4px",
-                      }}
-                    >
-                      {r.duration}s
-                    </span>
-                  )}
-                  {/* pick order */}
-                  {picked && (
-                    <span
-                      style={{
-                        position: "absolute",
-                        top: 4,
-                        left: 5,
-                        fontFamily: "monospace",
-                        fontSize: "0.625rem",
-                        color: "#04110e",
-                        background: "var(--fr-gold)",
-                        padding: "1px 5px",
-                      }}
-                    >
-                      {String(selectedClips.findIndex((c) => c.id === r.id) + 1).padStart(2, "0")}
-                    </span>
-                  )}
-                </motion.button>
+                  r={r}
+                  picked={picked}
+                  clip={clip}
+                  pickIndex={selectedClips.findIndex((c) => c.id === r.id)}
+                  toggleClip={toggleClip}
+                />
               );
             })}
+
+            {/* load more placeholder */}
+            {hasMore && (
+              <motion.button
+                layout
+                initial={{ opacity: 0, scale: 0.97 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.18 }}
+                onClick={loadMore}
+                disabled={loadingMore}
+                style={{
+                  aspectRatio: "9 / 16",
+                  border: "1px dashed var(--fr-line)",
+                  background: "transparent",
+                  cursor: loadingMore ? "default" : "pointer",
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  gap: 8,
+                  padding: 0,
+                  transition: "border-color 150ms ease",
+                }}
+                onMouseEnter={(e) => {
+                  if (!loadingMore) e.currentTarget.style.borderColor = "rgba(82,214,196,0.5)";
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.borderColor = "var(--fr-line)";
+                }}
+                aria-label="Load more clips"
+              >
+                {loadingMore ? (
+                  <div
+                    style={{
+                      width: 20,
+                      height: 20,
+                      border: "2px solid rgba(82,214,196,0.25)",
+                      borderTopColor: "var(--fr-gold)",
+                      borderRadius: "50%",
+                      animation: "spin 0.7s linear infinite",
+                    }}
+                  />
+                ) : (
+                  <>
+                    <Plus size={16} style={{ color: "var(--fr-muted)" }} />
+                    <span
+                      style={{
+                        fontFamily: "var(--font-mono), monospace",
+                        fontSize: "0.5625rem",
+                        letterSpacing: "0.08em",
+                        color: "var(--fr-muted)",
+                        textTransform: "uppercase",
+                      }}
+                    >
+                      More
+                    </span>
+                  </>
+                )}
+              </motion.button>
+            )}
           </div>
         )}
       </div>
