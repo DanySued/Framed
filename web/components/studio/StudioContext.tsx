@@ -73,6 +73,9 @@ interface StudioState {
   // Text overlays
   overlays: TextOverlay[];
 
+  // Cinematic filter preset (CSS filter string or null)
+  vibePreset: string | null;
+
   // Workflow phase
   phase: StudioPhase;
 
