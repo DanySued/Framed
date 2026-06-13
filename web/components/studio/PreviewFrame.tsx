@@ -113,7 +113,38 @@ export default function PreviewFrame() {
         ) : (
           <>
             <AnimatePresence mode="wait">
-              {!isEmpty && thumbnails[activeIndex] && (
+              {!isEmpty && showVideoSlideshow && videoUrls[activeIndex] && (
+                <motion.div
+                  key={videoUrls[activeIndex]}
+                  className="absolute inset-0"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: 0.5, ease: "easeInOut" }}
+                >
+                  <video
+                    src={videoUrls[activeIndex]}
+                    autoPlay
+                    muted
+                    playsInline
+                    loop={videoUrls.length === 1}
+                    className="absolute inset-0 w-full h-full object-cover"
+                    onEnded={() =>
+                      videoUrls.length > 1 &&
+                      setActiveIndex((i) => (i + 1) % videoUrls.length)
+                    }
+                  />
+                  <div
+                    className="absolute inset-0"
+                    style={{
+                      background:
+                        "radial-gradient(ellipse at center, transparent 40%, rgba(6,9,11,0.5) 100%)",
+                      pointerEvents: "none",
+                    }}
+                  />
+                </motion.div>
+              )}
+              {!isEmpty && !showVideoSlideshow && thumbnails[activeIndex] && (
                 <motion.div
                   key={thumbnails[activeIndex]}
                   className="absolute inset-0"
