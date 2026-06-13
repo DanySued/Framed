@@ -43,10 +43,13 @@ function StudioLayout() {
             className="flex-1 min-h-0 grid lg:grid-cols-[minmax(260px,320px)_1fr_minmax(260px,320px)]"
             style={{ borderBottom: "1px solid var(--fr-line)" }}
           >
-            {/* Left: nothing in compose (clips already above); ClipRail in approval */}
+            {/* Left: Add Text shortcut in compose; ClipRail in approval */}
             <div className="lg:overflow-hidden" style={{ borderRight: "1px solid var(--fr-line)" }}>
               <StudioPhaseGate phases={["approval"]}>
                 <ClipRail />
+              </StudioPhaseGate>
+              <StudioPhaseGate phases={["compose"]}>
+                <AddTextPanel />
               </StudioPhaseGate>
             </div>
 
