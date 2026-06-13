@@ -153,6 +153,7 @@ export function StudioProvider({ children }: { children: React.ReactNode }) {
   const [jobs, setJobs] = useState<JobEntry[]>([]);
   const [approvalJobIndex, setApprovalJobIndex] = useState(0);
   const [previewOverride, setPreviewOverride] = useState<string | null>(null);
+  const [vibePreset, setVibePreset] = useState<string | null>(null);
 
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
