@@ -38,9 +38,6 @@ export async function getSession(): Promise<boolean> {
 }
 
 export async function requireSession(): Promise<NextResponse | null> {
-  const valid = await getSession();
-  if (!valid) {
-    return NextResponse.json({ error: "unauthorized" }, { status: 401 });
-  }
+  // Auth temporarily disabled — mirrors the page-level redirect bypass.
   return null;
 }
