@@ -4,6 +4,7 @@ export default async function StudioLayout({ children }: { children: React.React
   // Auth temporarily disabled.
   return (
     <div className="flex flex-col min-h-screen" style={{ backgroundColor: "var(--fr-black)" }}>
+      <div className="max-w-6xl mx-auto w-full flex flex-col flex-1" style={{ boxShadow: "0 0 0 1px var(--fr-line)" }}>
       {/* Top bar — frosted sticky nav */}
       <header
         className="sticky top-0 z-50 flex items-center justify-between px-6 h-[44px] shrink-0"
