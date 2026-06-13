@@ -285,6 +285,7 @@ export default function ControlBar() {
       >
         Generate film
       </button>
+      </div>
     </footer>
   );
 }
