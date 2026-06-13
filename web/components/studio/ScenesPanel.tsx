@@ -802,6 +802,7 @@ export default function ScenesPanel() {
                 style={{
                   aspectRatio: "9 / 16",
                   border: "1px dashed var(--fr-line)",
+                  borderRadius: "10px",
                   background: "transparent",
                   cursor: loadingMore ? "default" : "pointer",
                   display: "flex",
