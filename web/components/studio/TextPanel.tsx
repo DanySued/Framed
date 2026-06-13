@@ -7,20 +7,9 @@ export default function TextPanel() {
   const { overlays, updateOverlay, addOverlay, removeOverlay } = useStudio();
 
   return (
-    <div
-      style={{
-        borderTop: "1px solid var(--fr-line)",
-        padding: "16px 20px",
-      }}
-    >
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          marginBottom: 12,
-        }}
-      >
+    <div style={{ padding: "20px", display: "flex", flexDirection: "column", gap: 16 }}>
+      {/* Header */}
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
         <h2
           style={{
             fontSize: "0.8125rem",
@@ -34,30 +23,32 @@ export default function TextPanel() {
           }}
         >
           <span style={{ fontFamily: "var(--font-mono), monospace", fontSize: "0.6875rem", color: "var(--fr-gold)" }}>03</span>
-          Title
+          Text overlays
         </h2>
         <button
           onClick={addOverlay}
           style={{
-            background: "none",
-            border: "none",
+            background: "rgba(82,214,196,0.1)",
+            border: "1px solid rgba(82,214,196,0.25)",
+            borderRadius: "20px",
             cursor: "pointer",
-            color: "var(--fr-muted)",
+            color: "var(--fr-gold)",
             display: "flex",
             alignItems: "center",
-            gap: 3,
-            padding: 0,
+            gap: 4,
+            padding: "4px 10px",
+            fontSize: "0.6875rem",
+            letterSpacing: "0.04em",
+            fontFamily: "var(--font-sans)",
           }}
           aria-label="Add text overlay"
         >
-          <Plus size={12} />
-          <span className="fr-caption" style={{ fontSize: "0.625rem", letterSpacing: "0.08em" }}>
-            add
-          </span>
+          <Plus size={11} />
+          add
         </button>
       </div>
 
-      <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+      <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
         {overlays.map((overlay, i) => (
           <OverlayEditor
             key={i}
@@ -79,53 +70,91 @@ interface EditorProps {
   onRemove?: () => void;
 }
 
-function OverlayEditor({ overlay, onUpdate, onRemove }: EditorProps) {
+function OverlayEditor({ index, overlay, onUpdate, onRemove }: EditorProps) {
   return (
     <div
       style={{
-        border: "1px solid var(--fr-line)",
-        padding: "10px 12px",
+        border: "1px solid var(--fr-line-2)",
+        borderRadius: "12px",
+        padding: "12px 14px",
         display: "flex",
         flexDirection: "column",
-        gap: 8,
+        gap: 10,
+        background: "var(--fr-surface-2)",
       }}
     >
+      {/* Overlay number */}
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+        <span
+          style={{
+            fontFamily: "var(--font-mono), monospace",
+            fontSize: "0.5625rem",
+            color: "var(--fr-gold)",
+            letterSpacing: "0.08em",
+          }}
+        >
+          TEXT {String(index + 1).padStart(2, "0")}
+        </span>
+        {onRemove && (
+          <button
+            onClick={onRemove}
+            style={{
+              background: "rgba(255,255,255,0.06)",
+              border: "1px solid var(--fr-line)",
+              borderRadius: "20px",
+              color: "var(--fr-muted)",
+              cursor: "pointer",
+              padding: "2px 8px",
+              display: "flex",
+              alignItems: "center",
+              gap: 3,
+              fontSize: "0.5625rem",
+              letterSpacing: "0.06em",
+            }}
+            aria-label="Remove overlay"
+          >
+            <Minus size={9} />
+            remove
+          </button>
+        )}
+      </div>
+
       {/* Text input */}
       <input
         type="text"
         value={overlay.text}
         onChange={(e) => onUpdate({ text: e.target.value })}
-        placeholder="overlay text…"
+        placeholder="type your overlay text…"
         aria-label="Overlay text"
         style={{
           width: "100%",
-          background: "transparent",
-          border: "none",
-          borderBottom: "1px solid var(--fr-line)",
+          background: "rgba(255,255,255,0.04)",
+          border: "1px solid var(--fr-line-2)",
+          borderRadius: "8px",
           outline: "none",
           color: "var(--fr-ivory)",
           fontFamily: "var(--font-display), Georgia, serif",
           fontSize: "0.9375rem",
-          padding: "4px 0",
+          padding: "8px 12px",
           caretColor: "var(--fr-gold)",
         }}
       />
 
       {/* Controls row */}
-      <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-        {/* Font selector */}
+      <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
         <select
           value={overlay.font}
           onChange={(e) => onUpdate({ font: e.target.value as TextOverlay["font"] })}
           style={{
             background: "var(--fr-surface)",
-            border: "1px solid var(--fr-line)",
+            border: "1px solid var(--fr-line-2)",
+            borderRadius: "8px",
             color: "var(--fr-muted)",
             fontFamily: "var(--font-sans)",
             fontSize: "0.6875rem",
-            padding: "3px 6px",
+            padding: "5px 8px",
             cursor: "pointer",
-            letterSpacing: "0.06em",
+            letterSpacing: "0.04em",
           }}
         >
           <option value="serif">serif</option>
@@ -133,18 +162,18 @@ function OverlayEditor({ overlay, onUpdate, onRemove }: EditorProps) {
           <option value="mono">mono</option>
         </select>
 
-        {/* Bold */}
         <button
           onClick={() => onUpdate({ bold: !overlay.bold })}
           style={{
-            background: overlay.bold ? "rgba(82,214,196,0.12)" : "transparent",
-            border: `1px solid ${overlay.bold ? "var(--fr-gold)" : "var(--fr-line)"}`,
+            background: overlay.bold ? "rgba(82,214,196,0.12)" : "rgba(255,255,255,0.04)",
+            border: `1px solid ${overlay.bold ? "var(--fr-gold)" : "var(--fr-line-2)"}`,
+            borderRadius: "8px",
             color: overlay.bold ? "var(--fr-gold)" : "var(--fr-muted)",
             fontWeight: 700,
             fontSize: "0.75rem",
             fontFamily: "var(--font-sans)",
-            width: 24,
-            height: 24,
+            width: 30,
+            height: 30,
             cursor: "pointer",
             display: "flex",
             alignItems: "center",
@@ -157,18 +186,18 @@ function OverlayEditor({ overlay, onUpdate, onRemove }: EditorProps) {
           B
         </button>
 
-        {/* Italic */}
         <button
           onClick={() => onUpdate({ italic: !overlay.italic })}
           style={{
-            background: overlay.italic ? "rgba(82,214,196,0.12)" : "transparent",
-            border: `1px solid ${overlay.italic ? "var(--fr-gold)" : "var(--fr-line)"}`,
+            background: overlay.italic ? "rgba(82,214,196,0.12)" : "rgba(255,255,255,0.04)",
+            border: `1px solid ${overlay.italic ? "var(--fr-gold)" : "var(--fr-line-2)"}`,
+            borderRadius: "8px",
             color: overlay.italic ? "var(--fr-gold)" : "var(--fr-muted)",
             fontStyle: "italic",
-            fontSize: "0.75rem",
+            fontSize: "0.875rem",
             fontFamily: "var(--font-display), Georgia, serif",
-            width: 24,
-            height: 24,
+            width: 30,
+            height: 30,
             cursor: "pointer",
             display: "flex",
             alignItems: "center",
@@ -181,35 +210,18 @@ function OverlayEditor({ overlay, onUpdate, onRemove }: EditorProps) {
           i
         </button>
 
-        <div style={{ flex: 1 }} />
-
-        {/* Remove overlay */}
-        {onRemove && (
-          <button
-            onClick={onRemove}
-            style={{
-              background: "none",
-              border: "none",
-              color: "var(--fr-muted)",
-              cursor: "pointer",
-              padding: 0,
-              display: "flex",
-              alignItems: "center",
-            }}
-            aria-label="Remove overlay"
-          >
-            <Minus size={12} />
-          </button>
-        )}
+        <p
+          style={{
+            flex: 1,
+            fontSize: "0.5625rem",
+            letterSpacing: "0.05em",
+            color: "rgba(255,255,255,0.2)",
+            textAlign: "right",
+          }}
+        >
+          drag on preview to reposition
+        </p>
       </div>
-
-      {/* Position hint */}
-      <p
-        className="fr-caption"
-        style={{ fontSize: "0.5625rem", letterSpacing: "0.06em", color: "var(--fr-muted)" }}
-      >
-        drag to reposition on canvas
-      </p>
     </div>
   );
 }
