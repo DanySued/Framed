@@ -43,6 +43,7 @@ export default async function StudioLayout({ children }: { children: React.React
 
       {/* Content */}
       <main className="flex-1">{children}</main>
+      </div>
     </div>
   );
 }
