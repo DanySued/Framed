@@ -48,6 +48,46 @@ export default function TextPanel() {
         </button>
       </div>
 
+      {/* Vibe presets */}
+      <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+        <span
+          className="fr-overline"
+          style={{
+            fontSize: "0.6375rem",
+            color: "var(--fr-muted)",
+            letterSpacing: "0.08em",
+            textTransform: "uppercase",
+          }}
+        >
+          Vibe
+        </span>
+        <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
+          {VIBE_PRESETS.map((preset) => {
+            const active = (vibePreset ?? "none") === preset.filter;
+            return (
+              <button
+                key={preset.name}
+                onClick={() => setVibePreset(preset.filter === "none" ? null : preset.filter)}
+                style={{
+                  background: active ? "rgba(82,214,196,0.12)" : "var(--fr-surface)",
+                  border: `1px solid ${active ? "var(--fr-gold)" : "var(--fr-line-2)"}`,
+                  color: active ? "var(--fr-gold)" : "var(--fr-muted)",
+                  fontFamily: "var(--font-mono), monospace",
+                  fontSize: "0.625rem",
+                  letterSpacing: "0.06em",
+                  padding: "4px 10px",
+                  borderRadius: "20px",
+                  cursor: "pointer",
+                  transition: "all 150ms ease",
+                }}
+              >
+                {preset.name}
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
       <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
         {overlays.map((overlay, i) => (
           <OverlayEditor
