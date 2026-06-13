@@ -49,7 +49,7 @@ export default function PreviewFrame() {
     prevPhase.current = phase;
   }, [phase]);
 
-  const isEmpty = thumbnails.length === 0;
+  const isEmpty = videoUrls.length === 0 && thumbnails.length === 0;
 
   // Find the final reel_id from done jobs
   const doneJob = jobs.find((j) => j.status?.status === "done" && j.status.reel_id);
