@@ -508,6 +508,7 @@ export default function ScenesPanel() {
                         fontSize: "0.625rem",
                         letterSpacing: "0.04em",
                         padding: "3px 9px",
+                        borderRadius: "6px",
                         cursor: "pointer",
                         transition: "all 120ms ease",
                       }}
