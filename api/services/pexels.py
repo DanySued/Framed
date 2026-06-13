@@ -29,7 +29,7 @@ async def search_videos(keywords: List[str], per_page: int = 10, page: int = 1) 
                 response = await client.get(
                     base_url,
                     headers=headers,
-                    params={"query": keyword, "per_page": per_page, "orientation": "portrait"},
+                    params={"query": keyword, "per_page": per_page, "page": page, "orientation": "portrait"},
                 )
                 if response.status_code == 401:
                     raise ValueError("Pexels API key is invalid")
