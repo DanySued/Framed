@@ -479,6 +479,7 @@ export default function ScenesPanel() {
                   padding: "10px 12px",
                   background: "var(--fr-surface-2)",
                   border: "1px solid var(--fr-line)",
+                  borderRadius: "10px",
                 }}
               >
                 {/* Format filter */}
