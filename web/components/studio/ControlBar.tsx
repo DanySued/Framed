@@ -56,15 +56,15 @@ export default function ControlBar() {
       style={{
         background: "var(--fr-black)",
         padding: "0 16px",
-        height: 60,
+        minHeight: 60,
         display: "flex",
         alignItems: "center",
-        gap: 16,
+        flexWrap: "wrap",
+        gap: 12,
         flexShrink: 0,
-        overflowX: "auto",
-        scrollbarWidth: "none",
       }}
     >
+      <div className="flex items-center gap-4 flex-1 flex-wrap">
       {/* Duration slider */}
       <div style={{ display: "flex", alignItems: "center", gap: 10, flex: "0 0 auto" }}>
         <label
