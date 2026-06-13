@@ -447,6 +447,7 @@ export default function ScenesPanel() {
               letterSpacing: "0.04em",
               padding: "4px 10px",
               cursor: "pointer",
+              borderRadius: "20px",
               transition: "all 150ms ease",
               display: "flex",
               alignItems: "center",
