@@ -43,6 +43,149 @@ function matchesDuration(r: SearchResult, f: DurationFilter): boolean {
   return true;
 }
 
+interface ClipCardProps {
+  r: SearchResult;
+  picked: boolean;
+  clip: PickedClip;
+  pickIndex: number;
+  toggleClip: (clip: PickedClip) => void;
+}
+
+function ClipCard({ r, picked, clip, pickIndex, toggleClip }: ClipCardProps) {
+  const [hovered, setHovered] = useState(false);
+  const [videoReady, setVideoReady] = useState(false);
+  const videoRef = useRef<HTMLVideoElement>(null);
+
+  const handleMouseEnter = useCallback(() => {
+    setHovered(true);
+    setVideoReady(false);
+  }, []);
+
+  const handleMouseLeave = useCallback(() => {
+    setHovered(false);
+    setVideoReady(false);
+    if (videoRef.current) {
+      videoRef.current.pause();
+      videoRef.current.currentTime = 0;
+    }
+  }, []);
+
+  return (
+    <motion.button
+      onClick={() => toggleClip(clip)}
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
+      layout
+      initial={{ opacity: 0, scale: 0.97 }}
+      animate={{ opacity: 1, scale: 1 }}
+      transition={{ duration: 0.18 }}
+      style={{
+        aspectRatio: "9 / 16",
+        border: `1px solid ${picked ? "var(--fr-gold)" : "var(--fr-line)"}`,
+        boxShadow: picked ? "0 0 0 1px var(--fr-gold)" : "none",
+        overflow: "hidden",
+        background: "var(--fr-surface)",
+        cursor: "pointer",
+        padding: 0,
+        transition: "border-color 150ms ease, box-shadow 150ms ease",
+        position: "relative",
+      }}
+      aria-pressed={picked}
+      aria-label={picked ? "Deselect clip" : "Select clip"}
+    >
+      {/* thumbnail */}
+      {r.image && (
+        <img
+          src={r.image}
+          alt=""
+          className="absolute inset-0 w-full h-full object-cover"
+          style={{
+            opacity: hovered && videoReady ? 0 : picked ? 0.95 : 0.7,
+            transition: "opacity 200ms ease",
+          }}
+        />
+      )}
+
+      {/* hover video */}
+      {hovered && r.url && (
+        <video
+          ref={videoRef}
+          src={r.url}
+          autoPlay
+          muted
+          loop
+          playsInline
+          className="absolute inset-0 w-full h-full object-cover"
+          style={{ opacity: videoReady ? 1 : 0, transition: "opacity 200ms ease" }}
+          onCanPlay={() => setVideoReady(true)}
+          onWaiting={() => setVideoReady(false)}
+        />
+      )}
+
+      {/* loading spinner while video buffers */}
+      {hovered && !videoReady && (
+        <div
+          style={{
+            position: "absolute",
+            inset: 0,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            pointerEvents: "none",
+          }}
+        >
+          <div
+            style={{
+              width: 22,
+              height: 22,
+              border: "2px solid rgba(82,214,196,0.25)",
+              borderTopColor: "var(--fr-gold)",
+              borderRadius: "50%",
+              animation: "spin 0.7s linear infinite",
+            }}
+          />
+        </div>
+      )}
+
+      {/* duration badge */}
+      {r.duration != null && (
+        <span
+          style={{
+            position: "absolute",
+            bottom: 4,
+            right: 5,
+            fontFamily: "monospace",
+            fontSize: "0.5625rem",
+            color: "var(--fr-ivory)",
+            background: "rgba(6,9,11,0.7)",
+            padding: "1px 4px",
+          }}
+        >
+          {r.duration}s
+        </span>
+      )}
+
+      {/* pick order */}
+      {picked && (
+        <span
+          style={{
+            position: "absolute",
+            top: 4,
+            left: 5,
+            fontFamily: "monospace",
+            fontSize: "0.625rem",
+            color: "#04110e",
+            background: "var(--fr-gold)",
+            padding: "1px 5px",
+          }}
+        >
+          {String(pickIndex + 1).padStart(2, "0")}
+        </span>
+      )}
+    </motion.button>
+  );
+}
+
 export default function ScenesPanel() {
   const {
     keywords,
@@ -59,9 +202,14 @@ export default function ScenesPanel() {
   const [activeKeyword, setActiveKeyword] = useState<string | null>(null);
   const [results, setResults] = useState<SearchResult[]>([]);
   const [searching, setSearching] = useState(false);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [page, setPage] = useState(1);
+  const [hasMore, setHasMore] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
   const [orientationFilter, setOrientationFilter] = useState<OrientationFilter>("all");
   const [durationFilter, setDurationFilter] = useState<DurationFilter>("all");
+
+  const PER_PAGE = 18;
 
   const filteredResults = useMemo(() => {
     return results.filter(
@@ -71,31 +219,50 @@ export default function ScenesPanel() {
     );
   }, [results, orientationFilter, durationFilter]);
 
+  const fetchPage = useCallback(
+    async (kw: string, pg: number, append: boolean) => {
+      try {
+        const res = await fetch(
+          `/api/reels/pexels/search?keywords=${encodeURIComponent(kw)}&per_page=${PER_PAGE}&page=${pg}`
+        );
+        if (!res.ok) throw new Error();
+        const data: { videos: SearchResult[] } = await res.json();
+        const videos = data.videos ?? [];
+        if (append) {
+          setResults((prev) => [...prev, ...videos]);
+        } else {
+          setResults(videos);
+          if (videos[0]) setKeywordThumbnail(kw, videos[0].image, videos[0].id);
+          if (!videos.length) toast.error(`No clips found for "${kw}"`);
+        }
+        setPage(pg);
+        setHasMore(videos.length === PER_PAGE);
+      } catch {
+        toast.error("Clip search failed — try again");
+      }
+    },
+    [setKeywordThumbnail]
+  );
+
   const search = useCallback(
     async (kw: string) => {
       setSearching(true);
       setActiveKeyword(kw);
       setResults([]);
-      try {
-        const res = await fetch(
-          `/api/reels/pexels/search?keywords=${encodeURIComponent(kw)}&per_page=18`
-        );
-        if (!res.ok) throw new Error();
-        const data: { videos: SearchResult[] } = await res.json();
-        const videos = data.videos ?? [];
-        setResults(videos);
-        if (videos[0]) {
-          setKeywordThumbnail(kw, videos[0].image, videos[0].id);
-        }
-        if (!videos.length) toast.error(`No clips found for "${kw}"`);
-      } catch {
-        toast.error("Clip search failed — try again");
-      } finally {
-        setSearching(false);
-      }
+      setPage(1);
+      setHasMore(false);
+      await fetchPage(kw, 1, false);
+      setSearching(false);
     },
-    [setKeywordThumbnail]
+    [fetchPage]
   );
+
+  const loadMore = useCallback(async () => {
+    if (!activeKeyword || loadingMore) return;
+    setLoadingMore(true);
+    await fetchPage(activeKeyword, page + 1, true);
+    setLoadingMore(false);
+  }, [activeKeyword, page, loadingMore, fetchPage]);
 
   const handleTagClick = useCallback(
     (query: string, label: string) => {
