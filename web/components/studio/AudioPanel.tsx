@@ -161,7 +161,6 @@ export default function AudioPanel() {
       {/* Header */}
       <div
         className="px-5 py-4 shrink-0"
-        style={{ borderBottom: "1px solid var(--fr-line)" }}
       >
         <h2
           style={{
