@@ -93,6 +93,7 @@ function ClipCard({ r, picked, clip, pickIndex, toggleClip }: ClipCardProps) {
         background: "var(--fr-surface)",
         cursor: "pointer",
         padding: 0,
+        borderRadius: "10px",
         transition: "border-color 150ms ease, box-shadow 150ms ease",
         position: "relative",
       }}
