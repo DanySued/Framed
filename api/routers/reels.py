@@ -61,7 +61,7 @@ async def generate_reel(request: ReelGenerateRequest):
 
 
 @router.get("/pexels/search")
-async def pexels_search(keywords: str, per_page: int = 20):
+async def pexels_search(keywords: str, per_page: int = 20, page: int = 1):
     """
     Search Pexels for portrait stock videos matching the given keywords.
 
@@ -73,7 +73,7 @@ async def pexels_search(keywords: str, per_page: int = 20):
         raise HTTPException(status_code=400, detail="At least one keyword required")
 
     try:
-        videos = await search_videos(kw_list, per_page=per_page)
+        videos = await search_videos(kw_list, per_page=per_page, page=page)
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
     except Exception as e:
