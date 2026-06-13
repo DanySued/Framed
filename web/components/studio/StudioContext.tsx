@@ -414,6 +414,7 @@ export function StudioProvider({ children }: { children: React.ReactNode }) {
     jobs,
     approvalJobIndex,
     previewOverride,
+    vibePreset,
 
     setAudio,
     clearAudio,
