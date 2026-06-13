@@ -433,6 +433,7 @@ export function StudioProvider({ children }: { children: React.ReactNode }) {
     removeOverlay,
     setPhase,
     setPreviewOverride,
+    setVibePreset,
     onGenerate,
     onApproveClips,
     onReset,
