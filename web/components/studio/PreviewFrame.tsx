@@ -65,6 +65,8 @@ export default function PreviewFrame() {
       style={{
         width: "min(calc(70vh * 9/16), 100%)",
         aspectRatio: "9 / 16",
+        borderRadius: "16px",
+        overflow: "hidden",
       }}
     >
       {/* Gold pulse border on done */}
@@ -77,18 +79,10 @@ export default function PreviewFrame() {
             pointerEvents: "none",
             boxShadow: "0 0 0 1px var(--fr-gold), 0 0 16px 2px var(--fr-gold)",
             animation: "goldPulse 600ms ease-out forwards",
+            borderRadius: "16px",
           }}
         />
       )}
-
-      {/* Hairline border frame */}
-      <div
-        className="absolute inset-0"
-        style={{ border: "1px solid var(--fr-line)", zIndex: 10, pointerEvents: "none" }}
-      />
-
-      {/* Cinema slate corner marks */}
-      <CornerMarks />
 
       {/* Background / slideshow */}
       <div className="absolute inset-0 overflow-hidden bg-[var(--fr-surface)]">
