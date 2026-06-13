@@ -218,7 +218,8 @@ export default function AudioPanel() {
                   style={{
                     border: `1px solid ${selected ? "var(--fr-gold)" : "var(--fr-line)"}`,
                     background: selected ? "rgba(82,214,196,0.05)" : "var(--fr-surface)",
-                    transition: "border-color 150ms ease, background 150ms ease",
+                    boxShadow: selected ? "0 0 0 1px var(--fr-gold)" : "none",
+                    transition: "border-color 150ms ease, background 150ms ease, box-shadow 150ms ease",
                     overflow: "hidden",
                   }}
                 >
