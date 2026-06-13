@@ -19,19 +19,14 @@ function StudioLayout() {
     <div className="flex flex-col" style={{ minHeight: "calc(100vh - 44px)" }}>
       <h1 className="sr-only">Studio</h1>
 
-      {/* ── Clip browser — always visible ───────────────────────── */}
+      {/* ── Clip browser ────────────────────────────────────────── */}
       <StudioPhaseGate phases={["compose"]}>
-        <div
-          style={{
-            borderBottom: "1px solid var(--fr-line)",
-            background: "var(--fr-black)",
-          }}
-        >
+        <div style={{ background: "var(--fr-black)" }}>
           <ScenesPanel />
         </div>
       </StudioPhaseGate>
 
-      {/* ── Compositor — slides in once clips are chosen ─────────── */}
+      {/* ── Compositor ──────────────────────────────────────────── */}
       <AnimatePresence>
         {showCompositor && (
           <motion.div
@@ -41,10 +36,9 @@ function StudioLayout() {
             exit={{ opacity: 0, y: 16 }}
             transition={{ duration: 0.32, ease: [0.22, 1, 0.36, 1] }}
             className="flex-1 min-h-0 grid lg:grid-cols-[minmax(260px,320px)_1fr_minmax(260px,320px)]"
-            style={{ borderBottom: "1px solid var(--fr-line)" }}
           >
             {/* Left: TextPanel in compose; ClipRail in approval */}
-            <div className="lg:overflow-y-auto flex flex-col" style={{ borderRight: "1px solid var(--fr-line)" }}>
+            <div className="lg:overflow-y-auto flex flex-col">
               <StudioPhaseGate phases={["approval"]}>
                 <ClipRail />
               </StudioPhaseGate>
@@ -53,11 +47,8 @@ function StudioLayout() {
               </StudioPhaseGate>
             </div>
 
-            {/* Center: preview only */}
-            <div
-              className="flex flex-col lg:overflow-hidden"
-              style={{ borderRight: "1px solid var(--fr-line)" }}
-            >
+            {/* Center: preview */}
+            <div className="flex flex-col lg:overflow-hidden">
               <div
                 className="flex items-center justify-center flex-1 lg:overflow-hidden"
                 style={{ padding: "24px 20px 48px" }}
@@ -66,7 +57,7 @@ function StudioLayout() {
               </div>
             </div>
 
-            {/* Right: audio in compose */}
+            {/* Right: audio */}
             <div className="lg:overflow-hidden flex flex-col">
               <StudioPhaseGate phases={["compose"]}>
                 <AudioPanel />
