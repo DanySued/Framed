@@ -711,6 +711,7 @@ export default function ScenesPanel() {
                   backgroundSize: "200% 100%",
                   animation: "shimmer 1.4s infinite",
                   border: "1px solid var(--fr-line)",
+                  borderRadius: "10px",
                 }}
               />
             ))}
