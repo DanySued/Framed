@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { X, Upload, Plus } from "lucide-react";
+import { X, Upload, Music } from "lucide-react";
 import { toast } from "sonner";
 import { useStudio } from "./StudioContext";
 import Waveform from "./Waveform";
@@ -10,6 +10,21 @@ interface AudioFile {
   id: string;
   filename: string;
   duration: number;
+}
+
+function cleanFilename(name: string): string {
+  return name
+    .replace(/\.[^/.]+$/, "")       // remove extension
+    .replace(/[-_]+/g, " ")          // dashes/underscores → spaces
+    .replace(/\s+\d{4,}\s*$/, "")   // strip trailing numeric IDs
+    .trim();
+}
+
+function formatDuration(s: number): string {
+  if (!s) return "";
+  const m = Math.floor(s / 60);
+  const sec = s % 60;
+  return `${m}:${String(sec).padStart(2, "0")}`;
 }
 
 export default function AudioPanel() {
@@ -45,8 +60,6 @@ export default function AudioPanel() {
         return;
       }
       setUploading(true);
-
-      // Optimistic placeholder
       const tempId = `temp-${Date.now()}`;
       const tempTrack: AudioFile = { id: tempId, filename: file.name, duration: 0 };
       setTracks((prev) => [tempTrack, ...prev]);
@@ -95,21 +108,60 @@ export default function AudioPanel() {
     [uploadFile]
   );
 
-  const formatDuration = (s: number) => {
-    if (!s) return "";
-    const m = Math.floor(s / 60);
-    const sec = s % 60;
-    return `${m}:${String(sec).padStart(2, "0")}`;
-  };
+  const triggerUpload = () => fileInputRef.current?.click();
+
+  const UploadButton = (
+    <button
+      onClick={triggerUpload}
+      onDragOver={(e) => { e.preventDefault(); setDraggingOver(true); }}
+      onDragLeave={() => setDraggingOver(false)}
+      onDrop={handleDrop}
+      disabled={uploading}
+      style={{
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        gap: 8,
+        width: "100%",
+        padding: "11px 16px",
+        background: draggingOver ? "rgba(82,214,196,0.1)" : "transparent",
+        border: `1px solid ${draggingOver ? "var(--fr-gold)" : "var(--fr-line-2)"}`,
+        color: uploading ? "var(--fr-gold)" : "var(--fr-muted)",
+        cursor: uploading ? "default" : "pointer",
+        fontFamily: "var(--font-sans)",
+        fontSize: "0.6875rem",
+        fontWeight: 600,
+        letterSpacing: "0.1em",
+        textTransform: "uppercase",
+        transition: "all 150ms ease",
+      }}
+      onMouseEnter={(e) => {
+        if (!uploading) {
+          e.currentTarget.style.borderColor = "rgba(82,214,196,0.5)";
+          e.currentTarget.style.color = "var(--fr-ivory)";
+        }
+      }}
+      onMouseLeave={(e) => {
+        if (!uploading) {
+          e.currentTarget.style.borderColor = draggingOver ? "var(--fr-gold)" : "var(--fr-line-2)";
+          e.currentTarget.style.color = "var(--fr-muted)";
+        }
+      }}
+      aria-label="Upload audio track"
+    >
+      <Upload size={13} style={{ flexShrink: 0 }} />
+      {uploading ? "Uploading…" : "Upload track"}
+    </button>
+  );
 
   return (
     <aside
-      className="flex flex-col min-h-[280px] lg:h-full overflow-hidden"
-      style={{ borderLeft: "1px solid var(--fr-line)", borderBottom: "1px solid var(--fr-line)" }}
+      className="flex flex-col lg:h-full overflow-hidden"
+      style={{ borderBottom: "1px solid var(--fr-line)" }}
     >
       {/* Header */}
       <div
-        className="px-5 py-4 shrink-0 flex items-center justify-between"
+        className="px-5 py-4 shrink-0"
         style={{ borderBottom: "1px solid var(--fr-line)" }}
       >
         <h2
@@ -127,26 +179,14 @@ export default function AudioPanel() {
           <span style={{ fontFamily: "var(--font-mono), monospace", fontSize: "0.6875rem", color: "var(--fr-gold)" }}>02</span>
           Audio
         </h2>
-        <button
-          onClick={() => fileInputRef.current?.click()}
-          style={{
-            background: "none",
-            border: "none",
-            cursor: "pointer",
-            color: "var(--fr-muted)",
-            display: "flex",
-            alignItems: "center",
-            gap: 3,
-            padding: 0,
-          }}
-          aria-label="Upload audio track"
-        >
-          <Plus size={12} />
-          <span className="fr-caption" style={{ fontSize: "0.625rem", letterSpacing: "0.08em" }}>
-            add
-          </span>
-        </button>
       </div>
+
+      {/* Upload button — at top when no tracks */}
+      {!loading && tracks.length === 0 && (
+        <div style={{ padding: "16px 20px 0" }}>
+          {UploadButton}
+        </div>
+      )}
 
       {/* Track list */}
       <div className="flex-1 overflow-y-auto min-h-0">
@@ -155,84 +195,151 @@ export default function AudioPanel() {
             <span className="fr-caption">Loading…</span>
           </div>
         ) : tracks.length === 0 ? (
-          <div className="flex items-center justify-center h-20 px-5">
-            <span className="fr-caption" style={{ textAlign: "center" }}>
-              No audio files yet
-            </span>
+          <div style={{ padding: "20px", textAlign: "center" }}>
+            <p
+              style={{
+                fontSize: "0.75rem",
+                color: "var(--fr-muted)",
+                fontStyle: "italic",
+                fontFamily: "var(--font-display), Georgia, serif",
+                lineHeight: 1.6,
+              }}
+            >
+              drop an audio file or upload a track
+            </p>
           </div>
         ) : (
-          <ul>
+          <ul style={{ padding: "16px 20px", display: "flex", flexDirection: "column", gap: 12 }}>
             {tracks.map((track) => {
               const selected = track.id === audioFileId;
+              const cleanName = cleanFilename(track.filename);
               return (
                 <li
                   key={track.id}
                   className="group"
                   style={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: 8,
-                    padding: "10px 20px",
-                    borderLeft: selected
-                      ? "2px solid var(--fr-gold)"
-                      : "2px solid transparent",
-                    background: selected
-                      ? "rgba(82,214,196,0.06)"
-                      : "transparent",
-                    borderBottom: "1px solid var(--fr-line)",
+                    border: `1px solid ${selected ? "var(--fr-gold)" : "var(--fr-line)"}`,
+                    background: selected ? "rgba(82,214,196,0.05)" : "var(--fr-surface)",
+                    transition: "border-color 150ms ease, background 150ms ease",
+                    overflow: "hidden",
                   }}
                 >
+                  {/* Track main row */}
                   <button
                     onClick={() => {
                       if (selected) clearAudio();
                       else setAudio(track.id, track.filename);
                     }}
                     data-no-lift
-                    className="flex-1 flex items-center gap-2 min-w-0 text-left"
                     style={{
+                      display: "flex",
+                      alignItems: "flex-start",
+                      gap: 12,
+                      padding: "14px 16px",
+                      width: "100%",
                       background: "none",
                       border: "none",
-                      padding: 0,
                       cursor: "pointer",
+                      textAlign: "left",
                     }}
                     aria-pressed={selected}
                   >
-                    <span
-                      className="flex-1 truncate"
+                    {/* Icon */}
+                    <div
                       style={{
-                        fontSize: "0.8125rem",
-                        color: selected ? "var(--fr-ivory)" : "var(--fr-muted)",
-                        transition: "color 150ms ease",
-                        fontFamily: "var(--font-sans)",
+                        width: 36,
+                        height: 36,
+                        background: selected ? "rgba(82,214,196,0.12)" : "rgba(255,255,255,0.04)",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        flexShrink: 0,
+                        transition: "background 150ms ease",
                       }}
                     >
-                      {track.filename}
-                    </span>
-                    {track.duration > 0 && (
-                      <span
-                        className="fr-caption shrink-0"
-                        style={{ fontSize: "0.6875rem" }}
+                      <Music
+                        size={16}
+                        style={{ color: selected ? "var(--fr-gold)" : "var(--fr-muted)" }}
+                      />
+                    </div>
+
+                    {/* Info */}
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <p
+                        style={{
+                          fontSize: "0.9375rem",
+                          fontWeight: 500,
+                          color: selected ? "var(--fr-ivory)" : "var(--fr-muted)",
+                          fontFamily: "var(--font-sans)",
+                          lineHeight: 1.3,
+                          marginBottom: 4,
+                          overflow: "hidden",
+                          textOverflow: "ellipsis",
+                          whiteSpace: "nowrap",
+                          transition: "color 150ms ease",
+                          textTransform: "capitalize",
+                        }}
                       >
-                        {formatDuration(track.duration)}
-                      </span>
-                    )}
+                        {cleanName || track.filename}
+                      </p>
+                      <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                        {track.duration > 0 && (
+                          <span
+                            style={{
+                              fontFamily: "var(--font-mono), monospace",
+                              fontSize: "0.6875rem",
+                              color: selected ? "rgba(82,214,196,0.7)" : "rgba(255,255,255,0.25)",
+                              letterSpacing: "0.04em",
+                            }}
+                          >
+                            {formatDuration(track.duration)}
+                          </span>
+                        )}
+                        <span
+                          style={{
+                            fontSize: "0.5625rem",
+                            letterSpacing: "0.08em",
+                            textTransform: "uppercase",
+                            color: selected ? "var(--fr-gold)" : "rgba(255,255,255,0.18)",
+                            fontFamily: "var(--font-mono), monospace",
+                          }}
+                        >
+                          {selected ? "selected" : track.id.startsWith("temp-") ? "uploading…" : "mp3"}
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Delete */}
+                    <button
+                      onClick={(e) => handleDelete(track.id, e)}
+                      data-no-lift
+                      className="opacity-0 group-hover:opacity-100 focus-visible:opacity-100 transition-opacity"
+                      style={{
+                        color: "var(--fr-muted)",
+                        background: "none",
+                        border: "none",
+                        cursor: "pointer",
+                        padding: 4,
+                        flexShrink: 0,
+                        lineHeight: 1,
+                      }}
+                      aria-label={`Delete ${track.filename}`}
+                    >
+                      <X size={13} />
+                    </button>
                   </button>
-                  <button
-                    onClick={(e) => handleDelete(track.id, e)}
-                    data-no-lift
-                    className="opacity-0 group-hover:opacity-100 focus-visible:opacity-100 transition-opacity shrink-0"
-                    style={{
-                      color: "var(--fr-muted)",
-                      lineHeight: 1,
-                      background: "none",
-                      border: "none",
-                      cursor: "pointer",
-                      padding: 2,
-                    }}
-                    aria-label={`Delete ${track.filename}`}
-                  >
-                    <X size={12} />
-                  </button>
+
+                  {/* Waveform — inline, only for selected track */}
+                  {selected && (
+                    <div
+                      style={{
+                        borderTop: "1px solid rgba(82,214,196,0.12)",
+                        padding: "0 16px 14px",
+                      }}
+                    >
+                      <Waveform audioId={track.id} />
+                    </div>
+                  )}
                 </li>
               );
             })}
@@ -240,61 +347,24 @@ export default function AudioPanel() {
         )}
       </div>
 
-      {/* Waveform for selected track */}
-      {audioFileId && (
-        <div style={{ borderTop: "1px solid var(--fr-line)" }}>
-          <Waveform audioId={audioFileId} />
+      {/* Upload button — below track list when tracks exist */}
+      {!loading && tracks.length > 0 && (
+        <div style={{ padding: "0 20px 20px", marginTop: 4 }}>
+          {UploadButton}
         </div>
       )}
 
-      {/* Upload zone */}
-      <div
-        onDragOver={(e) => { e.preventDefault(); setDraggingOver(true); }}
-        onDragLeave={() => setDraggingOver(false)}
-        onDrop={handleDrop}
-        onClick={() => fileInputRef.current?.click()}
-        role="button"
-        tabIndex={0}
-        onKeyDown={(e) => {
-          if (e.key === "Enter" || e.key === " ") {
-            e.preventDefault();
-            fileInputRef.current?.click();
-          }
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept="audio/*"
+        className="sr-only"
+        onChange={(e) => {
+          const f = e.target.files?.[0];
+          if (f) uploadFile(f);
+          e.target.value = "";
         }}
-        className="shrink-0 transition-colors cursor-pointer"
-        style={{
-          borderTop: "1px solid var(--fr-line)",
-          padding: "14px 20px",
-          display: "flex",
-          alignItems: "center",
-          gap: 8,
-          background: draggingOver
-            ? "rgba(82,214,196,0.08)"
-            : "transparent",
-        }}
-      >
-        <Upload
-          size={13}
-          style={{ color: uploading ? "var(--fr-gold)" : "var(--fr-muted)", flexShrink: 0 }}
-        />
-        <span
-          className="fr-overline"
-          style={{ fontSize: "0.6875rem", letterSpacing: "0.1em" }}
-        >
-          {uploading ? "Uploading…" : "Upload track"}
-        </span>
-        <input
-          ref={fileInputRef}
-          type="file"
-          accept="audio/*"
-          className="sr-only"
-          onChange={(e) => {
-            const f = e.target.files?.[0];
-            if (f) uploadFile(f);
-            e.target.value = "";
-          }}
-        />
-      </div>
+      />
     </aside>
   );
 }
