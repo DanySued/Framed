@@ -54,7 +54,6 @@ export default function ControlBar() {
   return (
     <footer
       style={{
-        borderTop: "1px solid var(--fr-line)",
         background: "var(--fr-black)",
         padding: "0 16px",
         height: 60,
