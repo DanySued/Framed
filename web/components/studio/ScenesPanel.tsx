@@ -306,7 +306,7 @@ export default function ScenesPanel() {
       {/* ── Hero search bar ─────────────────────────────────────── */}
       <div
         style={{
-          padding: "16px 24px 14px",
+          padding: "28px 24px 20px",
         }}
       >
       <div style={{ maxWidth: 720, margin: "0 auto" }}>
