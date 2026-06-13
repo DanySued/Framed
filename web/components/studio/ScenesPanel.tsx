@@ -306,7 +306,6 @@ export default function ScenesPanel() {
       {/* ── Hero search bar ─────────────────────────────────────── */}
       <div
         style={{
-          borderBottom: "1px solid var(--fr-line)",
           padding: "16px 24px 14px",
         }}
       >
