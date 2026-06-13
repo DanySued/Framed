@@ -555,6 +555,7 @@ export default function ScenesPanel() {
           </div>
         )}
       </div>
+      </div>
 
       {/* ── Selected clips strip ────────────────────────────────── */}
       <AnimatePresence>
