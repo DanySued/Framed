@@ -699,13 +699,14 @@ export default function ScenesPanel() {
               gap: 8,
             }}
           >
-            {Array.from({ length: 12 }).map((_, i) => (
+            {Array.from({ length: 18 }).map((_, i) => (
               <div
                 key={i}
                 style={{
                   aspectRatio: "9 / 16",
-                  background:
-                    "linear-gradient(90deg, var(--fr-surface) 25%, rgba(255,255,255,0.06) 50%, var(--fr-surface) 75%)",
+                  background: "var(--fr-surface-2)",
+                  backgroundImage:
+                    "linear-gradient(90deg, var(--fr-surface-2) 25%, rgba(255,255,255,0.05) 50%, var(--fr-surface-2) 75%)",
                   backgroundSize: "200% 100%",
                   animation: "shimmer 1.4s infinite",
                   border: "1px solid var(--fr-line)",
