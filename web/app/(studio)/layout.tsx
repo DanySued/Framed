@@ -30,15 +30,7 @@ export default async function StudioLayout({ children }: { children: React.React
           </span>
         </Link>
 
-        <nav className="flex items-center gap-6">
-          <Link
-            href="/films"
-            className="text-[0.8125rem] font-medium"
-            style={{ color: "var(--fr-muted)" }}
-          >
-            Films
-          </Link>
-        </nav>
+        <NavLinks />
       </header>
 
       {/* Content */}
