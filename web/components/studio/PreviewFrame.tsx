@@ -10,10 +10,13 @@ const KEN_BURNS_DURATION = 7000; // ms per slide
 
 export default function PreviewFrame() {
   const { keywords, selectedClips, overlays, phase, jobs, previewOverride, subtitlesEnabled, onReset } = useStudio();
+  const videoUrls =
+    selectedClips.map((c) => c.url).filter((u): u is string => Boolean(u));
   const thumbnails =
-    selectedClips.length > 0
-      ? selectedClips.map((c) => c.image).filter((t): t is string => Boolean(t))
-      : keywords.map((k) => k.thumbnail).filter((t): t is string => Boolean(t));
+    selectedClips.length === 0
+      ? keywords.map((k) => k.thumbnail).filter((t): t is string => Boolean(t))
+      : selectedClips.map((c) => c.image).filter((t): t is string => Boolean(t));
+  const showVideoSlideshow = videoUrls.length > 0;
 
   const [activeIndex, setActiveIndex] = useState(0);
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
