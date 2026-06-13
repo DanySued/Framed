@@ -7,6 +7,7 @@ export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
   const keywords = searchParams.get('keywords');
   const perPage = searchParams.get('per_page') ?? '20';
+  const page = searchParams.get('page') ?? '1';
 
   if (!keywords) {
     return NextResponse.json({ error: 'keywords required' }, { status: 400 });
