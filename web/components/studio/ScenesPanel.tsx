@@ -394,7 +394,7 @@ export default function ScenesPanel() {
             display: "flex",
             flexWrap: "wrap",
             gap: 6,
-            marginTop: 20,
+            marginTop: 26,
           }}
         >
           {TAG_CHIPS.map((label) => {
