@@ -230,6 +230,7 @@ export default function AudioPanel() {
                       else setAudio(track.id, track.filename);
                     }}
                     data-no-lift
+                    title="Click to select track"
                     style={{
                       display: "flex",
                       alignItems: "flex-start",
