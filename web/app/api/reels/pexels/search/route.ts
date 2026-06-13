@@ -16,7 +16,7 @@ export async function GET(request: NextRequest) {
   try {
     const apiUrl = process.env.API_URL || 'http://localhost:8000';
     const res = await fetch(
-      `${apiUrl}/reels/pexels/search?keywords=${encodeURIComponent(keywords)}&per_page=${encodeURIComponent(perPage)}`,
+      `${apiUrl}/reels/pexels/search?keywords=${encodeURIComponent(keywords)}&per_page=${encodeURIComponent(perPage)}&page=${encodeURIComponent(page)}`,
       { cache: 'no-store' }
     );
 
