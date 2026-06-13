@@ -690,7 +690,7 @@ export default function ScenesPanel() {
       </AnimatePresence>
 
       {/* ── Results grid ────────────────────────────────────────── */}
-      <div style={{ padding: "16px 24px", flex: 1 }}>
+      <div style={{ padding: "28px 24px", flex: 1 }}>
         {searching ? (
           <div
             style={{
