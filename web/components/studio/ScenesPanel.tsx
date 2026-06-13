@@ -652,7 +652,7 @@ export default function ScenesPanel() {
           <div
             style={{
               display: "grid",
-              gridTemplateColumns: "repeat(auto-fill, minmax(140px, 1fr))",
+              gridTemplateColumns: "repeat(auto-fill, minmax(100px, 1fr))",
               gap: 8,
             }}
           >
@@ -719,7 +719,7 @@ export default function ScenesPanel() {
           <div
             style={{
               display: "grid",
-              gridTemplateColumns: "repeat(auto-fill, minmax(140px, 1fr))",
+              gridTemplateColumns: "repeat(auto-fill, minmax(100px, 1fr))",
               gap: 8,
             }}
           >
