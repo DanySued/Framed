@@ -85,7 +85,10 @@ export default function PreviewFrame() {
       )}
 
       {/* Background / slideshow */}
-      <div className="absolute inset-0 overflow-hidden bg-[var(--fr-surface)]">
+      <div
+        className="absolute inset-0 overflow-hidden bg-[var(--fr-surface)]"
+        style={{ filter: vibePreset && vibePreset !== "none" ? vibePreset : undefined }}
+      >
         {/* Override: clip preview or final film */}
         {(previewOverride || showFinal) ? (
           <video
