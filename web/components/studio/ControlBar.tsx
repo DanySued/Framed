@@ -164,7 +164,7 @@ export default function ControlBar() {
       />
 
       {/* Bulk count stepper */}
-      <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+      <div style={{ display: "flex", alignItems: "center", gap: 8 }} title="Number of unique films to generate">
         <span className="fr-overline" style={{ fontSize: "0.6375rem" }}>
           Films
         </span>
