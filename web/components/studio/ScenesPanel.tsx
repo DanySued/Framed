@@ -11,27 +11,33 @@ interface SearchResult {
   url: string;
   image: string | null;
   duration: number | null;
+  width?: number;
+  height?: number;
 }
 
 const TAG_CHIPS = [
-  { label: "Nature", query: "nature" },
-  { label: "City", query: "city night" },
-  { label: "People", query: "people lifestyle" },
-  { label: "Abstract", query: "abstract motion" },
-  { label: "Aerial", query: "aerial drone" },
-  { label: "Ocean", query: "ocean waves" },
-  { label: "Golden Hour", query: "golden hour sunset" },
-  { label: "Slow Mo", query: "slow motion" },
-  { label: "Rain", query: "rain cinematic" },
-  { label: "Architecture", query: "architecture modern" },
+  "kids playing",
+  "school class",
+  "couple dating",
+  "walk in the park",
+  "city at night",
+  "coffee shop",
+  "beach sunset",
+  "mountain hike",
+  "rainy street",
+  "people laughing",
 ];
 
-type OrientationFilter = "all" | "portrait" | "landscape";
+type FormatFilter = "all" | "9:16" | "3:4" | "1:1" | "16:9";
 type DurationFilter = "all" | "short" | "medium" | "long";
 
-function matchesOrientation(r: SearchResult, f: OrientationFilter): boolean {
-  // We don't have dimension data from the API, so we pass all through for now
-  // (Pexels API can be extended later with orientation param)
+function matchesFormat(r: SearchResult, f: FormatFilter): boolean {
+  if (f === "all" || !r.width || !r.height) return true;
+  const ratio = r.width / r.height;
+  if (f === "9:16") return ratio < 0.65;
+  if (f === "3:4") return ratio >= 0.65 && ratio < 0.85;
+  if (f === "1:1") return ratio >= 0.85 && ratio < 1.2;
+  if (f === "16:9") return ratio >= 1.4;
   return true;
 }
 
@@ -206,18 +212,16 @@ export default function ScenesPanel() {
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
-  const [orientationFilter, setOrientationFilter] = useState<OrientationFilter>("all");
+  const [formatFilter, setFormatFilter] = useState<FormatFilter>("all");
   const [durationFilter, setDurationFilter] = useState<DurationFilter>("all");
 
   const PER_PAGE = 18;
 
   const filteredResults = useMemo(() => {
     return results.filter(
-      (r) =>
-        matchesOrientation(r, orientationFilter) &&
-        matchesDuration(r, durationFilter)
+      (r) => matchesFormat(r, formatFilter) && matchesDuration(r, durationFilter)
     );
-  }, [results, orientationFilter, durationFilter]);
+  }, [results, formatFilter, durationFilter]);
 
   const fetchPage = useCallback(
     async (kw: string, pg: number, append: boolean) => {
@@ -265,11 +269,11 @@ export default function ScenesPanel() {
   }, [activeKeyword, page, loadingMore, fetchPage]);
 
   const handleTagClick = useCallback(
-    (query: string, label: string) => {
-      addKeyword(label.toLowerCase());
-      search(query);
+    (label: string) => {
+      setInput(label);
+      search(label);
     },
-    [addKeyword, search]
+    [search]
   );
 
   const submit = useCallback(() => {
@@ -291,7 +295,7 @@ export default function ScenesPanel() {
   );
 
   const targetClips = Math.max(1, Math.round(duration / 4));
-  const hasActiveFilters = orientationFilter !== "all" || durationFilter !== "all";
+  const hasActiveFilters = formatFilter !== "all" || durationFilter !== "all";
 
   return (
     <section
@@ -383,7 +387,7 @@ export default function ScenesPanel() {
           )}
         </div>
 
-        {/* Tag chips */}
+        {/* Suggestion chips */}
         <div
           style={{
             display: "flex",
@@ -392,12 +396,12 @@ export default function ScenesPanel() {
             marginTop: 12,
           }}
         >
-          {TAG_CHIPS.map((tag) => {
-            const isActive = activeKeyword === tag.query || keywords.some((k) => k.keyword === tag.label.toLowerCase());
+          {TAG_CHIPS.map((label) => {
+            const isActive = activeKeyword === label;
             return (
               <button
-                key={tag.label}
-                onClick={() => handleTagClick(tag.query, tag.label)}
+                key={label}
+                onClick={() => handleTagClick(label)}
                 style={{
                   background: isActive ? "rgba(82,214,196,0.12)" : "var(--fr-surface-2)",
                   border: `1px solid ${isActive ? "var(--fr-gold)" : "var(--fr-line-2)"}`,
@@ -423,7 +427,7 @@ export default function ScenesPanel() {
                   }
                 }}
               >
-                {tag.label}
+                {label}
               </button>
             );
           })}
@@ -473,6 +477,41 @@ export default function ScenesPanel() {
                   border: "1px solid var(--fr-line)",
                 }}
               >
+                {/* Format filter */}
+                <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                  <span
+                    style={{
+                      fontSize: "0.5625rem",
+                      letterSpacing: "0.08em",
+                      textTransform: "uppercase",
+                      color: "var(--fr-muted)",
+                      fontFamily: "var(--font-mono), monospace",
+                      minWidth: 44,
+                    }}
+                  >
+                    Format
+                  </span>
+                  {(["all", "9:16", "3:4", "1:1", "16:9"] as FormatFilter[]).map((opt) => (
+                    <button
+                      key={opt}
+                      onClick={() => setFormatFilter(opt)}
+                      style={{
+                        background: formatFilter === opt ? "var(--fr-gold)" : "transparent",
+                        color: formatFilter === opt ? "#04110e" : "var(--fr-muted)",
+                        border: `1px solid ${formatFilter === opt ? "var(--fr-gold)" : "var(--fr-line)"}`,
+                        fontFamily: "var(--font-mono), monospace",
+                        fontSize: "0.625rem",
+                        letterSpacing: "0.04em",
+                        padding: "3px 9px",
+                        cursor: "pointer",
+                        transition: "all 120ms ease",
+                      }}
+                    >
+                      {opt === "all" ? "All" : opt}
+                    </button>
+                  ))}
+                </div>
+
                 {/* Duration filter */}
                 <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
                   <span
@@ -482,10 +521,10 @@ export default function ScenesPanel() {
                       textTransform: "uppercase",
                       color: "var(--fr-muted)",
                       fontFamily: "var(--font-mono), monospace",
-                      minWidth: 52,
+                      minWidth: 44,
                     }}
                   >
-                    Duration
+                    Length
                   </span>
                   {(["all", "short", "medium", "long"] as DurationFilter[]).map((opt) => (
                     <button
@@ -688,7 +727,7 @@ export default function ScenesPanel() {
               }}
             >
               {keywords.length === 0
-                ? "pick a mood above, or search for a scene"
+                ? "pick a scene above, or type what you're looking for"
                 : "click a keyword chip to browse its clips"}
             </p>
             {keywords.length === 0 && (
@@ -699,7 +738,7 @@ export default function ScenesPanel() {
                   letterSpacing: "0.04em",
                 }}
               >
-                ocean · golden hour · city night · …
+                beach sunset · walk in the park · city at night · …
               </p>
             )}
           </div>
