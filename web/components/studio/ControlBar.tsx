@@ -74,21 +74,44 @@ export default function ControlBar() {
         >
           Duration
         </label>
-        <div style={{ position: "relative", width: 120 }}>
-          <input
-            id="duration-slider"
-            type="range"
-            min={15}
-            max={60}
-            step={5}
-            value={duration}
-            onChange={(e) => setDuration(Number(e.target.value))}
-            style={{
-              width: "100%",
-              accentColor: "var(--fr-gold)",
-              cursor: "pointer",
-            }}
-          />
+        <div style={{ display: "flex", flexDirection: "column", gap: 0 }}>
+          <div style={{ position: "relative", width: 120 }}>
+            <input
+              id="duration-slider"
+              type="range"
+              min={15}
+              max={60}
+              step={5}
+              value={duration}
+              onChange={(e) => setDuration(Number(e.target.value))}
+              style={{
+                width: "100%",
+                accentColor: "var(--fr-gold)",
+                cursor: "pointer",
+              }}
+            />
+          </div>
+          {/* Tick marks under slider */}
+          <div style={{
+            display: "flex",
+            justifyContent: "space-between",
+            marginTop: 2,
+            width: 120,
+            paddingLeft: 1,
+            paddingRight: 1,
+          }}>
+            {[15, 30, 45, 60].map(v => (
+              <span key={v} style={{
+                fontFamily: "monospace",
+                fontSize: "0.4375rem",
+                color: duration === v ? "var(--fr-gold)" : "rgba(255,255,255,0.2)",
+                letterSpacing: 0,
+                transition: "color 150ms ease",
+              }}>
+                {v}
+              </span>
+            ))}
+          </div>
         </div>
         <span
           style={{
