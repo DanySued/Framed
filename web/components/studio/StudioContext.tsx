@@ -122,6 +122,14 @@ type StudioContextValue = StudioState & StudioActions;
 
 const StudioContext = createContext<StudioContextValue | null>(null);
 
+export const VIBE_PRESETS: Array<{ name: string; filter: string; emoji: string }> = [
+  { name: "Natural", filter: "none", emoji: "○" },
+  { name: "Golden", filter: "saturate(1.3) sepia(0.2) contrast(1.08) brightness(1.05)", emoji: "◑" },
+  { name: "Noir", filter: "grayscale(0.85) contrast(1.25) brightness(0.9)", emoji: "●" },
+  { name: "Faded", filter: "saturate(0.7) contrast(0.88) brightness(1.08) sepia(0.08)", emoji: "◔" },
+  { name: "Neon", filter: "saturate(1.7) contrast(1.12) hue-rotate(-15deg)", emoji: "◕" },
+];
+
 const DEFAULT_OVERLAY: TextOverlay = {
   text: "",
   x: 50,
