@@ -344,6 +344,7 @@ export default function ScenesPanel() {
             gap: 10,
             background: "var(--fr-surface-2)",
             border: "1px solid var(--fr-line-2)",
+            borderRadius: "12px",
             padding: "10px 14px",
             transition: "border-color 150ms ease",
           }}
