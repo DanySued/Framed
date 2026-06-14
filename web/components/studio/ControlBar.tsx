@@ -69,16 +69,17 @@ export default function ControlBar() {
     <footer
       style={{
         background: "var(--fr-black)",
-        padding: "0 16px",
-        minHeight: 60,
+        borderTop: "1px solid var(--fr-line)",
+        padding: "0 20px",
+        height: 52,
         display: "flex",
         alignItems: "center",
-        flexWrap: "wrap",
-        gap: 12,
+        gap: 16,
         flexShrink: 0,
+        overflow: "hidden",
       }}
     >
-      <div className="flex items-center gap-4 flex-1 flex-wrap">
+      <div className="flex items-center gap-4 flex-1">
       {/* Duration slider */}
       <div style={{ display: "flex", alignItems: "center", gap: 10, flex: "0 0 auto" }}>
         <label
