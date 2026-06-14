@@ -7,22 +7,13 @@ import { useStudio } from "./StudioContext";
 
 const PX_PER_SEC = 56;
 
-// ── Trim popover ─────────────────────────────────────────────────
-function TrimPopover({ clipId, clipDuration, trimStart, trimEnd, onClose }: {
+// ── Inline trim overlay (renders inside the clip block, no overflow issues) ──
+function InlineTrim({ clipId, clipDuration, trimStart, trimEnd, onClose }: {
   clipId: number; clipDuration: number; trimStart: number; trimEnd: number; onClose: () => void;
 }) {
   const { trimClip } = useStudio();
   const [start, setStart] = useState(trimStart);
   const [end, setEnd] = useState(trimEnd);
-  const ref = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    function onDown(e: MouseEvent) {
-      if (ref.current && !ref.current.contains(e.target as Node)) onClose();
-    }
-    document.addEventListener("mousedown", onDown);
-    return () => document.removeEventListener("mousedown", onDown);
-  }, [onClose]);
 
   function apply() {
     const s = Math.max(0, Math.min(start, clipDuration - 1));
@@ -32,28 +23,33 @@ function TrimPopover({ clipId, clipDuration, trimStart, trimEnd, onClose }: {
   }
 
   return (
-    <div ref={ref} style={{ position: "absolute", bottom: "calc(100% + 6px)", left: "50%", transform: "translateX(-50%)", background: "var(--fr-surface-2)", border: "1px solid var(--fr-line-2)", borderRadius: 8, padding: "10px 12px", zIndex: 60, width: 186, boxShadow: "0 8px 24px rgba(0,0,0,0.6)" }}>
-      <p style={{ fontFamily: "var(--font-mono), monospace", fontSize: "0.5rem", letterSpacing: "0.08em", textTransform: "uppercase", color: "var(--fr-gold)", marginBottom: 8 }}>
-        trim · max {clipDuration}s
-      </p>
-      <div style={{ display: "flex", gap: 8, marginBottom: 10 }}>
-        {(["start", "end"] as const).map((key) => (
-          <label key={key} style={{ flex: 1 }}>
-            <span style={{ display: "block", fontSize: "0.5rem", color: "var(--fr-muted)", marginBottom: 3, fontFamily: "var(--font-mono), monospace", letterSpacing: "0.06em", textTransform: "uppercase" }}>{key}</span>
-            <input
-              type="number"
-              min={key === "start" ? 0 : 1}
-              max={key === "start" ? clipDuration - 1 : clipDuration}
-              step={0.5}
-              value={key === "start" ? start : end}
-              onChange={(e) => key === "start" ? setStart(Number(e.target.value)) : setEnd(Number(e.target.value))}
-              style={{ width: "100%", background: "var(--fr-surface)", border: "1px solid var(--fr-line)", color: "var(--fr-ivory)", fontFamily: "var(--font-mono), monospace", fontSize: "0.75rem", padding: "4px 6px", outline: "none", borderRadius: 4 }}
-            />
-          </label>
-        ))}
-      </div>
-      <button onClick={apply} style={{ width: "100%", background: "var(--fr-gold)", color: "var(--fr-black)", border: "none", borderRadius: 4, padding: "5px 0", fontFamily: "var(--font-mono), monospace", fontSize: "0.5625rem", fontWeight: 700, letterSpacing: "0.06em", textTransform: "uppercase", cursor: "pointer" }}>
-        apply · {Math.max(0, end - start).toFixed(1)}s
+    <div
+      onClick={(e) => e.stopPropagation()}
+      style={{
+        position: "absolute", inset: 0, zIndex: 50,
+        background: "rgba(4,17,14,0.96)",
+        display: "flex", alignItems: "center", gap: 5, padding: "0 8px",
+        borderRadius: 3,
+      }}
+    >
+      <span style={{ fontFamily: "var(--font-mono), monospace", fontSize: "0.45rem", color: "var(--fr-muted)", textTransform: "uppercase", letterSpacing: "0.05em", flexShrink: 0 }}>start</span>
+      <input
+        type="number" min={0} max={clipDuration - 1} step={0.5} value={start}
+        onChange={(e) => setStart(Number(e.target.value))}
+        style={{ width: 36, background: "var(--fr-surface)", border: "1px solid var(--fr-line)", color: "var(--fr-ivory)", fontFamily: "var(--font-mono), monospace", fontSize: "0.6875rem", padding: "2px 4px", borderRadius: 3, outline: "none" }}
+      />
+      <span style={{ color: "var(--fr-line)", fontSize: "0.6rem", flexShrink: 0 }}>→</span>
+      <span style={{ fontFamily: "var(--font-mono), monospace", fontSize: "0.45rem", color: "var(--fr-muted)", textTransform: "uppercase", letterSpacing: "0.05em", flexShrink: 0 }}>end</span>
+      <input
+        type="number" min={1} max={clipDuration} step={0.5} value={end}
+        onChange={(e) => setEnd(Number(e.target.value))}
+        style={{ width: 36, background: "var(--fr-surface)", border: "1px solid var(--fr-line)", color: "var(--fr-ivory)", fontFamily: "var(--font-mono), monospace", fontSize: "0.6875rem", padding: "2px 4px", borderRadius: 3, outline: "none" }}
+      />
+      <button onClick={apply} style={{ marginLeft: 2, padding: "3px 8px", background: "var(--fr-gold)", color: "var(--fr-black)", border: "none", borderRadius: 3, fontFamily: "var(--font-mono), monospace", fontSize: "0.5rem", fontWeight: 700, letterSpacing: "0.06em", textTransform: "uppercase", cursor: "pointer", flexShrink: 0, whiteSpace: "nowrap" }}>
+        ✓ {Math.max(0, end - start).toFixed(1)}s
+      </button>
+      <button onClick={(e) => { e.stopPropagation(); onClose(); }} style={{ background: "transparent", border: "none", color: "var(--fr-muted)", cursor: "pointer", padding: "2px", flexShrink: 0, display: "flex", alignItems: "center" }}>
+        <X size={10} />
       </button>
     </div>
   );
