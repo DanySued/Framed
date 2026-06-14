@@ -516,6 +516,11 @@ export function StudioProvider({ children }: { children: React.ReactNode }) {
     previewOverride,
     vibePreset,
 
+    isPlaying,
+    currentTime,
+    activeClipIndex,
+    totalDuration,
+
     setAudio,
     clearAudio,
     setSongStartTime,
