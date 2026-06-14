@@ -684,6 +684,36 @@ export default function ScenesPanel() {
                   ))}
                 </AnimatePresence>
               </div>
+              {/* Capacity bar */}
+              {(() => {
+                const totalSecs = selectedClips.reduce((sum, c) => sum + (c.duration ?? 4), 0);
+                const pct = Math.min(100, (totalSecs / duration) * 100);
+                const over = totalSecs > duration;
+                return (
+                  <div style={{ marginTop: 8, display: "flex", alignItems: "center", gap: 8 }}>
+                    <div style={{ flex: 1, height: 2, background: "var(--fr-line)", borderRadius: 1, overflow: "hidden" }}>
+                      <div
+                        style={{
+                          height: "100%",
+                          width: `${pct}%`,
+                          background: over ? "#f97316" : "var(--fr-gold)",
+                          transition: "width 300ms ease, background 200ms ease",
+                          borderRadius: 1,
+                        }}
+                      />
+                    </div>
+                    <span style={{
+                      fontFamily: "var(--font-mono), monospace",
+                      fontSize: "0.5rem",
+                      color: over ? "#f97316" : "var(--fr-muted)",
+                      whiteSpace: "nowrap",
+                      transition: "color 200ms ease",
+                    }}>
+                      {totalSecs}s / {duration}s
+                    </span>
+                  </div>
+                );
+              })()}
             </div>
           </motion.div>
         )}
