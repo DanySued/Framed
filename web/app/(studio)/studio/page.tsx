@@ -31,8 +31,8 @@ function StudioLayout() {
         </div>
       </StudioPhaseGate>
 
-      {/* ── Selected clips strip — between video list and preview ── */}
-      <SelectedClipsStrip />
+      {/* ── Timeline ─────────────────────────────────────────────── */}
+      <StudioTimeline />
 
       {/* ── Compositor ──────────────────────────────────────────── */}
       <AnimatePresence>
