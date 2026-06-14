@@ -165,6 +165,7 @@ export default function AudioPanel() {
         className="px-5 py-4 shrink-0"
       >
         <h2
+          className="text-center"
           style={{
             fontSize: "0.8125rem",
             fontWeight: 600,
@@ -173,6 +174,7 @@ export default function AudioPanel() {
             color: "var(--fr-muted)",
             display: "flex",
             alignItems: "baseline",
+            justifyContent: "center",
             gap: 8,
           }}
         >
