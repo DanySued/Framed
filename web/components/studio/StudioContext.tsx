@@ -138,6 +138,9 @@ interface StudioState {
 }
 
 interface StudioActions {
+  undo: () => void;
+  redo: () => void;
+
   setAudio: (id: string, name: string) => void;
   clearAudio: () => void;
   setSongStartTime: (t: number) => void;
