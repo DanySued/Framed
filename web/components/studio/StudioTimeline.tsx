@@ -353,7 +353,7 @@ export default function StudioTimeline() {
                       onPointerDown={onAudioDown}
                       onPointerMove={onAudioMove}
                       onPointerUp={onAudioUp}
-                      style={{ position: "absolute", left: Math.max(0, songStartTime * PX_PER_SEC), top: 2, bottom: 2, right: 2, background: "rgba(82,214,196,0.1)", border: "1px solid rgba(82,214,196,0.3)", borderRadius: 3, cursor: "grab", display: "flex", alignItems: "center", gap: 5, paddingLeft: 7, userSelect: "none", minWidth: 60 }}
+                      style={{ position: "absolute", left: Math.max(0, songStartTime * pxPerSec), top: 2, bottom: 2, right: 2, background: "rgba(82,214,196,0.1)", border: "1px solid rgba(82,214,196,0.3)", borderRadius: 3, cursor: "grab", display: "flex", alignItems: "center", gap: 5, paddingLeft: 7, userSelect: "none", minWidth: 60 }}
                     >
                       <Music2 size={9} style={{ color: "var(--fr-gold)", flexShrink: 0 }} />
                       <span style={{ fontFamily: "var(--font-mono), monospace", fontSize: "0.4375rem", color: "var(--fr-gold)", letterSpacing: "0.04em", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
