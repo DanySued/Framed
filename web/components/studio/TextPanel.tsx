@@ -23,44 +23,13 @@ export default function TextPanel() {
           }}
         >
           <span style={{ fontFamily: "var(--font-mono), monospace", fontSize: "0.6875rem", color: "var(--fr-gold)" }}>02</span>
-          Text overlays
+          Style
         </h2>
-        <button
-          onClick={addOverlay}
-          style={{
-            background: "rgba(82,214,196,0.1)",
-            border: "1px solid rgba(82,214,196,0.25)",
-            borderRadius: "20px",
-            cursor: "pointer",
-            color: "var(--fr-gold)",
-            display: "flex",
-            alignItems: "center",
-            gap: 4,
-            padding: "4px 10px",
-            fontSize: "0.6875rem",
-            letterSpacing: "0.04em",
-            fontFamily: "var(--font-sans)",
-          }}
-          aria-label="Add text overlay"
-        >
-          <Plus size={11} />
-          add
-        </button>
       </div>
 
-      {/* Vibe presets */}
+      {/* Vibe sub-section */}
       <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-        <span
-          className="fr-overline"
-          style={{
-            fontSize: "0.6375rem",
-            color: "var(--fr-muted)",
-            letterSpacing: "0.08em",
-            textTransform: "uppercase",
-          }}
-        >
-          Vibe
-        </span>
+        <span style={{ fontFamily: "var(--font-sans)", fontSize: "0.625rem", fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--fr-muted)" }}>Vibe</span>
         <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
           {VIBE_PRESETS.map((preset) => {
             const active = (vibePreset ?? "none") === preset.filter;
@@ -88,7 +57,35 @@ export default function TextPanel() {
         </div>
       </div>
 
+      {/* Divider */}
+      <div style={{ height: 1, background: "var(--fr-line)" }} />
+
+      {/* Overlays sub-section */}
       <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+          <span style={{ fontFamily: "var(--font-sans)", fontSize: "0.625rem", fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--fr-muted)" }}>Overlays</span>
+          <button
+            onClick={addOverlay}
+            style={{
+              background: "rgba(82,214,196,0.1)",
+              border: "1px solid rgba(82,214,196,0.25)",
+              borderRadius: "20px",
+              cursor: "pointer",
+              color: "var(--fr-gold)",
+              display: "flex",
+              alignItems: "center",
+              gap: 4,
+              padding: "4px 10px",
+              fontSize: "0.6875rem",
+              letterSpacing: "0.04em",
+              fontFamily: "var(--font-sans)",
+            }}
+            aria-label="Add text overlay"
+          >
+            <Plus size={11} />
+            add
+          </button>
+        </div>
         {overlays.map((overlay, i) => (
           <OverlayEditor
             key={i}
