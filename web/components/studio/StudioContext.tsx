@@ -64,7 +64,6 @@ interface StudioState {
 
   // Scenes
   keywords: SceneKeyword[];
-  // Clips the user hand-picked (clip-first flow). Empty = let the API pick.
   selectedClips: PickedClip[];
 
   // Reel settings
@@ -83,10 +82,14 @@ interface StudioState {
 
   // Generation jobs
   jobs: JobEntry[];
-  // Index of the job currently shown in approval UI
   approvalJobIndex: number;
-  // Override media shown in PreviewFrame (clip preview or final video)
   previewOverride: string | null;
+
+  // Playback
+  isPlaying: boolean;
+  currentTime: number;     // seconds along the full clip sequence
+  activeClipIndex: number; // derived from currentTime
+  totalDuration: number;   // sum of effective clip durations
 }
 
 interface StudioActions {
@@ -116,6 +119,12 @@ interface StudioActions {
 
   setPhase: (p: StudioPhase) => void;
   setPreviewOverride: (src: string | null) => void;
+
+  // Playback controls
+  play: () => void;
+  pause: () => void;
+  togglePlay: () => void;
+  seek: (t: number) => void;
 
   onGenerate: () => void;
   onApproveClips: (jobId: string) => Promise<void>;
