@@ -31,42 +31,137 @@ function ProgressBar({ value, label }: { value: number; label: string }) {
 
 // ── Clip card for approval ────────────────────────────────────────
 function ClipCard({ jobId, index, total }: { jobId: string; index: number; total: number }) {
-  const src = `/api/reels/clips/${jobId}/${index}`;
+  const [swapping, setSwapping] = useState(false);
+  const [version, setVersion] = useState(0); // bumped after swap to cache-bust video src
+  const [hovered, setHovered] = useState(false);
+  const [swapError, setSwapError] = useState(false);
+
+  const src = `/api/reels/clips/${jobId}/${index}${version > 0 ? `?v=${version}` : ""}`;
   const cardWidth = `min(${Math.floor(88 / Math.min(total, 5))}%, 140px)`;
+
+  const handleSwap = useCallback(async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setSwapping(true);
+    setSwapError(false);
+    try {
+      const res = await fetch(`/api/reels/clips/${jobId}/replace/${index}`, { method: "POST" });
+      if (!res.ok) throw new Error("swap failed");
+      setVersion((v) => v + 1);
+    } catch {
+      setSwapError(true);
+      setTimeout(() => setSwapError(false), 2000);
+    } finally {
+      setSwapping(false);
+    }
+  }, [jobId, index]);
+
   return (
-    <div style={{
-      position: "relative",
-      aspectRatio: "9/16",
-      background: "var(--fr-surface)",
-      border: "1px solid var(--fr-line)",
-      borderRadius: 6,
-      overflow: "hidden",
-      flexShrink: 0,
-      width: cardWidth,
-    }}>
+    <div
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+      style={{
+        position: "relative",
+        aspectRatio: "9/16",
+        background: "var(--fr-surface)",
+        border: `1px solid ${swapError ? "rgba(255,80,80,0.6)" : hovered ? "rgba(82,214,196,0.4)" : "var(--fr-line)"}`,
+        borderRadius: 6,
+        overflow: "hidden",
+        flexShrink: 0,
+        width: cardWidth,
+        transition: "border-color 150ms ease",
+      }}
+    >
+      {/* Video */}
       <video
+        key={src}
         src={src}
         muted
         playsInline
         loop
-        onMouseEnter={(e) => { (e.currentTarget as HTMLVideoElement).play(); }}
+        onMouseEnter={(e) => { if (!swapping) (e.currentTarget as HTMLVideoElement).play(); }}
         onMouseLeave={(e) => { const v = e.currentTarget as HTMLVideoElement; v.pause(); v.currentTime = 0; }}
-        style={{ width: "100%", height: "100%", objectFit: "cover" }}
+        style={{ width: "100%", height: "100%", objectFit: "cover", opacity: swapping ? 0.3 : 1, transition: "opacity 200ms ease" }}
       />
-      <div style={{
-        position: "absolute", bottom: 0, left: 0, right: 0,
-        padding: "4px 6px",
-        background: "linear-gradient(transparent, rgba(4,17,14,0.85))",
-        fontFamily: "var(--font-mono), monospace",
-        fontSize: "0.4rem",
-        color: "var(--fr-gold)",
-        letterSpacing: "0.06em",
-      }}>
-        {String(index + 1).padStart(2, "0")}
-      </div>
-      <div style={{ position: "absolute", top: 6, right: 6 }}>
-        <Play size={10} style={{ color: "rgba(255,255,255,0.4)" }} />
-      </div>
+
+      {/* Swapping spinner overlay */}
+      {swapping && (
+        <div style={{
+          position: "absolute", inset: 0,
+          display: "flex", alignItems: "center", justifyContent: "center",
+          background: "rgba(4,17,14,0.5)",
+        }}>
+          <motion.div
+            animate={{ rotate: 360 }}
+            transition={{ duration: 0.9, repeat: Infinity, ease: "linear" }}
+          >
+            <RefreshCw size={18} style={{ color: "var(--fr-gold)" }} />
+          </motion.div>
+        </div>
+      )}
+
+      {/* Swap button — visible on hover when not swapping */}
+      {!swapping && hovered && (
+        <motion.button
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.12 }}
+          onClick={handleSwap}
+          title="Swap this clip"
+          style={{
+            position: "absolute", top: 6, right: 6,
+            display: "flex", alignItems: "center", gap: 4,
+            background: "rgba(4,17,14,0.82)",
+            border: "1px solid var(--fr-line-2)",
+            borderRadius: 4, padding: "3px 7px",
+            cursor: "pointer",
+            backdropFilter: "blur(4px)",
+          }}
+          onMouseEnter={(e) => { e.currentTarget.style.borderColor = "var(--fr-gold)"; }}
+          onMouseLeave={(e) => { e.currentTarget.style.borderColor = "var(--fr-line-2)"; }}
+        >
+          <RefreshCw size={8} style={{ color: "var(--fr-gold)" }} />
+          <span style={{ fontFamily: "var(--font-mono), monospace", fontSize: "0.4rem", color: "var(--fr-gold)", letterSpacing: "0.06em", textTransform: "uppercase" }}>
+            swap
+          </span>
+        </motion.button>
+      )}
+
+      {/* Error badge */}
+      {swapError && (
+        <div style={{
+          position: "absolute", top: 6, right: 6,
+          fontFamily: "var(--font-mono), monospace", fontSize: "0.4rem",
+          color: "rgba(255,80,80,0.9)", background: "rgba(4,17,14,0.82)",
+          border: "1px solid rgba(255,80,80,0.4)", borderRadius: 4,
+          padding: "3px 7px", letterSpacing: "0.06em", textTransform: "uppercase",
+        }}>
+          failed
+        </div>
+      )}
+
+      {/* Clip number */}
+      {!swapping && (
+        <div style={{
+          position: "absolute", bottom: 0, left: 0, right: 0,
+          padding: "4px 6px",
+          background: "linear-gradient(transparent, rgba(4,17,14,0.85))",
+          fontFamily: "var(--font-mono), monospace",
+          fontSize: "0.4rem", color: "var(--fr-gold)", letterSpacing: "0.06em",
+        }}>
+          {String(index + 1).padStart(2, "0")}
+          {version > 0 && (
+            <span style={{ color: "rgba(82,214,196,0.6)", marginLeft: 4 }}>↻</span>
+          )}
+        </div>
+      )}
+
+      {/* Play hint when idle */}
+      {!swapping && !hovered && (
+        <div style={{ position: "absolute", top: 6, right: 6 }}>
+          <Play size={10} style={{ color: "rgba(255,255,255,0.4)" }} />
+        </div>
+      )}
     </div>
   );
 }
