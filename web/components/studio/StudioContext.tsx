@@ -564,18 +564,21 @@ export function StudioProvider({ children }: { children: React.ReactNode }) {
   );
 
   const updateOverlay = useCallback((index: number, patch: Partial<TextOverlay>) => {
+    pushHistoryDebounced();
     setOverlays((prev) =>
       prev.map((o, i) => (i === index ? { ...o, ...patch } : o))
     );
-  }, []);
+  }, [pushHistoryDebounced]);
 
   const addOverlay = useCallback(() => {
+    pushHistory();
     setOverlays((prev) => [...prev, { ...DEFAULT_OVERLAY }]);
-  }, []);
+  }, [pushHistory]);
 
   const removeOverlay = useCallback((index: number) => {
+    pushHistory();
     setOverlays((prev) => prev.filter((_, i) => i !== index));
-  }, []);
+  }, [pushHistory]);
 
   const onGenerate = useCallback(async () => {
     if (!audioFileId || (keywords.length < 1 && selectedClips.length < 1)) return;
