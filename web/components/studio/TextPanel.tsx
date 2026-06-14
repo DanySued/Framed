@@ -22,7 +22,7 @@ export default function TextPanel() {
             gap: 8,
           }}
         >
-          <span style={{ fontFamily: "var(--font-mono), monospace", fontSize: "0.6875rem", color: "var(--fr-gold)" }}>03</span>
+          <span style={{ fontFamily: "var(--font-mono), monospace", fontSize: "0.6875rem", color: "var(--fr-gold)" }}>02</span>
           Text overlays
         </h2>
         <button
