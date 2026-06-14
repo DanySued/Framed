@@ -40,7 +40,8 @@ async def generate_reel(request: ReelGenerateRequest):
 
     Returns job ID for polling progress.
     """
-    if not request.keywords or len(request.keywords) == 0:
+    has_clips = request.selected_clips and len(request.selected_clips) > 0
+    if (not request.keywords or len(request.keywords) == 0) and not has_clips:
         raise HTTPException(status_code=400, detail="At least one keyword required")
 
     if request.duration < 3 or request.duration > 60:
