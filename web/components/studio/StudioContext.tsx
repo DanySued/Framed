@@ -3,6 +3,43 @@
 import React, { createContext, useCallback, useContext, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 
+const DRAFT_KEY = "framed:studio:draft";
+
+interface DraftSnapshot {
+  selectedClips: PickedClip[];
+  keywords: SceneKeyword[];
+  audioFileId: string | null;
+  audioName: string | null;
+  songStartTime: number;
+  duration: number;
+  subtitlesEnabled: boolean;
+  transitionsEnabled: boolean;
+  bulkCount: number;
+  overlays: TextOverlay[];
+  vibePreset: string | null;
+  savedAt: number; // epoch ms
+}
+
+function loadDraft(): DraftSnapshot | null {
+  try {
+    const raw = localStorage.getItem(DRAFT_KEY);
+    if (!raw) return null;
+    return JSON.parse(raw) as DraftSnapshot;
+  } catch {
+    return null;
+  }
+}
+
+function saveDraft(snap: DraftSnapshot) {
+  try {
+    localStorage.setItem(DRAFT_KEY, JSON.stringify(snap));
+  } catch {}
+}
+
+function deleteDraft() {
+  try { localStorage.removeItem(DRAFT_KEY); } catch {}
+}
+
 // Matches TextOverlayItem in api/models/schemas.py exactly
 export interface TextOverlay {
   text: string;
