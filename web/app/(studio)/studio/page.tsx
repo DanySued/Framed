@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { StudioProvider, useStudio } from "@/components/studio/StudioContext";
 import AudioPanel from "@/components/studio/AudioPanel";
@@ -11,6 +11,55 @@ import ControlBar from "@/components/studio/ControlBar";
 import StudioTimeline from "@/components/studio/StudioTimeline";
 import StudioPhaseGate from "@/components/studio/StudioPhaseGate";
 import GenerationOverlay from "@/components/studio/GenerationOverlay";
+
+function DraftPill() {
+  const { draftRestoredAt, clearDraft } = useStudio();
+  const [dismissed, setDismissed] = useState(false);
+
+  if (!draftRestoredAt || dismissed) return null;
+
+  const ago = (() => {
+    const diff = Math.round((Date.now() - draftRestoredAt) / 1000);
+    if (diff < 60) return "just now";
+    if (diff < 3600) return `${Math.round(diff / 60)}m ago`;
+    if (diff < 86400) return `${Math.round(diff / 3600)}h ago`;
+    return `${Math.round(diff / 86400)}d ago`;
+  })();
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: -8 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -8 }}
+      transition={{ duration: 0.25 }}
+      style={{
+        position: "fixed", top: 58, left: "50%", transform: "translateX(-50%)",
+        zIndex: 90, display: "flex", alignItems: "center", gap: 10,
+        background: "rgba(6,9,11,0.92)", border: "1px solid var(--fr-line)",
+        borderRadius: 6, padding: "6px 12px",
+        backdropFilter: "blur(8px)",
+        boxShadow: "0 2px 12px rgba(0,0,0,0.4)",
+      }}
+    >
+      <span style={{ fontFamily: "var(--font-mono), monospace", fontSize: "0.5rem", color: "var(--fr-muted)", letterSpacing: "0.06em", textTransform: "uppercase" }}>
+        draft restored · saved {ago}
+      </span>
+      <button
+        onClick={() => setDismissed(true)}
+        style={{ fontFamily: "var(--font-mono), monospace", fontSize: "0.5rem", color: "var(--fr-gold)", background: "transparent", border: "none", cursor: "pointer", letterSpacing: "0.06em", textTransform: "uppercase", padding: 0 }}
+      >
+        ok
+      </button>
+      <span style={{ color: "var(--fr-line)", fontSize: "0.4rem" }}>·</span>
+      <button
+        onClick={() => { clearDraft(); setDismissed(true); }}
+        style={{ fontFamily: "var(--font-mono), monospace", fontSize: "0.5rem", color: "var(--fr-muted)", background: "transparent", border: "none", cursor: "pointer", letterSpacing: "0.06em", textTransform: "uppercase", padding: 0 }}
+      >
+        start fresh
+      </button>
+    </motion.div>
+  );
+}
 
 function StudioLayout() {
   const { selectedClips, phase, togglePlay } = useStudio();
