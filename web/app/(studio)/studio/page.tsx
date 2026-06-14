@@ -81,6 +81,9 @@ function StudioLayout() {
 
       {/* ── Control bar ─────────────────────────────────────────── */}
       {hasClips && <ControlBar />}
+
+      {/* ── Generation overlay (mounts over everything when generating/done) ── */}
+      <GenerationOverlay />
     </div>
   );
 }
