@@ -303,6 +303,7 @@ export default function ControlBar() {
           whiteSpace: "nowrap",
           position: "relative",
           overflow: "hidden",
+          animation: glowing ? "fr-glow-pulse 0.6s ease-out 2" : "none",
         }}
         onMouseEnter={(e) => {
           if (!canGenerate) return;
