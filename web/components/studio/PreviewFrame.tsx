@@ -1,11 +1,10 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useMemo, useCallback } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { Play, Pause } from "lucide-react";
 import { useStudio } from "./StudioContext";
 import TextOverlayLayer from "./TextOverlayLayer";
-import GenerationOverlay from "./GenerationOverlay";
 
 const KEN_BURNS_DURATION = 7000;
 
@@ -13,7 +12,8 @@ export default function PreviewFrame() {
   const {
     keywords, selectedClips, overlays, phase, jobs,
     previewOverride, subtitlesEnabled, onReset, vibePreset,
-    isPlaying, activeClipIndex, togglePlay,
+    isPlaying, activeClipIndex, currentTime,
+    togglePlay, seek, pause,
   } = useStudio();
 
   const videoUrls = selectedClips.map((c) => c.url).filter((u): u is string => Boolean(u));
@@ -22,6 +22,18 @@ export default function PreviewFrame() {
       ? keywords.map((k) => k.thumbnail).filter((t): t is string => Boolean(t))
       : selectedClips.map((c) => c.image).filter((t): t is string => Boolean(t));
   const showVideoSlideshow = videoUrls.length > 0;
+
+  // Cumulative clip start times (seconds into the full sequence)
+  const clipStarts = useMemo(() => {
+    const starts: number[] = [];
+    let elapsed = 0;
+    for (const clip of selectedClips) {
+      starts.push(elapsed);
+      const raw = clip.duration ?? 5;
+      elapsed += (clip.trimEnd ?? raw) - (clip.trimStart ?? 0);
+    }
+    return starts;
+  }, [selectedClips]);
 
   // Thumbnail Ken-Burns (only when no clips picked)
   const [thumbIndex, setThumbIndex] = useState(0);
@@ -33,14 +45,70 @@ export default function PreviewFrame() {
   }, [thumbIndex, thumbnails.length, showVideoSlideshow]);
   useEffect(() => { setThumbIndex(0); }, [thumbnails.length]);
 
-  // Video ref — play/pause driven by isPlaying from context
+  // Video ref
   const videoRef = useRef<HTMLVideoElement>(null);
+
+  // Compute where within the current clip the playhead sits
+  const clipTimeOffset = useCallback((contextT: number, clipIdx: number) => {
+    const clip = selectedClips[clipIdx];
+    if (!clip) return 0;
+    const trimStart = clip.trimStart ?? 0;
+    const offsetInClip = Math.max(0, contextT - (clipStarts[clipIdx] ?? 0));
+    return trimStart + offsetInClip;
+  }, [selectedClips, clipStarts]);
+
+  // When video mounts for a new clip: seek to the correct position and play if needed
+  const handleLoadedMetadata = useCallback(() => {
+    const v = videoRef.current;
+    if (!v) return;
+    v.currentTime = clipTimeOffset(currentTime, activeClipIndex);
+    if (isPlaying) v.play().catch(() => {});
+  }, [currentTime, activeClipIndex, clipTimeOffset, isPlaying]);
+
+  // Advance to the next clip (or stop at the end)
+  const advanceClip = useCallback(() => {
+    const next = activeClipIndex + 1;
+    if (next < selectedClips.length) {
+      seek(clipStarts[next] ?? 0);
+    } else {
+      pause();
+      seek(0);
+    }
+  }, [activeClipIndex, selectedClips.length, clipStarts, seek, pause]);
+
+  // timeupdate: enforce trimEnd and advance clips
+  const handleTimeUpdate = useCallback(() => {
+    const v = videoRef.current;
+    if (!v) return;
+    const clip = selectedClips[activeClipIndex];
+    if (!clip) return;
+    const trimEnd = clip.trimEnd ?? (clip.duration ?? Infinity);
+    if (v.currentTime >= trimEnd) {
+      advanceClip();
+    }
+  }, [selectedClips, activeClipIndex, advanceClip]);
+
+  // play/pause driven by context
   useEffect(() => {
     const v = videoRef.current;
     if (!v) return;
     if (isPlaying) v.play().catch(() => {});
     else v.pause();
   }, [isPlaying, activeClipIndex]);
+
+  // Seek sync: when paused and user scrubs the timeline, update the video position
+  const isPlayingRef = useRef(isPlaying);
+  useEffect(() => { isPlayingRef.current = isPlaying; }, [isPlaying]);
+
+  useEffect(() => {
+    if (isPlayingRef.current) return; // video is running on its own during playback
+    const v = videoRef.current;
+    if (!v || v.readyState < 1) return;
+    const target = clipTimeOffset(currentTime, activeClipIndex);
+    if (Math.abs(v.currentTime - target) > 0.08) {
+      v.currentTime = target;
+    }
+  }, [currentTime, activeClipIndex, clipTimeOffset]);
 
   // Gold pulse on done
   const [showGoldPulse, setShowGoldPulse] = useState(false);
@@ -97,20 +165,21 @@ export default function PreviewFrame() {
             <AnimatePresence mode="wait">
               {!isEmpty && showVideoSlideshow && videoUrls[activeClipIndex] && (
                 <motion.div
-                  key={videoUrls[activeClipIndex]}
+                  key={`${activeClipIndex}-${videoUrls[activeClipIndex]}`}
                   className="absolute inset-0"
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   exit={{ opacity: 0 }}
-                  transition={{ duration: 0.4, ease: "easeInOut" }}
+                  transition={{ duration: 0.3, ease: "easeInOut" }}
                 >
                   <video
                     ref={videoRef}
                     src={videoUrls[activeClipIndex]}
-                    autoPlay={isPlaying}
                     muted
                     playsInline
-                    loop={videoUrls.length === 1}
+                    onLoadedMetadata={handleLoadedMetadata}
+                    onTimeUpdate={handleTimeUpdate}
+                    onEnded={advanceClip}
                     className="absolute inset-0 w-full h-full object-cover"
                   />
                   <div className="absolute inset-0" style={{ background: "radial-gradient(ellipse at center, transparent 40%, rgba(6,9,11,0.5) 100%)", pointerEvents: "none" }} />
@@ -149,7 +218,6 @@ export default function PreviewFrame() {
         )}
       </div>
 
-      <GenerationOverlay />
       {(phase === "compose" || phase === "approval") && <TextOverlayLayer overlays={overlays} />}
 
       {/* Ghost play/pause overlay — appears on hover when clips are loaded */}
@@ -165,27 +233,18 @@ export default function PreviewFrame() {
               onClick={togglePlay}
               aria-label={isPlaying ? "Pause" : "Play"}
               style={{
-                position: "absolute",
-                inset: 0,
-                background: "transparent",
-                border: "none",
-                cursor: "pointer",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
+                position: "absolute", inset: 0, background: "transparent",
+                border: "none", cursor: "pointer",
+                display: "flex", alignItems: "center", justifyContent: "center",
                 zIndex: 20,
               }}
             >
               <div style={{
-                width: 48,
-                height: 48,
-                borderRadius: "50%",
+                width: 48, height: 48, borderRadius: "50%",
                 background: "rgba(6,9,11,0.55)",
                 border: "1px solid rgba(255,255,255,0.18)",
                 boxShadow: "inset 0 1px 0 rgba(255,255,255,0.12), 0 2px 8px rgba(0,0,0,0.5)",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
+                display: "flex", alignItems: "center", justifyContent: "center",
                 backdropFilter: "blur(6px)",
               }}>
                 {isPlaying
@@ -217,17 +276,28 @@ function DoneActions({ reelId, srtSrc, subtitlesEnabled, onReset }: { reelId: st
   if (!reelId) return null;
   return (
     <div style={{ position: "absolute", bottom: -56, left: 0, right: 0, display: "flex", alignItems: "center", justifyContent: "center", gap: 16, zIndex: 15 }}>
-      <a href={`/api/reels/download/${reelId}`} download style={{ fontFamily: "var(--font-display), Georgia, serif", fontSize: "0.8125rem", letterSpacing: "0.04em", color: "var(--fr-gold)", border: "1px solid var(--fr-gold)", padding: "6px 18px", textDecoration: "none", transition: "background 150ms ease, color 150ms ease", whiteSpace: "nowrap" }}
+      <a
+        href={`/api/reels/download/${reelId}`}
+        download
+        style={{ fontFamily: "var(--font-display), Georgia, serif", fontSize: "0.8125rem", letterSpacing: "0.04em", color: "var(--fr-gold)", border: "1px solid var(--fr-gold)", padding: "6px 18px", textDecoration: "none", transition: "background 150ms ease, color 150ms ease", whiteSpace: "nowrap" }}
         onMouseEnter={(e) => { e.currentTarget.style.background = "var(--fr-gold)"; e.currentTarget.style.color = "#04110e"; }}
         onMouseLeave={(e) => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = "var(--fr-gold)"; }}
-      >download film</a>
+      >
+        download film
+      </a>
       {subtitlesEnabled && srtSrc && (
-        <a href={srtSrc} download style={{ fontFamily: "var(--font-display), Georgia, serif", fontSize: "0.8125rem", letterSpacing: "0.04em", color: "var(--fr-muted)", border: "1px solid var(--fr-line)", padding: "6px 18px", textDecoration: "none", transition: "color 150ms ease", whiteSpace: "nowrap" }}>subtitles (.srt)</a>
+        <a href={srtSrc} download style={{ fontFamily: "var(--font-display), Georgia, serif", fontSize: "0.8125rem", letterSpacing: "0.04em", color: "var(--fr-muted)", border: "1px solid var(--fr-line)", padding: "6px 18px", textDecoration: "none", transition: "color 150ms ease", whiteSpace: "nowrap" }}>
+          subtitles (.srt)
+        </a>
       )}
-      <button onClick={onReset} style={{ background: "transparent", border: "none", fontFamily: "var(--font-display), Georgia, serif", fontSize: "0.8125rem", letterSpacing: "0.04em", color: "var(--fr-muted)", cursor: "pointer", padding: "6px 12px", transition: "color 150ms ease" }}
+      <button
+        onClick={onReset}
+        style={{ background: "transparent", border: "none", fontFamily: "var(--font-display), Georgia, serif", fontSize: "0.8125rem", letterSpacing: "0.04em", color: "var(--fr-muted)", cursor: "pointer", padding: "6px 12px", transition: "color 150ms ease" }}
         onMouseEnter={(e) => { e.currentTarget.style.color = "var(--fr-ivory)"; }}
         onMouseLeave={(e) => { e.currentTarget.style.color = "var(--fr-muted)"; }}
-      >new film</button>
+      >
+        new film
+      </button>
     </div>
   );
 }
