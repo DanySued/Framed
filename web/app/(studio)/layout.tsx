@@ -8,7 +8,7 @@ export default async function StudioLayout({ children }: { children: React.React
       <div className="max-w-7xl mx-auto w-full flex flex-col flex-1">
       {/* Top bar — frosted sticky nav */}
       <header
-        className="sticky top-0 z-50 flex items-center justify-between px-6 h-[44px] shrink-0"
+        className="sticky top-0 z-50 flex items-center justify-between px-6 h-[54px] shrink-0"
         style={{
           background: "color-mix(in oklab, var(--fr-black) 78%, transparent)",
           backdropFilter: "blur(14px) saturate(160%)",
