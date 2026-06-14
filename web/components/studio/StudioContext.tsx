@@ -168,6 +168,75 @@ export function StudioProvider({ children }: { children: React.ReactNode }) {
   const [previewOverride, setPreviewOverride] = useState<string | null>(null);
   const [vibePreset, setVibePreset] = useState<string | null>(null);
 
+  // ── Playback clock ─────────────────────────────────────────────
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [currentTime, setCurrentTime] = useState(0);
+  const currentTimeRef = useRef(0);
+  const rafRef = useRef<number | null>(null);
+  const lastTsRef = useRef<number | null>(null);
+  const frameRef = useRef(0);
+  // Keep a ref of selectedClips for rAF without stale closure
+  const clipsRef = useRef(selectedClips);
+  useEffect(() => { clipsRef.current = selectedClips; }, [selectedClips]);
+
+  function clipEffDur(c: PickedClip) {
+    const raw = c.duration ?? 5;
+    return (c.trimEnd ?? raw) - (c.trimStart ?? 0);
+  }
+
+  const totalDuration = selectedClips.reduce((s, c) => s + clipEffDur(c), 0);
+
+  const activeClipIndex = (() => {
+    let elapsed = 0;
+    for (let i = 0; i < selectedClips.length; i++) {
+      elapsed += clipEffDur(selectedClips[i]);
+      if (currentTime < elapsed) return i;
+    }
+    return Math.max(0, selectedClips.length - 1);
+  })();
+
+  useEffect(() => {
+    if (!isPlaying) {
+      if (rafRef.current) cancelAnimationFrame(rafRef.current);
+      lastTsRef.current = null;
+      return;
+    }
+    function tick(ts: number) {
+      if (lastTsRef.current === null) lastTsRef.current = ts;
+      const dt = Math.min((ts - lastTsRef.current) / 1000, 0.1); // cap dt at 100ms
+      lastTsRef.current = ts;
+      const total = clipsRef.current.reduce((s, c) => s + clipEffDur(c), 0);
+      const next = Math.min(currentTimeRef.current + dt, total);
+      currentTimeRef.current = next;
+      frameRef.current++;
+      if (frameRef.current % 2 === 0) setCurrentTime(next); // ~30fps state updates
+      if (next >= total) {
+        setIsPlaying(false);
+        currentTimeRef.current = 0;
+        setCurrentTime(0);
+        return;
+      }
+      rafRef.current = requestAnimationFrame(tick);
+    }
+    rafRef.current = requestAnimationFrame(tick);
+    return () => { if (rafRef.current) cancelAnimationFrame(rafRef.current); };
+  }, [isPlaying]);
+
+  // Reset playback when clips change
+  useEffect(() => {
+    setIsPlaying(false);
+    currentTimeRef.current = 0;
+    setCurrentTime(0);
+  }, [selectedClips.length]);
+
+  const play = useCallback(() => setIsPlaying(true), []);
+  const pause = useCallback(() => setIsPlaying(false), []);
+  const togglePlay = useCallback(() => setIsPlaying((v) => !v), []);
+  const seek = useCallback((t: number) => {
+    currentTimeRef.current = t;
+    setCurrentTime(t);
+  }, []);
+
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const stopPolling = useCallback(() => {
