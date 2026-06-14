@@ -191,14 +191,41 @@ export default function ControlBar() {
       </div>
 
       {/* Divider */}
-      <div
-        style={{
-          width: 1,
-          height: 20,
-          background: "var(--fr-line)",
-          flexShrink: 0,
-        }}
-      />
+      <div style={{ width: 1, height: 20, background: "var(--fr-line)", flexShrink: 0 }} />
+
+      {/* Transitions toggle */}
+      <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+        <button
+          role="switch"
+          aria-checked={transitionsEnabled}
+          aria-label="Transitions"
+          onClick={() => setTransitionsEnabled(!transitionsEnabled)}
+          style={{
+            width: 32, height: 18, borderRadius: 9,
+            background: transitionsEnabled ? "var(--fr-gold)" : "var(--fr-line)",
+            border: "none", cursor: "pointer", position: "relative",
+            transition: "background 200ms ease", flexShrink: 0,
+          }}
+        >
+          <span style={{
+            position: "absolute", top: 2,
+            left: transitionsEnabled ? 16 : 2,
+            width: 14, height: 14, borderRadius: "50%",
+            background: transitionsEnabled ? "#04110e" : "var(--fr-muted)",
+            transition: "left 200ms ease",
+          }} />
+        </button>
+        <label
+          className="fr-overline"
+          style={{ fontSize: "0.6375rem", cursor: "pointer" }}
+          onClick={() => setTransitionsEnabled(!transitionsEnabled)}
+        >
+          Transitions
+        </label>
+      </div>
+
+      {/* Divider */}
+      <div style={{ width: 1, height: 20, background: "var(--fr-line)", flexShrink: 0 }} />
 
       {/* Bulk count stepper */}
       <div style={{ display: "flex", alignItems: "center", gap: 8 }} title="Number of unique films to generate">
