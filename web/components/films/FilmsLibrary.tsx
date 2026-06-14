@@ -432,41 +432,85 @@ function EmptyState() {
         flexDirection: "column",
         alignItems: "center",
         justifyContent: "center",
-        minHeight: "40vh",
-        gap: 16,
+        minHeight: "50vh",
+        gap: 32,
+        padding: "40px 20px",
       }}
     >
-      <p
+      {/* Film strip illustration */}
+      <div
         style={{
-          fontFamily: "var(--font-display), Georgia, serif",
-          fontSize: "0.9375rem",
-          fontStyle: "italic",
-          color: "var(--fr-muted)",
-          textAlign: "center",
-          maxWidth: 340,
-          lineHeight: 1.6,
-          margin: 0,
+          display: "flex",
+          gap: 4,
+          opacity: 0.18,
         }}
       >
-        no films yet — your premieres will appear here
-      </p>
+        {Array.from({ length: 5 }).map((_, i) => (
+          <div
+            key={i}
+            style={{
+              width: 48,
+              aspectRatio: "9 / 16",
+              background: "var(--fr-surface-2)",
+              border: "1px solid var(--fr-line-2)",
+              borderRadius: 6,
+              position: "relative",
+              overflow: "hidden",
+            }}
+          >
+            {/* sprocket holes */}
+            <div style={{ position: "absolute", top: 6, left: "50%", transform: "translateX(-50%)", width: 8, height: 8, borderRadius: "50%", background: "var(--fr-black)" }} />
+            <div style={{ position: "absolute", bottom: 6, left: "50%", transform: "translateX(-50%)", width: 8, height: 8, borderRadius: "50%", background: "var(--fr-black)" }} />
+          </div>
+        ))}
+      </div>
+
+      <div style={{ textAlign: "center", display: "flex", flexDirection: "column", gap: 10 }}>
+        <p
+          style={{
+            fontFamily: "var(--font-display), Georgia, serif",
+            fontSize: "1.125rem",
+            fontStyle: "italic",
+            color: "var(--fr-ivory)",
+            margin: 0,
+            lineHeight: 1.5,
+          }}
+        >
+          your premieres will appear here
+        </p>
+        <p
+          style={{
+            fontFamily: "var(--font-sans)",
+            fontSize: "0.75rem",
+            color: "var(--fr-muted)",
+            margin: 0,
+            letterSpacing: "0.02em",
+          }}
+        >
+          make your first film to see it in the collection
+        </p>
+      </div>
+
       <Link
         href="/studio"
         style={{
           fontFamily: "var(--font-display), Georgia, serif",
-          fontSize: "0.8125rem",
+          fontSize: "0.9375rem",
           letterSpacing: "0.04em",
           color: "var(--fr-gold)",
+          border: "1px solid var(--fr-gold)",
+          padding: "10px 32px",
           textDecoration: "none",
-          borderBottom: "1px solid var(--fr-line)",
-          paddingBottom: 2,
-          transition: "border-color 150ms ease",
+          transition: "background 150ms ease, color 150ms ease",
+          display: "inline-block",
         }}
         onMouseEnter={(e) => {
-          (e.currentTarget as HTMLAnchorElement).style.borderColor = "var(--fr-gold)";
+          (e.currentTarget as HTMLAnchorElement).style.background = "var(--fr-gold)";
+          (e.currentTarget as HTMLAnchorElement).style.color = "#04110e";
         }}
         onMouseLeave={(e) => {
-          (e.currentTarget as HTMLAnchorElement).style.borderColor = "var(--fr-line)";
+          (e.currentTarget as HTMLAnchorElement).style.background = "transparent";
+          (e.currentTarget as HTMLAnchorElement).style.color = "var(--fr-gold)";
         }}
       >
         open studio
