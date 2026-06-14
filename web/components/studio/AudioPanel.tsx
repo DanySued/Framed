@@ -14,9 +14,11 @@ interface AudioFile {
 
 function cleanFilename(name: string): string {
   return name
-    .replace(/\.[^/.]+$/, "")       // remove extension
-    .replace(/[-_]+/g, " ")          // dashes/underscores → spaces
-    .replace(/\s+\d{4,}\s*$/, "")   // strip trailing numeric IDs
+    .replace(/\.[^/.]+$/, "")         // remove extension
+    .replace(/\s*\[[^\]]+\]/g, "")    // strip [bracket content]
+    .replace(/\s*\([^)]{6,}\)/g, "")  // strip (long paren content like IDs)
+    .replace(/[-_]+/g, " ")            // dashes/underscores → spaces
+    .replace(/\s+\d{4,}\s*$/, "")     // strip trailing numeric IDs
     .trim();
 }
 
