@@ -9,8 +9,9 @@ export default function TextPanel() {
   return (
     <div style={{ padding: "20px", display: "flex", flexDirection: "column", gap: 16 }}>
       {/* Header */}
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+      <div className="flex items-center justify-center">
         <h2
+          className="text-center"
           style={{
             fontSize: "0.8125rem",
             fontWeight: 600,
