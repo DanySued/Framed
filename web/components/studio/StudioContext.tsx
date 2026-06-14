@@ -340,6 +340,8 @@ export function StudioProvider({ children }: { children: React.ReactNode }) {
             selectedClips: selectedClips.map((c) => ({
               url: c.url,
               duration: c.duration,
+              trim_start: c.trimStart,
+              trim_end: c.trimEnd,
             })),
           }),
         }).then(async (res) => {
