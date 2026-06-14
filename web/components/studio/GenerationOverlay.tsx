@@ -1,8 +1,8 @@
 "use client";
 
-import { useCallback } from "react";
+import { useCallback, useState } from "react";
 import { motion, AnimatePresence } from "motion/react";
-import { Download, RotateCcw, Check, Play } from "lucide-react";
+import { Download, RotateCcw, Check, Play, RefreshCw } from "lucide-react";
 import { useStudio, JobEntry } from "./StudioContext";
 
 // ── Progress bar ──────────────────────────────────────────────────
