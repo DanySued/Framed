@@ -537,6 +537,7 @@ export function StudioProvider({ children }: { children: React.ReactNode }) {
     reorderClips,
     setDuration,
     setSubtitlesEnabled,
+    setTransitionsEnabled,
     setBulkCount,
     setOverlays,
     updateOverlay,
