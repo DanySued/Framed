@@ -237,11 +237,35 @@ function FilmCard({
 function FilmFocus({ reel, onClose }: { reel: ReelItem; onClose: () => void }) {
   const src = `/api/reels/download/${reel.id}`;
   const downloadRef = useRef<HTMLAnchorElement>(null);
+  const router = useRouter();
 
   // Move focus into the dialog when it opens
   useEffect(() => {
     downloadRef.current?.focus();
   }, []);
+
+  const handleRemix = useCallback(() => {
+    const keywords = reel.keywords
+      .split(",")
+      .map((k) => k.trim())
+      .filter(Boolean);
+    const draft = {
+      selectedClips: [],
+      keywords: keywords.map((k) => ({ keyword: k, thumbnail: null, videoId: null })),
+      audioFileId: null,
+      audioName: null,
+      songStartTime: 0,
+      duration: reel.duration || 30,
+      subtitlesEnabled: false,
+      transitionsEnabled: true,
+      bulkCount: 1,
+      overlays: [{ text: "", x: 50, y: 82, font: "serif", bold: false, italic: false }],
+      vibePreset: null,
+      savedAt: Date.now(),
+    };
+    try { localStorage.setItem("framed:studio:draft", JSON.stringify(draft)); } catch {}
+    router.push("/studio");
+  }, [reel, router]);
 
   // Close on backdrop click
   const handleBackdrop = useCallback(
