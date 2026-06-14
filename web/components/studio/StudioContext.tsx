@@ -25,6 +25,8 @@ export interface PickedClip {
   image: string | null;
   duration: number | null;
   keyword: string;
+  trimStart?: number;     // seconds from clip start
+  trimEnd?: number;       // seconds from clip start
 }
 
 export type StudioPhase =
