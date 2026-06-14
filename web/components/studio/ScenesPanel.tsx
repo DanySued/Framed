@@ -768,7 +768,7 @@ export default function ScenesPanel() {
               }}
             >
               {keywords.length === 0
-                ? "search a mood, place, or feeling above — or try one of these"
+                ? "lets start by choosing the clips"
                 : "click a keyword chip to browse its clips"}
             </p>
           </div>
