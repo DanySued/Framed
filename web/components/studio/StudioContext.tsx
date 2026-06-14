@@ -291,6 +291,16 @@ export function StudioProvider({ children }: { children: React.ReactNode }) {
     );
   }, []);
 
+  const reorderClips = useCallback((from: number, to: number) => {
+    if (from === to) return;
+    setSelectedClips((prev) => {
+      const next = [...prev];
+      const [moved] = next.splice(from, 1);
+      next.splice(to, 0, moved);
+      return next;
+    });
+  }, []);
+
   const setKeywordThumbnail = useCallback(
     (kw: string, thumbnail: string | null, videoId: number | null) => {
       setKeywords((prev) =>
