@@ -72,7 +72,7 @@ function StudioLayout() {
       </AnimatePresence>
 
       {/* ── Control bar ─────────────────────────────────────────── */}
-      <ControlBar />
+      {hasClips && <ControlBar />}
     </div>
   );
 }
