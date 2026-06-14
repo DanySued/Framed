@@ -298,6 +298,37 @@ export default function StudioTimeline() {
                   }} />
                 </div>
 
+                {/* Target duration marker */}
+                {(() => {
+                  const targetPx = duration * pxPerSec;
+                  const over = totalSecs > duration;
+                  return (
+                    <div style={{
+                      position: "absolute",
+                      top: 0, bottom: 0,
+                      left: targetPx,
+                      width: 1,
+                      background: over ? "rgba(255,80,80,0.5)" : "rgba(255,255,255,0.15)",
+                      zIndex: 20,
+                      pointerEvents: "none",
+                    }}>
+                      <span style={{
+                        position: "absolute",
+                        top: 2,
+                        left: 4,
+                        fontFamily: "var(--font-mono), monospace",
+                        fontSize: "0.38rem",
+                        color: over ? "rgba(255,80,80,0.7)" : "rgba(255,255,255,0.25)",
+                        letterSpacing: "0.04em",
+                        whiteSpace: "nowrap",
+                        textTransform: "uppercase",
+                      }}>
+                        {duration}s target
+                      </span>
+                    </div>
+                  );
+                })()}
+
                 {/* Ruler */}
                 <div
                   onClick={handleRulerClick}
