@@ -100,6 +100,7 @@ interface StudioActions {
 
   toggleClip: (clip: PickedClip) => void;
   removeClip: (id: number) => void;
+  trimClip: (id: number, start: number, end: number) => void;
 
   setDuration: (d: number) => void;
   setSubtitlesEnabled: (v: boolean) => void;
