@@ -93,7 +93,14 @@ export interface JobEntry {
   status: JobStatus | null;
 }
 
+type HistoryEntry = Omit<DraftSnapshot, "savedAt">;
+const MAX_HISTORY = 50;
+
 interface StudioState {
+  // Undo/redo
+  canUndo: boolean;
+  canRedo: boolean;
+
   // Audio
   audioFileId: string | null;
   audioName: string | null;
