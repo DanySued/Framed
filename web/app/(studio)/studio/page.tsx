@@ -35,11 +35,7 @@ function StudioLayout() {
 
       {/* ── Clip browser ────────────────────────────────────────── */}
       <StudioPhaseGate phases={["compose"]}>
-        <div style={{
-          background: "var(--fr-black)",
-          borderLeft: selectedClips.length > 0 ? "2px solid var(--fr-gold)" : "2px solid transparent",
-          transition: "border-color 400ms ease",
-        }}>
+        <div style={{ background: "var(--fr-black)" }}>
           <ScenesPanel />
         </div>
       </StudioPhaseGate>
