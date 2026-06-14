@@ -293,7 +293,7 @@ export default function ControlBar() {
       {/* Spacer (desktop only) */}
       <div className="hidden sm:flex flex-1" />
 
-      <div className="flex items-center gap-4 w-full sm:w-auto justify-between sm:justify-end">
+      <div className="flex items-center gap-4 shrink-0">
       {/* Readiness hint */}
       <span
         style={{
