@@ -624,6 +624,8 @@ export function StudioProvider({ children }: { children: React.ReactNode }) {
     setPhase,
     setPreviewOverride,
     setVibePreset,
+    draftRestoredAt,
+    clearDraft,
     play,
     pause,
     togglePlay,
