@@ -282,6 +282,7 @@ export default function ControlBar() {
       {/* Generate button */}
       <button
         ref={btnRef}
+        className="fr-shine"
         onClick={canGenerate ? onGenerate : undefined}
         disabled={!canGenerate}
         onMouseMove={handleMouseMove}
