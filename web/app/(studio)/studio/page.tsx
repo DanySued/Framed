@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { StudioProvider, useStudio } from "@/components/studio/StudioContext";
 import AudioPanel from "@/components/studio/AudioPanel";
@@ -7,14 +8,26 @@ import PreviewFrame from "@/components/studio/PreviewFrame";
 import ScenesPanel from "@/components/studio/ScenesPanel";
 import TextPanel from "@/components/studio/TextPanel";
 import ControlBar from "@/components/studio/ControlBar";
-import ClipRail from "@/components/studio/ClipRail";
 import StudioTimeline from "@/components/studio/StudioTimeline";
+import TransportBar from "@/components/studio/TransportBar";
 import StudioPhaseGate from "@/components/studio/StudioPhaseGate";
 
 function StudioLayout() {
-  const { selectedClips, phase } = useStudio();
+  const { selectedClips, phase, togglePlay } = useStudio();
   const hasClips = selectedClips.length > 0;
   const showCompositor = hasClips || phase !== "compose";
+
+  // Spacebar → play/pause
+  useEffect(() => {
+    function onKey(e: KeyboardEvent) {
+      if (e.code === "Space" && e.target === document.body) {
+        e.preventDefault();
+        togglePlay();
+      }
+    }
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+  }, [togglePlay]);
 
   return (
     <div className="flex flex-col" style={{ minHeight: "calc(100vh - 54px)" }}>
@@ -33,6 +46,9 @@ function StudioLayout() {
 
       {/* ── Timeline ─────────────────────────────────────────────── */}
       <StudioTimeline />
+
+      {/* ── Transport bar — between timeline and preview ─────────── */}
+      <TransportBar />
 
       {/* ── Compositor ──────────────────────────────────────────── */}
       <AnimatePresence>
@@ -53,11 +69,8 @@ function StudioLayout() {
             </div>
 
             {/* Center: preview */}
-            <div className="flex flex-col lg:sticky lg:top-[52px] lg:self-start lg:max-h-[calc(100vh-52px)] lg:overflow-hidden">
-              <div
-                className="flex items-center justify-center flex-1 lg:overflow-hidden"
-                style={{ padding: "24px 20px 48px" }}
-              >
+            <div className="flex flex-col lg:sticky lg:top-[54px] lg:self-start lg:max-h-[calc(100vh-54px)] lg:overflow-hidden">
+              <div className="flex items-center justify-center flex-1 lg:overflow-hidden" style={{ padding: "24px 20px 48px" }}>
                 <PreviewFrame />
               </div>
             </div>
