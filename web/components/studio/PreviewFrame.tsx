@@ -219,6 +219,78 @@ export default function PreviewFrame() {
         <TextOverlayLayer overlays={overlays} />
       )}
 
+      {/* Play / Stop controls — only when clips are loaded and not in final phase */}
+      {showVideoSlideshow && phase === "compose" && !previewOverride && (
+        <>
+          {/* Centered play button (shown when paused) */}
+          <AnimatePresence>
+            {!isPlaying && (
+              <motion.button
+                initial={{ opacity: 0, scale: 0.85 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.85 }}
+                transition={{ duration: 0.15 }}
+                onClick={() => setIsPlaying(true)}
+                style={{
+                  position: "absolute",
+                  top: "50%",
+                  left: "50%",
+                  transform: "translate(-50%, -50%)",
+                  width: 48,
+                  height: 48,
+                  borderRadius: "50%",
+                  background: "rgba(6,9,11,0.65)",
+                  border: "1px solid rgba(255,255,255,0.2)",
+                  color: "var(--fr-ivory)",
+                  cursor: "pointer",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  zIndex: 20,
+                  backdropFilter: "blur(4px)",
+                }}
+                aria-label="Play preview"
+              >
+                <Play size={18} style={{ marginLeft: 2 }} />
+              </motion.button>
+            )}
+          </AnimatePresence>
+
+          {/* Stop button — top right when playing */}
+          <AnimatePresence>
+            {isPlaying && (
+              <motion.button
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.8 }}
+                transition={{ duration: 0.15 }}
+                onClick={() => { setIsPlaying(false); setActiveIndex(0); }}
+                style={{
+                  position: "absolute",
+                  top: 10,
+                  right: 10,
+                  width: 30,
+                  height: 30,
+                  borderRadius: "50%",
+                  background: "rgba(6,9,11,0.7)",
+                  border: "1px solid rgba(255,255,255,0.15)",
+                  color: "var(--fr-ivory)",
+                  cursor: "pointer",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  zIndex: 20,
+                  backdropFilter: "blur(4px)",
+                }}
+                aria-label="Stop preview"
+              >
+                <Square size={11} />
+              </motion.button>
+            )}
+          </AnimatePresence>
+        </>
+      )}
+
       {/* Done state actions (shown outside the 9:16 frame, below) */}
       {phase === "done" && (
         <DoneActions
