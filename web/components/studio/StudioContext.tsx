@@ -284,6 +284,12 @@ export function StudioProvider({ children }: { children: React.ReactNode }) {
     setSelectedClips((prev) => prev.filter((c) => c.id !== id));
   }, []);
 
+  const trimClip = useCallback((id: number, start: number, end: number) => {
+    setSelectedClips((prev) =>
+      prev.map((c) => c.id === id ? { ...c, trimStart: start, trimEnd: end } : c)
+    );
+  }, []);
+
   const setKeywordThumbnail = useCallback(
     (kw: string, thumbnail: string | null, videoId: number | null) => {
       setKeywords((prev) =>
