@@ -27,6 +27,18 @@ export default function ControlBar() {
         ? `${selectedClips.length} clip${selectedClips.length > 1 ? "s" : ""} · your cut`
         : "framed will pick clips for you";
 
+  const [glowing, setGlowing] = useState(false);
+  const prevCanGenerate = useRef(false);
+
+  useEffect(() => {
+    if (canGenerate && !prevCanGenerate.current) {
+      setGlowing(true);
+      const t = setTimeout(() => setGlowing(false), 1200);
+      return () => clearTimeout(t);
+    }
+    prevCanGenerate.current = canGenerate;
+  }, [canGenerate]);
+
   // Magnetic button effect
   const btnRef = useRef<HTMLButtonElement>(null);
   const [magnetic, setMagnetic] = useState({ x: 0, y: 0 });
