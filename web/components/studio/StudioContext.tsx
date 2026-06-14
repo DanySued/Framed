@@ -109,6 +109,7 @@ interface StudioActions {
 
   setDuration: (d: number) => void;
   setSubtitlesEnabled: (v: boolean) => void;
+  setTransitionsEnabled: (v: boolean) => void;
   setBulkCount: (n: number) => void;
 
   setOverlays: (overlays: TextOverlay[]) => void;
