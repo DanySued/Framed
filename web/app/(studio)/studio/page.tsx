@@ -10,6 +10,7 @@ import TextPanel from "@/components/studio/TextPanel";
 import ControlBar from "@/components/studio/ControlBar";
 import StudioTimeline from "@/components/studio/StudioTimeline";
 import StudioPhaseGate from "@/components/studio/StudioPhaseGate";
+import GenerationOverlay from "@/components/studio/GenerationOverlay";
 
 function StudioLayout() {
   const { selectedClips, phase, togglePlay } = useStudio();
