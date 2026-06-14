@@ -69,6 +69,7 @@ interface StudioState {
   // Reel settings
   duration: number; // 15–60
   subtitlesEnabled: boolean;
+  transitionsEnabled: boolean;
   bulkCount: number; // 1–5
 
   // Text overlays
