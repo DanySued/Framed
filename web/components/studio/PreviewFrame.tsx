@@ -40,7 +40,15 @@ export default function PreviewFrame() {
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setActiveIndex(0);
+    setIsPlaying(false);
   }, [thumbnails.length]);
+
+  useEffect(() => {
+    const v = videoRef.current;
+    if (!v) return;
+    if (isPlaying) { v.play().catch(() => {}); }
+    else { v.pause(); }
+  }, [isPlaying, activeIndex]);
 
   // Trigger gold pulse once when phase transitions to "done"
   useEffect(() => {
