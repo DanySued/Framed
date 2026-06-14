@@ -6,7 +6,7 @@ export default function NavLinks() {
   const pathname = usePathname();
   const links = [
     { href: "/studio", label: "Studio" },
-    { href: "/films", label: "Films" },
+    { href: "/films", label: "My Films" },
   ];
   return (
     <nav className="flex items-center gap-6">
