@@ -267,7 +267,7 @@ export default function StudioTimeline() {
                         </button>
 
                         {openTrimId === clip.id && (
-                          <TrimPopover clipId={clip.id} clipDuration={clipDur} trimStart={clip.trimStart ?? 0} trimEnd={clip.trimEnd ?? clipDur} onClose={() => setOpenTrimId(null)} />
+                          <InlineTrim clipId={clip.id} clipDuration={clipDur} trimStart={clip.trimStart ?? 0} trimEnd={clip.trimEnd ?? clipDur} onClose={() => setOpenTrimId(null)} />
                         )}
                       </div>
                     );
