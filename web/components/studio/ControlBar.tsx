@@ -298,6 +298,44 @@ export default function ControlBar() {
       {/* Spacer (desktop only) */}
       <div className="hidden sm:flex flex-1" />
 
+      {/* Undo / Redo */}
+      <div className="hidden sm:flex items-center gap-1" style={{ flexShrink: 0 }}>
+        <button
+          onClick={undo}
+          disabled={!canUndo}
+          title="Undo (⌘Z)"
+          aria-label="Undo"
+          style={{
+            width: 28, height: 28, display: "flex", alignItems: "center", justifyContent: "center",
+            background: "transparent", border: "1px solid var(--fr-line)",
+            borderRadius: 4, cursor: canUndo ? "pointer" : "not-allowed",
+            color: canUndo ? "var(--fr-muted)" : "var(--fr-line)",
+            transition: "color 120ms ease, border-color 120ms ease",
+          }}
+          onMouseEnter={(e) => { if (canUndo) { e.currentTarget.style.color = "var(--fr-ivory)"; e.currentTarget.style.borderColor = "var(--fr-muted)"; } }}
+          onMouseLeave={(e) => { e.currentTarget.style.color = canUndo ? "var(--fr-muted)" : "var(--fr-line)"; e.currentTarget.style.borderColor = "var(--fr-line)"; }}
+        >
+          <Undo2 size={12} strokeWidth={2} />
+        </button>
+        <button
+          onClick={redo}
+          disabled={!canRedo}
+          title="Redo (⌘⇧Z)"
+          aria-label="Redo"
+          style={{
+            width: 28, height: 28, display: "flex", alignItems: "center", justifyContent: "center",
+            background: "transparent", border: "1px solid var(--fr-line)",
+            borderRadius: 4, cursor: canRedo ? "pointer" : "not-allowed",
+            color: canRedo ? "var(--fr-muted)" : "var(--fr-line)",
+            transition: "color 120ms ease, border-color 120ms ease",
+          }}
+          onMouseEnter={(e) => { if (canRedo) { e.currentTarget.style.color = "var(--fr-ivory)"; e.currentTarget.style.borderColor = "var(--fr-muted)"; } }}
+          onMouseLeave={(e) => { e.currentTarget.style.color = canRedo ? "var(--fr-muted)" : "var(--fr-line)"; e.currentTarget.style.borderColor = "var(--fr-line)"; }}
+        >
+          <Redo2 size={12} strokeWidth={2} />
+        </button>
+      </div>
+
       <div className="flex items-center gap-4 shrink-0">
       {/* Readiness hint */}
       <span
