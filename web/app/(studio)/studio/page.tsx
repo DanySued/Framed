@@ -62,21 +62,35 @@ function DraftPill() {
 }
 
 function StudioLayout() {
-  const { selectedClips, phase, togglePlay } = useStudio();
+  const { selectedClips, phase, togglePlay, undo, redo } = useStudio();
   const hasClips = selectedClips.length > 0;
   const showCompositor = hasClips || phase !== "compose";
 
-  // Spacebar → play/pause
+  // Keyboard shortcuts
   useEffect(() => {
     function onKey(e: KeyboardEvent) {
+      const meta = e.metaKey || e.ctrlKey;
+      // Spacebar → play/pause (only when not in an input)
       if (e.code === "Space" && e.target === document.body) {
         e.preventDefault();
         togglePlay();
+        return;
+      }
+      // Cmd/Ctrl+Z → undo
+      if (meta && e.code === "KeyZ" && !e.shiftKey) {
+        e.preventDefault();
+        undo();
+        return;
+      }
+      // Cmd/Ctrl+Shift+Z or Cmd/Ctrl+Y → redo
+      if ((meta && e.code === "KeyZ" && e.shiftKey) || (meta && e.code === "KeyY")) {
+        e.preventDefault();
+        redo();
       }
     }
     document.addEventListener("keydown", onKey);
     return () => document.removeEventListener("keydown", onKey);
-  }, [togglePlay]);
+  }, [togglePlay, undo, redo]);
 
   return (
     <div className="flex flex-col" style={{ minHeight: "calc(100vh - 54px)" }}>
