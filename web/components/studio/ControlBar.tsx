@@ -12,6 +12,8 @@ export default function ControlBar() {
     setDuration,
     subtitlesEnabled,
     setSubtitlesEnabled,
+    transitionsEnabled,
+    setTransitionsEnabled,
     bulkCount,
     setBulkCount,
     onGenerate,
