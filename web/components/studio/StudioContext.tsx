@@ -512,6 +512,7 @@ export function StudioProvider({ children }: { children: React.ReactNode }) {
     selectedClips,
     duration,
     subtitlesEnabled,
+    transitionsEnabled,
     bulkCount,
     overlays,
     phase,
