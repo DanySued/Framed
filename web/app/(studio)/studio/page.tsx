@@ -16,7 +16,7 @@ function StudioLayout() {
   const showCompositor = hasClips || phase !== "compose";
 
   return (
-    <div className="flex flex-col" style={{ minHeight: "calc(100vh - 44px)" }}>
+    <div className="flex flex-col" style={{ minHeight: "calc(100vh - 54px)" }}>
       <h1 className="sr-only">Studio</h1>
 
       {/* ── Clip browser ────────────────────────────────────────── */}
