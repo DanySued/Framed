@@ -196,21 +196,26 @@ const DEFAULT_OVERLAY: TextOverlay = {
 };
 
 export function StudioProvider({ children }: { children: React.ReactNode }) {
-  const [audioFileId, setAudioFileId] = useState<string | null>(null);
-  const [audioName, setAudioName] = useState<string | null>(null);
-  const [songStartTime, setSongStartTime] = useState(0);
-  const [keywords, setKeywords] = useState<SceneKeyword[]>([]);
-  const [selectedClips, setSelectedClips] = useState<PickedClip[]>([]);
-  const [duration, setDuration] = useState(30);
-  const [subtitlesEnabled, setSubtitlesEnabled] = useState(false);
-  const [transitionsEnabled, setTransitionsEnabled] = useState(true);
-  const [bulkCount, setBulkCount] = useState(1);
-  const [overlays, setOverlays] = useState<TextOverlay[]>([{ ...DEFAULT_OVERLAY }]);
+  // Hydrate from draft on first render (localStorage is client-only)
+  const draft = typeof window !== "undefined" ? loadDraft() : null;
+  const hasDraft = draft !== null && (draft.selectedClips.length > 0 || draft.keywords.length > 0);
+
+  const [audioFileId, setAudioFileId] = useState<string | null>(draft?.audioFileId ?? null);
+  const [audioName, setAudioName] = useState<string | null>(draft?.audioName ?? null);
+  const [songStartTime, setSongStartTime] = useState(draft?.songStartTime ?? 0);
+  const [keywords, setKeywords] = useState<SceneKeyword[]>(draft?.keywords ?? []);
+  const [selectedClips, setSelectedClips] = useState<PickedClip[]>(draft?.selectedClips ?? []);
+  const [duration, setDuration] = useState(draft?.duration ?? 30);
+  const [subtitlesEnabled, setSubtitlesEnabled] = useState(draft?.subtitlesEnabled ?? false);
+  const [transitionsEnabled, setTransitionsEnabled] = useState(draft?.transitionsEnabled ?? true);
+  const [bulkCount, setBulkCount] = useState(draft?.bulkCount ?? 1);
+  const [overlays, setOverlays] = useState<TextOverlay[]>(draft?.overlays ?? [{ ...DEFAULT_OVERLAY }]);
   const [phase, setPhase] = useState<StudioPhase>("compose");
   const [jobs, setJobs] = useState<JobEntry[]>([]);
   const [approvalJobIndex, setApprovalJobIndex] = useState(0);
   const [previewOverride, setPreviewOverride] = useState<string | null>(null);
-  const [vibePreset, setVibePreset] = useState<string | null>(null);
+  const [vibePreset, setVibePreset] = useState<string | null>(draft?.vibePreset ?? null);
+  const [draftRestoredAt] = useState<number | null>(hasDraft ? (draft?.savedAt ?? Date.now()) : null);
 
   // ── Playback clock ─────────────────────────────────────────────
   const [isPlaying, setIsPlaying] = useState(false);
