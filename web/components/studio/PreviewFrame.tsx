@@ -131,14 +131,15 @@ export default function PreviewFrame() {
                   transition={{ duration: 0.5, ease: "easeInOut" }}
                 >
                   <video
+                    ref={videoRef}
                     src={videoUrls[activeIndex]}
-                    autoPlay
+                    autoPlay={isPlaying}
                     muted
                     playsInline
-                    loop={videoUrls.length === 1}
+                    loop={videoUrls.length === 1 && isPlaying}
                     className="absolute inset-0 w-full h-full object-cover"
                     onEnded={() =>
-                      videoUrls.length > 1 &&
+                      isPlaying && videoUrls.length > 1 &&
                       setActiveIndex((i) => (i + 1) % videoUrls.length)
                     }
                   />
