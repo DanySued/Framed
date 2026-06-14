@@ -205,6 +205,50 @@ export default function StudioTimeline() {
                 clip <span style={{ color: "var(--fr-ivory)" }}>{activeClipIndex + 1}</span> of {selectedClips.length}
               </span>
 
+              {/* Divider */}
+              <div style={{ width: 1, height: 14, background: "var(--fr-line)", flexShrink: 0 }} />
+
+              {/* Duration meter */}
+              {(() => {
+                const over = totalSecs > duration;
+                const under = totalSecs < duration - 2;
+                const color = over
+                  ? "rgba(255,80,80,0.9)"
+                  : under
+                  ? "rgba(255,180,50,0.9)"
+                  : "var(--fr-gold)";
+                const bg = over
+                  ? "rgba(255,80,80,0.1)"
+                  : under
+                  ? "rgba(255,180,50,0.08)"
+                  : "rgba(82,214,196,0.1)";
+                const border = over
+                  ? "rgba(255,80,80,0.3)"
+                  : under
+                  ? "rgba(255,180,50,0.25)"
+                  : "rgba(82,214,196,0.25)";
+                const label = over
+                  ? `+${(totalSecs - duration).toFixed(1)}s over`
+                  : under
+                  ? `${(duration - totalSecs).toFixed(1)}s short`
+                  : "fits";
+                return (
+                  <div style={{
+                    display: "flex", alignItems: "center", gap: 6,
+                    background: bg, border: `1px solid ${border}`,
+                    borderRadius: 4, padding: "2px 8px", flexShrink: 0,
+                    transition: "background 200ms ease, border-color 200ms ease",
+                  }}>
+                    <span style={{ fontFamily: "var(--font-mono), monospace", fontSize: "0.5rem", color, letterSpacing: "0.04em", transition: "color 200ms ease" }}>
+                      {totalSecs.toFixed(1)}s / {duration}s
+                    </span>
+                    <span style={{ fontFamily: "var(--font-mono), monospace", fontSize: "0.4rem", color: color, opacity: 0.7, letterSpacing: "0.06em", textTransform: "uppercase" }}>
+                      {label}
+                    </span>
+                  </div>
+                );
+              })()}
+
               {/* Spacer */}
               <div style={{ flex: 1 }} />
 
