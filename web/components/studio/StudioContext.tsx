@@ -579,6 +579,7 @@ export function StudioProvider({ children }: { children: React.ReactNode }) {
     setJobs([]);
     setApprovalJobIndex(0);
     setPreviewOverride(null);
+    deleteDraft();
   }, [stopPolling]);
 
   const value: StudioContextValue = {
