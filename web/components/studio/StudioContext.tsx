@@ -375,6 +375,37 @@ export function StudioProvider({ children }: { children: React.ReactNode }) {
   // Cleanup on unmount
   useEffect(() => () => stopPolling(), [stopPolling]);
 
+  // ── Draft persistence ──────────────────────────────────────────
+  const saveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  useEffect(() => {
+    if (phase !== "compose") return; // don't overwrite draft during generation
+    if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
+    saveTimerRef.current = setTimeout(() => {
+      saveDraft({
+        selectedClips, keywords, audioFileId, audioName, songStartTime,
+        duration, subtitlesEnabled, transitionsEnabled, bulkCount, overlays, vibePreset,
+        savedAt: Date.now(),
+      });
+    }, 800);
+    return () => { if (saveTimerRef.current) clearTimeout(saveTimerRef.current); };
+  }, [selectedClips, keywords, audioFileId, audioName, songStartTime,
+      duration, subtitlesEnabled, transitionsEnabled, bulkCount, overlays, vibePreset, phase]);
+
+  const clearDraft = useCallback(() => {
+    deleteDraft();
+    setSelectedClips([]);
+    setKeywords([]);
+    setAudioFileId(null);
+    setAudioName(null);
+    setSongStartTime(0);
+    setDuration(30);
+    setSubtitlesEnabled(false);
+    setTransitionsEnabled(true);
+    setBulkCount(1);
+    setOverlays([{ ...DEFAULT_OVERLAY }]);
+    setVibePreset(null);
+  }, []);
+
   const setAudio = useCallback((id: string, name: string) => {
     setAudioFileId(id);
     setAudioName(name);
