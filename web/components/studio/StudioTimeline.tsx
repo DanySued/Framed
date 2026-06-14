@@ -143,7 +143,7 @@ export default function StudioTimeline() {
           transition={{ duration: 0.22 }}
           style={{ overflow: "hidden", borderTop: "1px solid var(--fr-line)" }}
         >
-          <div style={{ padding: "14px 24px 18px", background: "rgba(0,0,0,0.25)" }}>
+          <div style={{ padding: "20px 32px 28px", background: "rgba(0,0,0,0.25)" }}>
             {/* Header */}
             <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 10 }}>
               <span style={{ fontFamily: "var(--font-mono), monospace", fontSize: "0.5rem", letterSpacing: "0.08em", textTransform: "uppercase", color: "var(--fr-gold)" }}>
