@@ -8,7 +8,7 @@ import ScenesPanel from "@/components/studio/ScenesPanel";
 import TextPanel from "@/components/studio/TextPanel";
 import ControlBar from "@/components/studio/ControlBar";
 import ClipRail from "@/components/studio/ClipRail";
-import SelectedClipsStrip from "@/components/studio/SelectedClipsStrip";
+import StudioTimeline from "@/components/studio/StudioTimeline";
 import StudioPhaseGate from "@/components/studio/StudioPhaseGate";
 
 function StudioLayout() {
