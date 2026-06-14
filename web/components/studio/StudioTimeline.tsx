@@ -158,7 +158,7 @@ export default function StudioTimeline() {
   }
   function onDragEnd() { setDraggingFrom(null); setDropTarget(null); }
 
-  const playheadPx = currentTime * PX_PER_SEC;
+  const playheadPx = currentTime * pxPerSec;
 
   return (
     <AnimatePresence>
@@ -170,15 +170,60 @@ export default function StudioTimeline() {
           transition={{ duration: 0.22 }}
           style={{ overflow: "hidden", borderTop: "1px solid var(--fr-line)" }}
         >
-          <div style={{ padding: "20px 32px 28px", background: "rgba(0,0,0,0.25)" }}>
-            {/* Header */}
-            <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 10 }}>
-              <span style={{ fontFamily: "var(--font-mono), monospace", fontSize: "0.5rem", letterSpacing: "0.08em", textTransform: "uppercase", color: "var(--fr-gold)" }}>
-                timeline · {selectedClips.length} clip{selectedClips.length > 1 ? "s" : ""} · {totalSecs.toFixed(1)}s
+          <div ref={containerRef} style={{ padding: "16px 32px 24px", background: "rgba(0,0,0,0.25)" }}>
+            {/* Header row: transport + meta + zoom */}
+            <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 12 }}>
+              {/* Play/pause */}
+              <button
+                onClick={togglePlay}
+                aria-label={isPlaying ? "Pause" : "Play"}
+                style={{
+                  width: 28, height: 28, borderRadius: "50%", flexShrink: 0,
+                  background: isPlaying ? "transparent" : "var(--fr-gold)",
+                  border: isPlaying ? "1px solid rgba(82,214,196,0.5)" : "none",
+                  color: isPlaying ? "var(--fr-gold)" : "#04110e",
+                  cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center",
+                  transition: "background 150ms ease",
+                }}
+              >
+                {isPlaying ? <Pause size={12} strokeWidth={2.5} /> : <Play size={12} strokeWidth={2.5} style={{ marginLeft: 1 }} />}
+              </button>
+
+              {/* Time */}
+              <span style={{ fontFamily: "var(--font-mono), monospace", fontSize: "0.6rem", color: "var(--fr-ivory)", letterSpacing: "0.02em", flexShrink: 0 }}>
+                {fmt(currentTime)} / {fmt(totalDuration)}
               </span>
-              <span style={{ fontFamily: "var(--font-mono), monospace", fontSize: "0.5rem", color: "var(--fr-muted)" }}>
-                — click to scrub · drag to reorder · ✂ to trim
+
+              {/* Divider */}
+              <div style={{ width: 1, height: 14, background: "var(--fr-line)", flexShrink: 0 }} />
+
+              {/* Clip indicator */}
+              <span style={{ fontFamily: "var(--font-mono), monospace", fontSize: "0.5rem", letterSpacing: "0.06em", textTransform: "uppercase", color: "var(--fr-gold)", flexShrink: 0 }}>
+                {selectedClips.length} clip{selectedClips.length > 1 ? "s" : ""} · {totalSecs.toFixed(1)}s
               </span>
+              <span style={{ fontFamily: "var(--font-mono), monospace", fontSize: "0.5rem", color: "var(--fr-muted)", flexShrink: 0 }}>
+                clip <span style={{ color: "var(--fr-ivory)" }}>{activeClipIndex + 1}</span> of {selectedClips.length}
+              </span>
+
+              {/* Spacer */}
+              <div style={{ flex: 1 }} />
+
+              {/* Zoom slider */}
+              <span style={{ fontFamily: "var(--font-mono), monospace", fontSize: "0.45rem", color: "var(--fr-muted)", textTransform: "uppercase", letterSpacing: "0.06em", flexShrink: 0 }}>zoom</span>
+              <input
+                type="range" min={1} max={8} step={0.1} value={zoom}
+                onChange={(e) => setZoom(Number(e.target.value))}
+                style={{ width: 80, accentColor: "var(--fr-gold)", cursor: "pointer" }}
+                aria-label="Timeline zoom"
+              />
+              {zoom > 1 && (
+                <button
+                  onClick={() => setZoom(1)}
+                  style={{ fontFamily: "var(--font-mono), monospace", fontSize: "0.45rem", color: "var(--fr-muted)", background: "transparent", border: "1px solid var(--fr-line)", padding: "2px 6px", cursor: "pointer", borderRadius: 3, flexShrink: 0 }}
+                >
+                  fit
+                </button>
+              )}
             </div>
 
             {/* Scrollable canvas */}
@@ -215,7 +260,7 @@ export default function StudioTimeline() {
                   style={{ height: 24, position: "relative", cursor: "crosshair", marginBottom: 4, userSelect: "none" }}
                 >
                   {ticks.map((t) => (
-                    <div key={t} style={{ position: "absolute", left: t * PX_PER_SEC, top: 0, display: "flex", flexDirection: "column", alignItems: "flex-start", gap: 2 }}>
+                    <div key={t} style={{ position: "absolute", left: t * pxPerSec, top: 0, display: "flex", flexDirection: "column", alignItems: "flex-start", gap: 2 }}>
                       <span style={{ fontFamily: "var(--font-mono), monospace", fontSize: "0.4375rem", color: "var(--fr-muted)", lineHeight: 1, transform: "translateX(-50%)" }}>{t}s</span>
                       <div style={{ width: 1, height: 6, background: "var(--fr-line)" }} />
                     </div>
