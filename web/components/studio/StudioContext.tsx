@@ -159,6 +159,10 @@ interface StudioActions {
   setPhase: (p: StudioPhase) => void;
   setPreviewOverride: (src: string | null) => void;
 
+  // Draft persistence
+  draftRestoredAt: number | null; // epoch ms when draft was loaded, null if fresh
+  clearDraft: () => void;
+
   // Playback controls
   play: () => void;
   pause: () => void;
