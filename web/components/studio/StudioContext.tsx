@@ -162,6 +162,7 @@ export function StudioProvider({ children }: { children: React.ReactNode }) {
   const [selectedClips, setSelectedClips] = useState<PickedClip[]>([]);
   const [duration, setDuration] = useState(30);
   const [subtitlesEnabled, setSubtitlesEnabled] = useState(false);
+  const [transitionsEnabled, setTransitionsEnabled] = useState(true);
   const [bulkCount, setBulkCount] = useState(1);
   const [overlays, setOverlays] = useState<TextOverlay[]>([{ ...DEFAULT_OVERLAY }]);
   const [phase, setPhase] = useState<StudioPhase>("compose");
