@@ -42,9 +42,6 @@ function StudioLayout() {
       {/* ── Timeline ─────────────────────────────────────────────── */}
       <StudioTimeline />
 
-      {/* ── Transport bar — between timeline and preview ─────────── */}
-      <TransportBar />
-
       {/* ── Compositor ──────────────────────────────────────────── */}
       <AnimatePresence>
         {showCompositor && (
