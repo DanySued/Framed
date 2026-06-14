@@ -196,7 +196,7 @@ export default function StudioTimeline() {
                 </div>
 
                 {/* Clips track */}
-                <div style={{ position: "relative", height: 72, background: "var(--fr-surface)", border: "1px solid var(--fr-line)", borderRadius: 4, marginBottom: audioFileId ? 6 : 0, overflow: "visible" }}>
+                <div style={{ position: "relative", height: 88, background: "var(--fr-surface)", border: "1px solid var(--fr-line)", borderRadius: 4, marginBottom: audioFileId ? 10 : 0, overflow: "visible" }}>
                   {blocks.map(({ clip, i, left, width }) => {
                     const clipDur = clip.duration ?? 5;
                     const isTrimmed = clip.trimStart !== undefined || clip.trimEnd !== undefined;
