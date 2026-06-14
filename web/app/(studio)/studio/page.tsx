@@ -30,6 +30,21 @@ function StudioLayout() {
         </div>
       </StudioPhaseGate>
 
+      {/* ── Timeline (clip rail) — below the video grid ─────────── */}
+      <AnimatePresence>
+        {hasClips && (
+          <motion.div
+            key="cliprail"
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 8 }}
+            transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
+          >
+            <ClipRail />
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       {/* ── Compositor ──────────────────────────────────────────── */}
       <AnimatePresence>
         {showCompositor && (
@@ -41,11 +56,8 @@ function StudioLayout() {
             transition={{ duration: 0.32, ease: [0.22, 1, 0.36, 1] }}
             className="flex-1 min-h-0 grid lg:grid-cols-[minmax(260px,320px)_1fr_minmax(260px,320px)] items-start"
           >
-            {/* Left: TextPanel in compose; ClipRail in approval */}
+            {/* Left: TextPanel in compose */}
             <div className="lg:overflow-y-auto flex flex-col">
-              <StudioPhaseGate phases={["approval"]}>
-                <ClipRail />
-              </StudioPhaseGate>
               <StudioPhaseGate phases={["compose"]}>
                 <TextPanel />
               </StudioPhaseGate>
