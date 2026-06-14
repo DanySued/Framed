@@ -41,6 +41,7 @@ export default function TransportBar() {
     <div style={{
       display: "flex",
       alignItems: "center",
+      justifyContent: "center",
       gap: 10,
       padding: "10px 24px",
       background: "rgba(0,0,0,0.35)",
