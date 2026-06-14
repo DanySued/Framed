@@ -763,20 +763,9 @@ export default function ScenesPanel() {
               }}
             >
               {keywords.length === 0
-                ? "pick a scene above, or type what you're looking for"
+                ? "search a mood, place, or feeling above — or try one of these"
                 : "click a keyword chip to browse its clips"}
             </p>
-            {keywords.length === 0 && (
-              <p
-                style={{
-                  fontSize: "0.6875rem",
-                  color: "rgba(255,255,255,0.25)",
-                  letterSpacing: "0.04em",
-                }}
-              >
-                beach sunset · walk in the park · city at night · …
-              </p>
-            )}
           </div>
         ) : filteredResults.length === 0 ? (
           <p
