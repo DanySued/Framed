@@ -2,10 +2,11 @@
 
 import { useRef, useState, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "motion/react";
-import { X, Scissors, Music2 } from "lucide-react";
+import { X, Scissors, Music2, Play, Pause } from "lucide-react";
 import { useStudio } from "./StudioContext";
 
-const PX_PER_SEC = 56;
+const MIN_PX_PER_SEC = 8;
+const MAX_PX_PER_SEC = 120;
 
 // ── Inline trim overlay (renders inside the clip block, no overflow issues) ──
 function InlineTrim({ clipId, clipDuration, trimStart, trimEnd, onClose }: {
