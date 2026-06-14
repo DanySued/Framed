@@ -311,19 +311,21 @@ export default function ScenesPanel() {
       >
       <div style={{ maxWidth: 720, margin: "0 auto" }}>
         {/* Section label */}
-        <div style={{ display: "flex", alignItems: "baseline", gap: 8, marginBottom: 28, justifyContent: "center" }}>
+        <div style={{ textAlign: "center", marginBottom: 28 }}>
           <span
             style={{
               fontFamily: "var(--font-mono), monospace",
               fontSize: "0.625rem",
               color: "var(--fr-gold)",
               letterSpacing: "0.06em",
+              marginRight: 8,
             }}
           >
             01
           </span>
           <h2
             style={{
+              display: "inline",
               fontSize: "0.75rem",
               fontWeight: 600,
               letterSpacing: "0.08em",
