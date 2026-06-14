@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import { Undo2, Redo2 } from "lucide-react";
 import { useStudio } from "./StudioContext";
 
 export default function ControlBar() {
@@ -17,6 +18,10 @@ export default function ControlBar() {
     bulkCount,
     setBulkCount,
     onGenerate,
+    undo,
+    redo,
+    canUndo,
+    canRedo,
   } = useStudio();
 
   const hasScenes = selectedClips.length >= 1 || keywords.length >= 1;
