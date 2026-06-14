@@ -133,6 +133,9 @@ function StudioLayout() {
 
       {/* ── Generation overlay (mounts over everything when generating/done) ── */}
       <GenerationOverlay />
+
+      {/* ── Draft restored pill ──────────────────────────────────── */}
+      <DraftPill />
     </div>
   );
 }
