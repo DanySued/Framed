@@ -9,7 +9,6 @@ import ScenesPanel from "@/components/studio/ScenesPanel";
 import TextPanel from "@/components/studio/TextPanel";
 import ControlBar from "@/components/studio/ControlBar";
 import StudioTimeline from "@/components/studio/StudioTimeline";
-import TransportBar from "@/components/studio/TransportBar";
 import StudioPhaseGate from "@/components/studio/StudioPhaseGate";
 
 function StudioLayout() {
