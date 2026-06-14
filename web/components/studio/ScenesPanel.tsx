@@ -613,7 +613,12 @@ export default function ScenesPanel() {
               overflow: "hidden",
             }}
           >
-            <div style={{ padding: "36px 24px 20px" }}>
+            <div style={{
+              padding: "24px 24px 20px",
+              borderLeft: "2px solid var(--fr-gold)",
+              marginLeft: 0,
+              background: "rgba(82,214,196,0.02)",
+            }}>
               <p
                 style={{
                   fontSize: "0.5625rem",
