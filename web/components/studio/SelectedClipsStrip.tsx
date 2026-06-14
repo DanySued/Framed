@@ -139,7 +139,8 @@ function TrimPopover({
 }
 
 export default function SelectedClipsStrip() {
-  const { selectedClips, targetClips, duration, removeClip } = useStudio();
+  const { selectedClips, duration, removeClip } = useStudio();
+  const targetClips = Math.max(1, Math.round(duration / 4));
   const [openTrimId, setOpenTrimId] = useState<number | null>(null);
 
   return (
