@@ -523,32 +523,36 @@ export function StudioProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const toggleClip = useCallback((clip: PickedClip) => {
+    pushHistory();
     setSelectedClips((prev) =>
       prev.some((c) => c.id === clip.id)
         ? prev.filter((c) => c.id !== clip.id)
         : [...prev, clip]
     );
-  }, []);
+  }, [pushHistory]);
 
   const removeClip = useCallback((id: number) => {
+    pushHistory();
     setSelectedClips((prev) => prev.filter((c) => c.id !== id));
-  }, []);
+  }, [pushHistory]);
 
   const trimClip = useCallback((id: number, start: number, end: number) => {
+    pushHistoryDebounced();
     setSelectedClips((prev) =>
       prev.map((c) => c.id === id ? { ...c, trimStart: start, trimEnd: end } : c)
     );
-  }, []);
+  }, [pushHistoryDebounced]);
 
   const reorderClips = useCallback((from: number, to: number) => {
     if (from === to) return;
+    pushHistory();
     setSelectedClips((prev) => {
       const next = [...prev];
       const [moved] = next.splice(from, 1);
       next.splice(to, 0, moved);
       return next;
     });
-  }, []);
+  }, [pushHistory]);
 
   const setKeywordThumbnail = useCallback(
     (kw: string, thumbnail: string | null, videoId: number | null) => {
