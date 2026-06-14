@@ -416,6 +416,87 @@ export function StudioProvider({ children }: { children: React.ReactNode }) {
     setVibePreset(null);
   }, []);
 
+  // ── Undo / Redo ────────────────────────────────────────────────
+  const [past, setPast] = useState<HistoryEntry[]>([]);
+  const [future, setFuture] = useState<HistoryEntry[]>([]);
+
+  // Always-current snapshot ref (updated after every render)
+  const historySnapshotRef = useRef<HistoryEntry>({
+    selectedClips, keywords, audioFileId, audioName, songStartTime,
+    duration, subtitlesEnabled, transitionsEnabled, bulkCount, overlays, vibePreset,
+  });
+  useEffect(() => {
+    historySnapshotRef.current = {
+      selectedClips, keywords, audioFileId, audioName, songStartTime,
+      duration, subtitlesEnabled, transitionsEnabled, bulkCount, overlays, vibePreset,
+    };
+  }, [selectedClips, keywords, audioFileId, audioName, songStartTime,
+      duration, subtitlesEnabled, transitionsEnabled, bulkCount, overlays, vibePreset]);
+
+  // Immediate push — call before discrete mutations (toggle, remove, reorder…)
+  const pushHistory = useCallback(() => {
+    const entry = { ...historySnapshotRef.current };
+    setPast((prev) => [...prev.slice(-(MAX_HISTORY - 1)), entry]);
+    setFuture([]);
+  }, []);
+
+  // Debounced push — call on continuous mutations (trim drag, overlay drag)
+  // Captures the pre-gesture state on first call, pushes it after 400ms silence
+  const historyDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const historyDebouncedSnap = useRef<HistoryEntry | null>(null);
+  const pushHistoryDebounced = useCallback(() => {
+    if (!historyDebounceRef.current) {
+      // First call in this gesture — capture pre-mutation state
+      historyDebouncedSnap.current = { ...historySnapshotRef.current };
+    }
+    if (historyDebounceRef.current) clearTimeout(historyDebounceRef.current);
+    historyDebounceRef.current = setTimeout(() => {
+      const snap = historyDebouncedSnap.current;
+      if (snap) {
+        setPast((prev) => [...prev.slice(-(MAX_HISTORY - 1)), snap]);
+        setFuture([]);
+      }
+      historyDebounceRef.current = null;
+      historyDebouncedSnap.current = null;
+    }, 400);
+  }, []);
+
+  const restoreEntry = useCallback((entry: HistoryEntry) => {
+    setSelectedClips(entry.selectedClips);
+    setKeywords(entry.keywords);
+    setAudioFileId(entry.audioFileId);
+    setAudioName(entry.audioName);
+    setSongStartTime(entry.songStartTime);
+    setDuration(entry.duration);
+    setSubtitlesEnabled(entry.subtitlesEnabled);
+    setTransitionsEnabled(entry.transitionsEnabled);
+    setBulkCount(entry.bulkCount);
+    setOverlays(entry.overlays);
+    setVibePreset(entry.vibePreset);
+  }, []);
+
+  const undo = useCallback(() => {
+    setPast((prev) => {
+      if (prev.length === 0) return prev;
+      const entry = prev[prev.length - 1];
+      const rest = prev.slice(0, -1);
+      setFuture((f) => [{ ...historySnapshotRef.current }, ...f.slice(0, MAX_HISTORY - 1)]);
+      restoreEntry(entry);
+      return rest;
+    });
+  }, [restoreEntry]);
+
+  const redo = useCallback(() => {
+    setFuture((prev) => {
+      if (prev.length === 0) return prev;
+      const entry = prev[0];
+      const rest = prev.slice(1);
+      setPast((p) => [...p.slice(-(MAX_HISTORY - 1)), { ...historySnapshotRef.current }]);
+      restoreEntry(entry);
+      return rest;
+    });
+  }, [restoreEntry]);
+
   const setAudio = useCallback((id: string, name: string) => {
     setAudioFileId(id);
     setAudioName(name);
