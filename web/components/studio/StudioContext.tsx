@@ -682,6 +682,10 @@ export function StudioProvider({ children }: { children: React.ReactNode }) {
   }, [stopPolling]);
 
   const value: StudioContextValue = {
+    canUndo: past.length > 0,
+    canRedo: future.length > 0,
+    undo,
+    redo,
     audioFileId,
     audioName,
     songStartTime,
