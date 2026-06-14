@@ -20,6 +20,8 @@ export default function PreviewFrame() {
   const showVideoSlideshow = videoUrls.length > 0;
 
   const [activeIndex, setActiveIndex] = useState(0);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const videoRef = useRef<HTMLVideoElement>(null);
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   // Gold border pulse on done
   const [showGoldPulse, setShowGoldPulse] = useState(false);
