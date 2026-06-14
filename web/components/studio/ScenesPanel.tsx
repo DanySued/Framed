@@ -365,6 +365,7 @@ export default function ScenesPanel() {
               fontFamily: "var(--font-sans)",
               fontSize: "0.9375rem",
               caretColor: "var(--fr-gold)",
+              textAlign: "center",
             }}
           />
           {input && (
