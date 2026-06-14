@@ -518,9 +518,10 @@ export function StudioProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const removeKeyword = useCallback((kw: string) => {
+    pushHistory();
     setKeywords((prev) => prev.filter((k) => k.keyword !== kw));
     setSelectedClips((prev) => prev.filter((c) => c.keyword !== kw));
-  }, []);
+  }, [pushHistory]);
 
   const toggleClip = useCallback((clip: PickedClip) => {
     pushHistory();
