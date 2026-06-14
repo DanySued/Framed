@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence } from "motion/react";
+import { Play, Square } from "lucide-react";
 import { useStudio } from "./StudioContext";
 import TextOverlayLayer from "./TextOverlayLayer";
 import GenerationOverlay from "./GenerationOverlay";
