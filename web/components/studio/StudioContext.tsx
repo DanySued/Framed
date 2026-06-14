@@ -435,6 +435,7 @@ export function StudioProvider({ children }: { children: React.ReactNode }) {
     setKeywordThumbnail,
     toggleClip,
     removeClip,
+    trimClip,
     setDuration,
     setSubtitlesEnabled,
     setBulkCount,
