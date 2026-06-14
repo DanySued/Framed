@@ -56,55 +56,81 @@ function InlineTrim({ clipId, clipDuration, trimStart, trimEnd, onClose }: {
   );
 }
 
+function fmt(t: number) {
+  const m = Math.floor(t / 60);
+  const s = (t % 60).toFixed(1).padStart(4, "0");
+  return `${String(m).padStart(2, "0")}:${s}`;
+}
+
 // ── Timeline ──────────────────────────────────────────────────────
 export default function StudioTimeline() {
   const {
     selectedClips, duration, audioFileId, audioName,
     songStartTime, setSongStartTime, removeClip, reorderClips, seek,
-    currentTime, activeClipIndex,
+    currentTime, activeClipIndex, totalDuration, isPlaying, togglePlay,
   } = useStudio();
 
   const scrollRef = useRef<HTMLDivElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
   const [openTrimId, setOpenTrimId] = useState<number | null>(null);
   const [draggingFrom, setDraggingFrom] = useState<number | null>(null);
   const [dropTarget, setDropTarget] = useState<number | null>(null);
+  const [zoom, setZoom] = useState(1); // 1 = auto-fit
+  const [containerW, setContainerW] = useState(800);
+
+  // Measure container width for auto-fit
+  useEffect(() => {
+    if (!containerRef.current) return;
+    const ro = new ResizeObserver(([entry]) => {
+      setContainerW(entry.contentRect.width);
+    });
+    ro.observe(containerRef.current);
+    return () => ro.disconnect();
+  }, []);
 
   function effDur(clip: (typeof selectedClips)[number]) {
     const raw = clip.duration ?? 5;
     return (clip.trimEnd ?? raw) - (clip.trimStart ?? 0);
   }
 
+  const totalSecs = selectedClips.reduce((s, c) => s + effDur(c), 0);
+
+  // Auto-fit: base scale fills the container; zoom multiplies it
+  const basePxPerSec = totalSecs > 0
+    ? Math.max(MIN_PX_PER_SEC, (containerW - 40) / totalSecs)
+    : 40;
+  const pxPerSec = Math.min(MAX_PX_PER_SEC, basePxPerSec * zoom);
+
   // Cumulative layout
   const blocks = selectedClips.map((clip, i) => {
-    const left = selectedClips.slice(0, i).reduce((s, c) => s + effDur(c), 0) * PX_PER_SEC;
-    const width = effDur(clip) * PX_PER_SEC;
+    const left = selectedClips.slice(0, i).reduce((s, c) => s + effDur(c), 0) * pxPerSec;
+    const width = effDur(clip) * pxPerSec;
     return { clip, i, left, width };
   });
 
-  const totalSecs = selectedClips.reduce((s, c) => s + effDur(c), 0);
-  const timelineW = Math.max(totalSecs * PX_PER_SEC + 80, duration * PX_PER_SEC + 80, 500);
-  const tickStep = timelineW > 2000 ? 10 : 5;
-  const ticks = Array.from({ length: Math.ceil((timelineW / PX_PER_SEC) / tickStep) + 1 }, (_, i) => i * tickStep);
+  const timelineW = Math.max(totalSecs * pxPerSec + 40, duration * pxPerSec + 40, containerW);
+  const tickStep = pxPerSec < 20 ? 10 : pxPerSec < 50 ? 5 : 2;
+  const ticks = Array.from({ length: Math.ceil((timelineW / pxPerSec) / tickStep) + 1 }, (_, i) => i * tickStep);
 
   // Auto-scroll to keep playhead visible
   useEffect(() => {
     const el = scrollRef.current;
     if (!el) return;
-    const px = currentTime * PX_PER_SEC;
+    const px = currentTime * pxPerSec;
     const { scrollLeft, clientWidth } = el;
     if (px > scrollLeft + clientWidth - 80) {
       el.scrollTo({ left: px - clientWidth / 2, behavior: "smooth" });
     } else if (px < scrollLeft + 20) {
       el.scrollTo({ left: Math.max(0, px - 40), behavior: "smooth" });
     }
-  }, [currentTime]);
+  }, [currentTime, pxPerSec]);
 
   // Click ruler → seek
   function handleRulerClick(e: React.MouseEvent<HTMLDivElement>) {
     const rect = e.currentTarget.getBoundingClientRect();
     const scrollX = scrollRef.current?.scrollLeft ?? 0;
     const x = e.clientX - rect.left + scrollX;
-    seek(Math.max(0, x / PX_PER_SEC));
+    seek(Math.max(0, x / pxPerSec));
   }
 
   // Audio drag
@@ -115,7 +141,7 @@ export default function StudioTimeline() {
   }
   function onAudioMove(e: React.PointerEvent) {
     if (!audioDrag.current) return;
-    setSongStartTime(Math.max(0, audioDrag.current.startTime + (e.clientX - audioDrag.current.startX) / PX_PER_SEC));
+    setSongStartTime(Math.max(0, audioDrag.current.startTime + (e.clientX - audioDrag.current.startX) / pxPerSec));
   }
   function onAudioUp() { audioDrag.current = null; }
 
