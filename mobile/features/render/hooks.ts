@@ -23,6 +23,23 @@ export function useStartRender() {
   })
 }
 
+export function useLatestRender(projectId: string | null, enabled: boolean) {
+  return useQuery<Render | null>({
+    queryKey: ['render', projectId],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from('renders')
+        .select('*')
+        .eq('project_id', projectId!)
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .maybeSingle()
+      return data as Render | null
+    },
+    enabled: !!projectId && enabled,
+  })
+}
+
 export function useRenderJob(jobId: string | null) {
   return useQuery<RenderJob>({
     queryKey: ['job', jobId],
