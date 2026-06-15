@@ -243,7 +243,21 @@ export default function ProjectScreen() {
         )}
         {job?.status === 'done' && (
           <View className="mx-5 mb-2 bg-fr-surface-3 rounded-xl border border-fr-green/30 p-3">
-            <Text className="text-[10px] font-semibold text-fr-green">Render complete!</Text>
+            <View className="flex-row items-center justify-between">
+              <Text className="text-[10px] font-semibold text-fr-green">Render complete!</Text>
+              {latestRender?.public_url && (
+                <Pressable
+                  onPress={handleSaveToLibrary}
+                  disabled={isSaving}
+                  className="px-3 py-1 rounded-lg bg-fr-green/20 border border-fr-green/40"
+                >
+                  {isSaving
+                    ? <ActivityIndicator size="small" color="#4ade80" />
+                    : <Text className="text-[10px] font-semibold text-fr-green">Save to Camera Roll</Text>
+                  }
+                </Pressable>
+              )}
+            </View>
           </View>
         )}
         {job?.status === 'failed' && (
