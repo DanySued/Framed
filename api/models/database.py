@@ -84,6 +84,7 @@ def init_db():
         ("reel_jobs", "clip_paths", "TEXT"),
         ("reel_jobs", "pending_request_data", "TEXT"),
         ("reels", "srt_path", "TEXT"),
+        ("reels", "public_slug", "TEXT"),
     ]:
         try:
             db.execute_sql(f"ALTER TABLE {table} ADD COLUMN {col} {col_type}")
