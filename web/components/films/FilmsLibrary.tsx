@@ -245,6 +245,23 @@ function FilmFocus({ reel, onClose }: { reel: ReelItem; onClose: () => void }) {
     downloadRef.current?.focus();
   }, []);
 
+  const [sharing, setSharing] = useState(false);
+  const handleShare = useCallback(async () => {
+    setSharing(true);
+    try {
+      const res = await fetch(`/api/reels/${reel.id}/share`, { method: "POST" });
+      if (!res.ok) throw new Error("share failed");
+      const { slug } = await res.json();
+      const url = `${window.location.origin}/f/${slug}`;
+      await navigator.clipboard.writeText(url);
+      toast.success("Link copied to clipboard");
+    } catch {
+      toast.error("Could not create share link");
+    } finally {
+      setSharing(false);
+    }
+  }, [reel.id]);
+
   const handleRemix = useCallback(() => {
     const keywords = reel.keywords
       .split(",")
