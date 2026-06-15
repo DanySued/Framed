@@ -1,5 +1,6 @@
 """Reels generation API endpoints."""
 import os
+import secrets
 import shutil
 import uuid
 from fastapi import APIRouter, HTTPException, File, UploadFile
