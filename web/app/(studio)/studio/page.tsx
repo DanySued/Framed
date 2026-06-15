@@ -63,9 +63,10 @@ function DraftPill() {
 }
 
 function StudioLayout() {
-  const { selectedClips, phase, togglePlay, undo, redo } = useStudio();
+  const { selectedClips, phase, togglePlay, undo, redo, draftRestoredAt } = useStudio();
   const hasClips = selectedClips.length > 0;
   const showCompositor = hasClips || phase !== "compose";
+  const showEmptyState = !hasClips && phase === "compose" && !draftRestoredAt;
 
   // Keyboard shortcuts
   useEffect(() => {
