@@ -36,6 +36,7 @@ export default function ProjectScreen() {
   const removeClip = useRemoveClip(id!)
   const startRender = useStartRender()
   const { data: job } = useRenderJob(activeJobId)
+  const { data: latestRender } = useLatestRender(id, job?.status === 'done')
   const saveTimeline = useSaveTimeline(id!)
   const hydrateEditor = useHydrateEditor()
 
