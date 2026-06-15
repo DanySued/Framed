@@ -94,6 +94,26 @@ export default function ProjectScreen() {
     }
   }
 
+  const handleSaveToLibrary = async () => {
+    if (!latestRender?.public_url) return
+    setIsSaving(true)
+    try {
+      const { status } = await MediaLibrary.requestPermissionsAsync()
+      if (status !== 'granted') {
+        Alert.alert('Permission required', 'Allow access to your photo library to save videos.')
+        return
+      }
+      const tempUri = FileSystem.cacheDirectory + 'framed_render.mp4'
+      const { uri } = await FileSystem.downloadAsync(latestRender.public_url, tempUri)
+      await MediaLibrary.saveToLibraryAsync(uri)
+      Alert.alert('Saved', 'Video saved to your camera roll.')
+    } catch (err: any) {
+      Alert.alert('Save failed', err.message ?? 'Could not save video')
+    } finally {
+      setIsSaving(false)
+    }
+  }
+
   const handleRemoveSelected = () => {
     if (!selectedClip) return
     Alert.alert('Remove clip', 'Remove this clip?', [
