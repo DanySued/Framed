@@ -423,6 +423,30 @@ function FilmFocus({ reel, onClose }: { reel: ReelItem; onClose: () => void }) {
         </a>
 
         <button
+          onClick={handleShare}
+          disabled={sharing}
+          style={{
+            background: "transparent",
+            border: "1px solid var(--fr-line)",
+            fontFamily: "var(--font-display), Georgia, serif",
+            fontSize: "0.875rem",
+            letterSpacing: "0.04em",
+            color: "var(--fr-muted)",
+            cursor: sharing ? "default" : "pointer",
+            padding: "8px 20px",
+            textAlign: "center",
+            display: "block",
+            width: "100%",
+            opacity: sharing ? 0.6 : 1,
+            transition: "color 150ms ease, border-color 150ms ease, opacity 150ms ease",
+          }}
+          onMouseEnter={(e) => { if (!sharing) { e.currentTarget.style.color = "var(--fr-ivory)"; e.currentTarget.style.borderColor = "var(--fr-muted)"; } }}
+          onMouseLeave={(e) => { e.currentTarget.style.color = "var(--fr-muted)"; e.currentTarget.style.borderColor = "var(--fr-line)"; }}
+        >
+          {sharing ? "generating link…" : "share film ↗"}
+        </button>
+
+        <button
           onClick={handleRemix}
           style={{
             background: "transparent",
