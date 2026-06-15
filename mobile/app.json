@@ -35,6 +35,7 @@
         "expo-document-picker",
         { "iCloudContainerEnvironment": "Production" }
       ],
+      "expo-media-library",
       "react-native-reanimated",
       "@sentry/react-native/expo"
     ],
