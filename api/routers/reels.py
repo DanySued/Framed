@@ -355,6 +355,64 @@ def _walk_files(path: str):
             yield os.path.join(root, f)
 
 
+@router.post("/{reel_id}/share")
+async def share_reel(reel_id: str):
+    """Mint a public_slug for this reel and return it. Idempotent."""
+    try:
+        reel = Reel.get_by_id(reel_id)
+    except Exception:
+        raise HTTPException(status_code=404, detail="Reel not found")
+
+    if not reel.public_slug:
+        # Generate a unique 8-char slug (retry on collision)
+        for _ in range(5):
+            slug = secrets.token_urlsafe(6)[:8]
+            if not Reel.select().where(Reel.public_slug == slug).exists():
+                reel.public_slug = slug
+                reel.save()
+                break
+        else:
+            raise HTTPException(status_code=500, detail="Could not generate unique slug")
+
+    return {"slug": reel.public_slug}
+
+
+@router.get("/public/{slug}")
+async def get_public_reel(slug: str):
+    """Return public metadata for a shared reel — no auth required."""
+    try:
+        reel = Reel.select().where(Reel.public_slug == slug).get()
+    except Exception:
+        raise HTTPException(status_code=404, detail="Film not found")
+
+    if not reel.output_path or not os.path.exists(reel.output_path):
+        raise HTTPException(status_code=404, detail="Film file not found")
+
+    return {
+        "id": reel.id,
+        "slug": reel.public_slug,
+        "title": reel.title,
+        "keywords": reel.keywords,
+        "duration": reel.duration,
+        "created_at": reel.created_at.isoformat() if reel.created_at else None,
+    }
+
+
+@router.get("/public/{slug}/video")
+async def stream_public_reel(slug: str):
+    """Stream the MP4 for a public reel — no auth required."""
+    try:
+        reel = Reel.select().where(Reel.public_slug == slug).get()
+    except Exception:
+        raise HTTPException(status_code=404, detail="Film not found")
+
+    if not reel.output_path or not os.path.exists(reel.output_path):
+        raise HTTPException(status_code=404, detail="Film file not found")
+
+    filename = f"{reel.title.replace(' ', '_')}.mp4" if reel.title else f"{slug}.mp4"
+    return FileResponse(path=reel.output_path, media_type="video/mp4", filename=filename)
+
+
 @router.get("/download/{reel_id}")
 async def download_reel(reel_id: str):
     """
