@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { apiFetch } from '@/lib/api'
-import type { RenderJob } from '@/types'
+import { supabase } from '@/lib/supabase'
+import type { Render, RenderJob } from '@/types'
 
 export function useStartRender() {
   const qc = useQueryClient()
