@@ -105,6 +105,13 @@ function StudioLayout() {
         </div>
       </StudioPhaseGate>
 
+      {/* ── Empty state / template picker ───────────────────────── */}
+      {showEmptyState && (
+        <StudioPhaseGate phases={["compose"]}>
+          <StudioEmptyState />
+        </StudioPhaseGate>
+      )}
+
       {/* ── Timeline ─────────────────────────────────────────────── */}
       <StudioTimeline />
 
