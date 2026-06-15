@@ -27,6 +27,7 @@ export default function ProjectScreen() {
   const [activeJobId, setActiveJobId] = useState<string | null>(null)
   const [isPlaying, setIsPlaying] = useState(false)
   const [cursorSec, setCursorSec] = useState(0)
+  const [isSaving, setIsSaving] = useState(false)
   const videoRef = useRef<Video>(null)
 
   const { data: project, isLoading: projectLoading } = useProject(id)
