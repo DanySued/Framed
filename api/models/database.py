@@ -38,6 +38,7 @@ class Reel(BaseModel):
     audio_path = CharField()  # Path to audio file
     output_path = CharField()  # Path to generated MP4
     srt_path = CharField(null=True)  # Path to generated .srt subtitle file (if subtitles were enabled)
+    public_slug = CharField(null=True, unique=True)  # Short URL slug, set on first share
     created_at = DateTimeField(default=datetime.now)
 
     class Meta:
