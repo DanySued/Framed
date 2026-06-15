@@ -11,6 +11,7 @@ import ControlBar from "@/components/studio/ControlBar";
 import StudioTimeline from "@/components/studio/StudioTimeline";
 import StudioPhaseGate from "@/components/studio/StudioPhaseGate";
 import GenerationOverlay from "@/components/studio/GenerationOverlay";
+import StudioEmptyState from "@/components/studio/StudioEmptyState";
 
 function DraftPill() {
   const { draftRestoredAt, clearDraft } = useStudio();
