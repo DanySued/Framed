@@ -193,8 +193,13 @@ def _run_reel_job(
                 return None
 
         # Trim sequentially on free-tier to avoid OOM; each pass is single-threaded
-        # and processes exactly one short clip, so peak memory stays low.
-        results = [_trim_one(args) for args in enumerate(video_paths[:target_clip_count])]
+        # and processes exactly one short clip, so peak memory stays low. This is the
+        # longest stage, so advance the bar per clip (40→54%) instead of sitting at 40.
+        to_trim = list(enumerate(video_paths[:target_clip_count]))
+        results = []
+        for i, args in enumerate(to_trim):
+            results.append(_trim_one(args))
+            _set_stage(job, job_id, 40 + round((i + 1) / len(to_trim) * 14), "cutting clips")
         clips = [p for p in results if p is not None]
 
         # Free raw downloads
