@@ -354,22 +354,20 @@ export function StudioProvider({ children }: { children: React.ReactNode }) {
       stopPolling();
       pollRef.current = setInterval(async () => {
         const results = await pollJobs(jobIds);
-        const newPhase = derivePhase(results);
 
-        setPhase(newPhase);
-
-        if (newPhase === "approval") {
-          // Find first job awaiting approval
-          const awaitingIdx = results.findIndex(
-            (s) => s?.status === "awaiting_clip_approval"
-          );
-          if (awaitingIdx >= 0) setApprovalJobIndex(awaitingIdx);
+        // Auto-approve any jobs waiting for clip approval
+        for (let i = 0; i < results.length; i++) {
+          if (results[i]?.status === "awaiting_clip_approval") {
+            fetch(`/api/reels/clips/${jobIds[i]}/approve`, { method: "POST" }).catch(() => {});
+          }
         }
+
+        const newPhase = derivePhase(results);
+        setPhase(newPhase);
 
         if (newPhase === "done" || newPhase === "compose") {
           stopPolling();
           if (newPhase === "compose") {
-            // Failed — show error
             const failed = results.find((s) => s?.status === "failed");
             toast.error(failed?.error_message ?? "Generation failed");
           }
