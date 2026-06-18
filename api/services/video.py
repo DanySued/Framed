@@ -116,37 +116,33 @@ def _get_video_dimensions(filepath: str) -> Tuple[int, int]:
 def concatenate_videos(
     video_paths: List[str],
     output_path: str,
+    target_w: int = 1080,
+    target_h: int = 1920,
 ) -> None:
     """
-    Concatenate multiple video clips in sequence.
+    Concatenate clips in sequence AND scale/crop to the final Instagram Reels
+    frame (1080x1920 by default) in a single ffmpeg pass.
+
+    Folding the 9:16 scale into the concat filter avoids a second full re-encode
+    of the whole video — a big speed/memory win on constrained hosts. All clips
+    are normalized to identical stream params (scale-fill-crop + setsar + fps) so
+    the concat filter receives matching inputs (mismatched resolutions from Pexels
+    are what distort frames with the old concat-demuxer approach).
 
     Args:
         video_paths: List of input video file paths (in order)
-        output_path: Output concatenated video
+        output_path: Output video (already at target resolution)
+        target_w/target_h: Final frame size (default 1080x1920, 9:16)
     """
     if len(video_paths) < 1:
         raise VideoProcessingError("No videos to concatenate")
 
     os.makedirs(os.path.dirname(output_path), exist_ok=True)
 
-    if len(video_paths) == 1:
-        import shutil
-        shutil.copy2(video_paths[0], output_path)
-        return
-
-    # Probe the first clip to get the normalization target dimensions.
-    # All clips are scaled to these dims before concat so the concat filter
-    # receives identical stream parameters — different resolutions from Pexels
-    # clips is what causes distorted frames with the old concat-demuxer approach.
-    try:
-        target_w, target_h = _get_video_dimensions(video_paths[0])
-    except Exception:
-        target_w, target_h = 1920, 1080
-
     n = len(video_paths)
     inputs = [item for p in video_paths for item in ("-i", p)]
 
-    # Per-clip: scale-fill-crop to the target dims and normalize SAR.
+    # Per-clip: scale-fill-crop to the final 9:16 frame and normalize SAR.
     # Audio is intentionally dropped here — mix_audio replaces it anyway.
     scale_filters = [
         f"[{i}:v]scale={target_w}:{target_h}:force_original_aspect_ratio=increase,"

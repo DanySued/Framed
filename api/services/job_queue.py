@@ -17,11 +17,8 @@ from services.video import (
     get_video_duration,
     trim_video,
     concatenate_videos,
-    scale_to_instagram_reels,
     mix_audio,
     burn_text_overlays,
-    transcribe_audio_to_srt,
-    burn_subtitles,
     VideoProcessingError,
 )
 
@@ -91,7 +88,7 @@ def create_reel_generation_job(request: ReelGenerateRequest) -> str:
 
     init_scheduler()
     scheduler.add_job(
-        _phase1_prepare_clips,
+        _run_reel_job,
         args=(job_id, reel_id, request),
         id=job_id,
         name=f"reel_gen_{job_id}",
@@ -101,14 +98,17 @@ def create_reel_generation_job(request: ReelGenerateRequest) -> str:
     return job_id
 
 
-def _phase1_prepare_clips(
+def _run_reel_job(
     job_id: str,
     reel_id: str,
     request: ReelGenerateRequest,
 ) -> None:
     """
-    Background job phase 1: search Pexels, download, and trim clips.
-    Pauses at 50% with status 'awaiting_clip_approval' for user review.
+    Render a reel end-to-end in one continuous pass (no approval pause):
+    search/download → trim → concat (directly to 1080x1920) → mix audio → burn titles.
+
+    Progress stages are kept compatible with _compute_phase: 10/20/40 read as phase 1
+    ("generating"), 60/90/95/100 read as phase 2 ("rendering").
     """
     try:
         job = ReelJob.get_by_id(job_id)
@@ -213,20 +213,55 @@ def _phase1_prepare_clips(
 
             clips = list(map(_retrim_one, clips))
 
-        # Pause for clip approval (50%)
+        # Record clips (used by stream/swap endpoints if ever needed)
         job.clip_paths = json.dumps(clips)
         job.pending_request_data = json.dumps(request.model_dump())
-        job.status = "awaiting_clip_approval"
-        job.progress = 50
         job.save()
 
-        JOBS[job_id] = {
-            "status": "awaiting_clip_approval",
-            "progress": 50,
-            "stage": "awaiting your approval",
-            "clip_count": len(clips),
-            "error": None,
-        }
+        # ── Render straight through — no approval pause ──────────────
+        # Concat clips directly to 1080x1920 (60%) — one pass, no separate scale step
+        _set_stage(job, job_id, 60, "assembling sequence")
+
+        concat_path = os.path.join(reel_dir, "concat.mp4")
+        concatenate_videos(clips, concat_path)
+        # Free clips dir after concat
+        clips_dir = os.path.dirname(clips[0]) if clips else None
+        if clips_dir:
+            shutil.rmtree(clips_dir, ignore_errors=True)
+
+        # Mix audio (90%)
+        _set_stage(job, job_id, 90, "mixing audio")
+
+        reel = Reel.get_by_id(reel_id)
+        audio_mixed_path = os.path.join(reel_dir, "audio_mixed.mp4")
+        mix_audio(
+            concat_path,
+            reel.audio_path,
+            audio_mixed_path,
+            audio_start_time=request.song_start_time,
+        )
+        os.remove(concat_path)
+
+        # Burn text overlays (95%)
+        _set_stage(job, job_id, 95, "burning titles")
+
+        final_path = os.path.join(reel_dir, "final.mp4")
+        active_overlays = [ov for ov in request.overlays if ov.text.strip()]
+        if active_overlays:
+            burn_text_overlays(audio_mixed_path, final_path, active_overlays)
+            os.remove(audio_mixed_path)
+        else:
+            os.rename(audio_mixed_path, final_path)
+
+        # Done (100%)
+        job.progress = 100
+        job.status = "done"
+        job.completed_at = datetime.now()
+        reel.output_path = final_path
+        reel.save()
+        job.save()
+
+        JOBS[job_id] = {"status": "done", "progress": 100, "stage": "done", "error": None, "srt_path": None}
 
     except Exception as e:
         job = ReelJob.get_by_id(job_id)
@@ -240,24 +275,12 @@ def _phase1_prepare_clips(
 
 
 def approve_clips(job_id: str) -> None:
-    """Approve the clips for a job and schedule phase 2 rendering."""
-    job = ReelJob.get_by_id(job_id)
-    if job.status != "awaiting_clip_approval":
-        raise ValueError(f"Job is not awaiting clip approval (status: {job.status})")
+    """No-op: reels now render straight through without a manual approval pause.
 
-    job.status = "processing"
-    job.progress = 55
-    job.save()
-
-    JOBS[job_id] = {"status": "processing", "progress": 55, "stage": "resuming render", "error": None}
-
-    init_scheduler()
-    scheduler.add_job(
-        _phase2_render_reel,
-        args=(job_id, str(job.reel_id)),
-        id=f"{job_id}_phase2",
-        name=f"reel_render_{job_id}",
-    )
+    Kept so the /clips/{id}/approve route stays valid; the studio calls it
+    defensively but jobs never enter 'awaiting_clip_approval' anymore.
+    """
+    return
 
 
 async def replace_clip(job_id: str, clip_index: int) -> None:
@@ -305,101 +328,6 @@ async def replace_clip(job_id: str, clip_index: int) -> None:
                 pass
 
     raise ValueError("Could not find a suitable replacement clip — try again")
-
-
-def _phase2_render_reel(job_id: str, reel_id: str) -> None:
-    """
-    Background job phase 2: concat, scale, mix audio, burn text.
-    Runs after the user approves the clips from phase 1.
-    """
-    try:
-        job = ReelJob.get_by_id(job_id)
-        clips = json.loads(job.clip_paths)
-        request_data = json.loads(job.pending_request_data)
-        request = ReelGenerateRequest(**request_data)
-
-        reel_dir = os.path.join(MEDIA_DIR, "generated", "reels", reel_id)
-
-        # Concat clips (60%)
-        _set_stage(job, job_id, 60, "assembling sequence")
-
-        concat_path = os.path.join(reel_dir, "concat.mp4")
-        concatenate_videos(clips, concat_path)
-        # Free clips dir after concat
-        clips_dir = os.path.dirname(clips[0]) if clips else None
-        if clips_dir:
-            shutil.rmtree(clips_dir, ignore_errors=True)
-
-        # Scale to Instagram Reels format (75%)
-        _set_stage(job, job_id, 75, "framing 9:16")
-
-        scaled_path = os.path.join(reel_dir, "scaled.mp4")
-        scale_to_instagram_reels(concat_path, scaled_path)
-        os.remove(concat_path)
-
-        # Mix audio (90%)
-        _set_stage(job, job_id, 90, "mixing audio")
-
-        reel = Reel.get_by_id(reel_id)
-        audio_mixed_path = os.path.join(reel_dir, "audio_mixed.mp4")
-        mix_audio(
-            scaled_path,
-            reel.audio_path,
-            audio_mixed_path,
-            audio_start_time=request.song_start_time,
-        )
-        os.remove(scaled_path)
-
-        # Burn text overlays (95%)
-        _set_stage(job, job_id, 95, "burning titles")
-
-        overlays_path = os.path.join(reel_dir, "final.mp4")
-        active_overlays = [ov for ov in request.overlays if ov.text.strip()]
-        if active_overlays:
-            burn_text_overlays(audio_mixed_path, overlays_path, active_overlays)
-            os.remove(audio_mixed_path)
-        else:
-            os.rename(audio_mixed_path, overlays_path)
-
-        # Auto-subtitles: transcribe → burn → keep .srt (96–99%)
-        srt_path = None
-        if request.subtitles_enabled:
-            _set_stage(job, job_id, 96, "transcribing subtitles")
-
-            # Whisper transcribes the video's audio track directly
-            srt_path = transcribe_audio_to_srt(overlays_path, reel_dir)
-
-            _set_stage(job, job_id, 98, "burning subtitles")
-
-            # Burn the subtitles into a new file, then replace
-            subtitled_path = os.path.join(reel_dir, "final_subtitled.mp4")
-            burn_subtitles(overlays_path, srt_path, subtitled_path)
-            os.remove(overlays_path)
-            os.rename(subtitled_path, overlays_path)
-
-        final_path = overlays_path
-
-        # Done (100%)
-        job.progress = 100
-        job.status = "done"
-        job.completed_at = datetime.now()
-        reel.output_path = final_path
-        if srt_path:
-            reel.srt_path = srt_path
-        reel.save()
-        job.save()
-
-        JOBS[job_id] = {"status": "done", "progress": 100, "stage": "done", "error": None, "srt_path": srt_path}
-
-    except Exception as e:
-        job = ReelJob.get_by_id(job_id)
-        job.status = "failed"
-        job.error_message = str(e)
-        job.completed_at = datetime.now()
-        job.save()
-        JOBS[job_id] = {"status": "failed", "progress": job.progress, "error": str(e)}
-        reel_dir = os.path.join(MEDIA_DIR, "generated", "reels", reel_id)
-        shutil.rmtree(reel_dir, ignore_errors=True)
 
 
 def _compute_phase(status: str, progress: int) -> tuple[int, int]:

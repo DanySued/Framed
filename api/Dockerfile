@@ -9,13 +9,6 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 WORKDIR /app
 
 COPY requirements.txt .
-# Install CPU-only torch before the rest — prevents openai-whisper from pulling the
-# 2 GB CUDA build, which exceeds Render free tier build limits.
-RUN pip install --no-cache-dir torch --index-url https://download.pytorch.org/whl/cpu
-# openai-whisper's sdist needs pkg_resources (gone from setuptools>=81) and pip's
-# build isolation ignores installed packages — so pin setuptools and build without isolation.
-RUN pip install --no-cache-dir "setuptools<81" wheel \
-    && pip install --no-cache-dir --no-build-isolation openai-whisper==20240930
 RUN pip install --no-cache-dir -r requirements.txt
 
 COPY . .
