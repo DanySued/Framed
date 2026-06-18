@@ -77,6 +77,28 @@ class AudioFile(BaseModel):
         table_name = "audio_files"
 
 
+def _recover_stale_jobs():
+    """
+    Reset any jobs stuck in 'processing' or 'queued' to 'failed'.
+    Called on startup — if the process died mid-job those jobs will never
+    advance, so we mark them failed so the user can retry.
+    """
+    try:
+        stale = (
+            ReelJob
+            .update(
+                status="failed",
+                error_message="Server restarted during processing — please try again",
+            )
+            .where(ReelJob.status.in_(["processing", "queued"]))
+            .execute()
+        )
+        if stale:
+            logger.info("Recovered %d stale job(s) to failed on startup", stale)
+    except Exception as exc:
+        logger.warning("Could not recover stale jobs: %s", exc)
+
+
 def init_db():
     """Initialize database tables."""
     if not _DATABASE_URL:
@@ -99,6 +121,7 @@ def init_db():
             logger.info("Migration applied: ALTER TABLE %s ADD COLUMN %s", table, col)
         except Exception as exc:
             logger.info("Migration skipped (column likely exists): %s.%s — %s", table, col, exc)
+    _recover_stale_jobs()
 
 
 if __name__ == "__main__":
