@@ -35,6 +35,20 @@ async def test_pexels(payload: KeyPayload):
     return {"ok": True}
 
 
+@router.get("/schema")
+def schema_debug():
+    """Return actual columns in the reels table for debugging."""
+    try:
+        with db.connection_context():
+            rows = db.execute_sql(
+                "SELECT column_name FROM information_schema.columns "
+                "WHERE table_name = 'reels' ORDER BY ordinal_position"
+            ).fetchall()
+            return {"reels_columns": [r[0] for r in rows]}
+    except Exception as exc:
+        return {"error": str(exc)}
+
+
 @router.get("/backend")
 def backend_health():
     db_error = None
