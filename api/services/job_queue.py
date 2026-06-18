@@ -29,6 +29,7 @@ from services.video import (
 # Global scheduler instance
 scheduler: BackgroundScheduler | None = None
 JOBS: dict = {}  # In-memory job tracking
+MEDIA_DIR = os.getenv("MEDIA_DIR", "/media")
 
 
 def _set_stage(job, job_id: str, progress: int, stage: str, status: str = "processing") -> None:
@@ -114,7 +115,6 @@ def _phase1_prepare_clips(
         job.started_at = datetime.now()
         _set_stage(job, job_id, 10, "searching scenes")
 
-        MEDIA_DIR = os.getenv("MEDIA_DIR", "/media")
         reel_dir = os.path.join(MEDIA_DIR, "generated", "reels", reel_id)
         os.makedirs(reel_dir, exist_ok=True)
 
@@ -236,7 +236,6 @@ def _phase1_prepare_clips(
         job.completed_at = datetime.now()
         job.save()
         JOBS[job_id] = {"status": "failed", "progress": job.progress, "error": str(e)}
-        MEDIA_DIR = os.getenv("MEDIA_DIR", "/media")
         reel_dir = os.path.join(MEDIA_DIR, "generated", "reels", reel_id)
         shutil.rmtree(reel_dir, ignore_errors=True)
 
@@ -282,7 +281,6 @@ async def replace_clip(job_id: str, clip_index: int) -> None:
     video_list = await search_videos(request.keywords, per_page=20)
     random.shuffle(video_list)
 
-    MEDIA_DIR = os.getenv("MEDIA_DIR", "/media")
     reel_id = str(job.reel_id)
     reel_dir = os.path.join(MEDIA_DIR, "generated", "reels", reel_id)
 
@@ -321,7 +319,6 @@ def _phase2_render_reel(job_id: str, reel_id: str) -> None:
         request_data = json.loads(job.pending_request_data)
         request = ReelGenerateRequest(**request_data)
 
-        MEDIA_DIR = os.getenv("MEDIA_DIR", "/media")
         reel_dir = os.path.join(MEDIA_DIR, "generated", "reels", reel_id)
 
         # Concat clips (60%)
@@ -402,7 +399,6 @@ def _phase2_render_reel(job_id: str, reel_id: str) -> None:
         job.completed_at = datetime.now()
         job.save()
         JOBS[job_id] = {"status": "failed", "progress": job.progress, "error": str(e)}
-        MEDIA_DIR = os.getenv("MEDIA_DIR", "/media")
         reel_dir = os.path.join(MEDIA_DIR, "generated", "reels", reel_id)
         shutil.rmtree(reel_dir, ignore_errors=True)
 

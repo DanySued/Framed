@@ -1,34 +1,6 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { requireSession } from '@/lib/auth';
+import { NextRequest } from 'next/server';
+import { proxyJson } from '@/lib/api-proxy';
 
-export async function GET(request: NextRequest) {
-  const unauth = await requireSession();
-  if (unauth) return unauth;
-  try {
-    const apiUrl = process.env.API_URL || 'http://localhost:8000';
-
-    const response = await fetch(`${apiUrl}/reels/audio`, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    });
-
-    if (!response.ok) {
-      const error = await response.json();
-      return NextResponse.json(
-        { error: error.detail || 'Failed to list audio files' },
-        { status: response.status }
-      );
-    }
-
-    const data = await response.json();
-    return NextResponse.json(data);
-  } catch (error) {
-    console.error('[reels/audio GET]', error);
-    return NextResponse.json(
-      { error: 'upstream error' },
-      { status: 500 }
-    );
-  }
+export async function GET(_request: NextRequest) {
+  return proxyJson('/reels/audio', undefined, 'Failed to list audio files');
 }

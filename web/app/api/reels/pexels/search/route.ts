@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { requireSession } from '@/lib/auth';
+import { API_URL } from '@/lib/api-proxy';
 
 export async function GET(request: NextRequest) {
   const unauth = await requireSession();
@@ -13,7 +14,6 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: 'keywords required' }, { status: 400 });
   }
 
-  const apiUrl = process.env.API_URL || 'http://localhost:8000';
   // Bound the wait so a cold/unreachable backend fails fast with a clear
   // message instead of hanging the function (and the user's spinner) for
   // minutes. 60s rides out a Render free-tier cold start (~50s) but no longer.
@@ -22,7 +22,7 @@ export async function GET(request: NextRequest) {
 
   try {
     const res = await fetch(
-      `${apiUrl}/reels/pexels/search?keywords=${encodeURIComponent(keywords)}&per_page=${encodeURIComponent(perPage)}&page=${encodeURIComponent(page)}`,
+      `${API_URL}/reels/pexels/search?keywords=${encodeURIComponent(keywords)}&per_page=${encodeURIComponent(perPage)}&page=${encodeURIComponent(page)}`,
       { cache: 'no-store', signal: controller.signal }
     );
 

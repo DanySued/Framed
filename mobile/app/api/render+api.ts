@@ -1,4 +1,6 @@
 import { createServerClient, serverError, badRequest } from '@/lib/server-client'
+import { bestFile } from '@/services/pexels'
+import type { PexelsVideo } from '@/types'
 
 // POST /api/render — enqueue a render job for a project
 // Body: { project_id: string }
@@ -41,12 +43,8 @@ export async function POST(request: Request) {
             { headers: { Authorization: process.env.PEXELS_API_KEY! } }
           )
           if (res.ok) {
-            const data = await res.json() as any
-            const files: any[] = data.video_files ?? []
-            const best = files
-              .filter((f) => f.file_type === 'video/mp4' && f.width <= 1080)
-              .sort((a, b) => (b.width ?? 0) - (a.width ?? 0))[0]
-            pexelsDownloadUrl = best?.link ?? null
+            const video = await res.json() as PexelsVideo
+            pexelsDownloadUrl = bestFile(video)?.link ?? null
           }
         } catch { /* fall through — worker will retry */ }
       }

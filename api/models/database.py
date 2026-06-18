@@ -79,7 +79,11 @@ def init_db():
     if not _DATABASE_URL:
         os.makedirs(os.path.dirname(db.database), exist_ok=True)
     db.create_tables([Reel, ReelJob, AudioFile], safe=True)
-    # Safe migration: add columns that were added after initial schema creation
+    # Safe migration: add columns that were added after initial schema creation.
+    # Each ALTER runs in its own transaction — on Postgres a failed statement
+    # (column already exists) aborts the surrounding transaction, so without the
+    # per-statement atomic() the first "already exists" error would poison every
+    # later ALTER in the loop and silently skip the new columns.
     for table, col, col_type in [
         ("reel_jobs", "clip_paths", "TEXT"),
         ("reel_jobs", "pending_request_data", "TEXT"),
@@ -87,7 +91,8 @@ def init_db():
         ("reels", "public_slug", "TEXT"),
     ]:
         try:
-            db.execute_sql(f"ALTER TABLE {table} ADD COLUMN {col} {col_type}")
+            with db.atomic():
+                db.execute_sql(f"ALTER TABLE {table} ADD COLUMN {col} {col_type}")
         except Exception:
             pass  # Column already exists
 

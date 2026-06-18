@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { requireSession } from '@/lib/auth';
+import { API_URL } from '@/lib/api-proxy';
 
 export async function GET(
   _request: NextRequest,
@@ -9,8 +10,7 @@ export async function GET(
   if (unauth) return unauth;
   try {
     const { jobId, index } = await params;
-    const apiUrl = process.env.API_URL || 'http://localhost:8000';
-    const response = await fetch(`${apiUrl}/reels/clips/${jobId}/${index}`);
+    const response = await fetch(`${API_URL}/reels/clips/${jobId}/${index}`);
     if (!response.ok) {
       return NextResponse.json({ error: 'Clip not found' }, { status: response.status });
     }

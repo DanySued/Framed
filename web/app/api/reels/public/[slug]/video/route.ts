@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { API_URL } from '@/lib/api-proxy';
 
 // No auth — public video stream
 export async function GET(
@@ -7,13 +8,12 @@ export async function GET(
 ) {
   try {
     const { slug } = await params;
-    const apiUrl = process.env.API_URL || 'http://localhost:8000';
 
     const upstreamHeaders: HeadersInit = {};
     const range = request.headers.get('range');
     if (range) upstreamHeaders['Range'] = range;
 
-    const response = await fetch(`${apiUrl}/reels/public/${slug}/video`, {
+    const response = await fetch(`${API_URL}/reels/public/${slug}/video`, {
       headers: upstreamHeaders,
     });
 

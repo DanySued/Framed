@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { requireSession } from '@/lib/auth';
+import { API_URL } from '@/lib/api-proxy';
 
 export async function DELETE(
   _request: NextRequest,
@@ -9,8 +10,7 @@ export async function DELETE(
   if (unauth) return unauth;
   try {
     const { id } = await params;
-    const apiUrl = process.env.API_URL || 'http://localhost:8000';
-    const response = await fetch(`${apiUrl}/reels/audio/${id}`, { method: 'DELETE' });
+    const response = await fetch(`${API_URL}/reels/audio/${id}`, { method: 'DELETE' });
     if (response.status === 404) {
       return NextResponse.json({ error: 'Audio not found' }, { status: 404 });
     }
@@ -32,13 +32,12 @@ export async function GET(
   if (unauth) return unauth;
   try {
     const { id } = await params;
-    const apiUrl = process.env.API_URL || 'http://localhost:8000';
 
     const upstreamHeaders: HeadersInit = {};
     const range = request.headers.get('range');
     if (range) upstreamHeaders['Range'] = range;
 
-    const response = await fetch(`${apiUrl}/reels/audio/${id}`, {
+    const response = await fetch(`${API_URL}/reels/audio/${id}`, {
       method: 'GET',
       headers: upstreamHeaders,
     });

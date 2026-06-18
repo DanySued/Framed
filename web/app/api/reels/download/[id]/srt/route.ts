@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { requireSession } from '@/lib/auth';
+import { API_URL } from '@/lib/api-proxy';
 
 export async function GET(
   request: NextRequest,
@@ -9,9 +10,8 @@ export async function GET(
   if (unauth) return unauth;
   try {
     const { id: reelId } = await params;
-    const apiUrl = process.env.API_URL || 'http://localhost:8000';
 
-    const response = await fetch(`${apiUrl}/reels/download/${reelId}/srt`, {
+    const response = await fetch(`${API_URL}/reels/download/${reelId}/srt`, {
       method: 'GET',
     });
 

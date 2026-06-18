@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { API_URL } from '@/lib/api-proxy';
 
 // No auth — public endpoint
 export async function GET(
@@ -7,8 +8,7 @@ export async function GET(
 ) {
   try {
     const { slug } = await params;
-    const apiUrl = process.env.API_URL || 'http://localhost:8000';
-    const response = await fetch(`${apiUrl}/reels/public/${slug}`);
+    const response = await fetch(`${API_URL}/reels/public/${slug}`);
     if (!response.ok) {
       return NextResponse.json({ error: 'Film not found' }, { status: response.status });
     }

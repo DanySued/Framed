@@ -1,18 +1,13 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { requireSession } from '@/lib/auth';
+import { NextRequest } from 'next/server';
+import { proxyJson } from '@/lib/api-proxy';
 
 export async function POST(request: NextRequest) {
-  const unauth = await requireSession();
-  if (unauth) return unauth;
-  try {
-    const body = await request.json();
-
-    const apiUrl = process.env.API_URL || 'http://localhost:8000';
-    const response = await fetch(`${apiUrl}/reels/generate`, {
+  const body = await request.json();
+  return proxyJson(
+    '/reels/generate',
+    {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         keywords: body.keywords,
         audio_file_id: body.audioFileId,
@@ -23,23 +18,7 @@ export async function POST(request: NextRequest) {
         subtitles_enabled: body.subtitlesEnabled ?? false,
         selected_clips: body.selectedClips ?? [],
       }),
-    });
-
-    if (!response.ok) {
-      const error = await response.json();
-      return NextResponse.json(
-        { error: error.detail || 'Generation failed' },
-        { status: response.status }
-      );
-    }
-
-    const data = await response.json();
-    return NextResponse.json(data);
-  } catch (error) {
-    console.error(error);
-    return NextResponse.json(
-      { error: "Failed to generate reel" },
-      { status: 500 }
-    );
-  }
+    },
+    'Failed to generate reel'
+  );
 }

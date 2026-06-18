@@ -303,6 +303,21 @@ def _srt_timestamp(t: float) -> str:
     return f"{h:02d}:{m:02d}:{s:02d},{ms:03d}"
 
 
+_WHISPER_MODELS: dict[str, object] = {}
+
+
+def _load_whisper_model(model_size: str):
+    """Load (and cache) a Whisper model. The ~150 MB 'base' model is expensive to
+    deserialize, so we keep one instance per size alive for the process lifetime
+    instead of reloading it on every render."""
+    model = _WHISPER_MODELS.get(model_size)
+    if model is None:
+        import whisper
+        model = whisper.load_model(model_size)
+        _WHISPER_MODELS[model_size] = model
+    return model
+
+
 def transcribe_audio_to_srt(video_path: str, output_dir: str, model_size: str = "base") -> str:
     """
     Transcribe the audio track of a video using OpenAI Whisper and write a .srt subtitle file.
@@ -329,7 +344,7 @@ def transcribe_audio_to_srt(video_path: str, output_dir: str, model_size: str = 
     os.makedirs(output_dir, exist_ok=True)
 
     try:
-        model = whisper.load_model(model_size)
+        model = _load_whisper_model(model_size)
         result = model.transcribe(video_path, word_timestamps=False, verbose=False)
     except Exception as e:
         raise VideoProcessingError(f"Whisper transcription failed: {e}")

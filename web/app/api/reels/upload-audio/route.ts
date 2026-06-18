@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { requireSession } from '@/lib/auth';
+import { API_URL } from '@/lib/api-proxy';
 
 export async function POST(request: NextRequest) {
   const unauth = await requireSession();
@@ -25,11 +26,10 @@ export async function POST(request: NextRequest) {
     }
 
     // Forward to backend
-    const apiUrl = process.env.API_URL || 'http://localhost:8000';
     const backendFormData = new FormData();
     backendFormData.append('file', file);
 
-    const response = await fetch(`${apiUrl}/reels/upload-audio`, {
+    const response = await fetch(`${API_URL}/reels/upload-audio`, {
       method: 'POST',
       body: backendFormData,
     });
