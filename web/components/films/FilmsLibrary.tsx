@@ -97,7 +97,14 @@ export default function FilmsLibrary() {
       {/* Focused film overlay */}
       <AnimatePresence>
         {focused && (
-          <FilmFocus reel={focused} onClose={() => setFocused(null)} />
+          <FilmFocus
+            reel={focused}
+            onClose={() => setFocused(null)}
+            onDeleted={(id) => {
+              setReels((prev) => prev.filter((r) => r.id !== id));
+              setFocused(null);
+            }}
+          />
         )}
       </AnimatePresence>
     </div>
@@ -235,10 +242,26 @@ function FilmCard({
   );
 }
 
-function FilmFocus({ reel, onClose }: { reel: ReelItem; onClose: () => void }) {
+function FilmFocus({ reel, onClose, onDeleted }: { reel: ReelItem; onClose: () => void; onDeleted: (id: string) => void }) {
   const src = `/api/reels/download/${reel.id}`;
   const downloadRef = useRef<HTMLAnchorElement>(null);
   const router = useRouter();
+
+  const [deleting, setDeleting] = useState(false);
+  const handleDelete = useCallback(async () => {
+    if (deleting) return;
+    if (!window.confirm("Delete this film? This can't be undone.")) return;
+    setDeleting(true);
+    try {
+      const res = await fetch(`/api/reels/${reel.id}`, { method: "DELETE" });
+      if (!res.ok && res.status !== 204) throw new Error("delete failed");
+      toast.success("Film deleted");
+      onDeleted(reel.id);
+    } catch {
+      toast.error("Could not delete film");
+      setDeleting(false);
+    }
+  }, [reel.id, deleting, onDeleted]);
 
   // Move focus into the dialog when it opens
   useEffect(() => {
@@ -472,6 +495,28 @@ function FilmFocus({ reel, onClose }: { reel: ReelItem; onClose: () => void }) {
           }}
         >
           remix in studio →
+        </button>
+
+        <button
+          onClick={handleDelete}
+          disabled={deleting}
+          style={{
+            background: "transparent",
+            border: "none",
+            fontFamily: "var(--font-display), Georgia, serif",
+            fontSize: "0.8125rem",
+            color: "var(--fr-muted)",
+            cursor: deleting ? "default" : "pointer",
+            padding: 0,
+            textAlign: "left",
+            letterSpacing: "0.04em",
+            opacity: deleting ? 0.6 : 1,
+            transition: "color 150ms ease",
+          }}
+          onMouseEnter={(e) => { if (!deleting) e.currentTarget.style.color = "#e57373"; }}
+          onMouseLeave={(e) => { e.currentTarget.style.color = "var(--fr-muted)"; }}
+        >
+          {deleting ? "deleting…" : "delete film"}
         </button>
 
         <button

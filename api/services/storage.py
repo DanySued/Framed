@@ -60,6 +60,19 @@ def upload_reel(local_path: str, reel_id: str) -> str | None:
         return None
 
 
+def delete_reel(object_path: str) -> None:
+    """Best-effort delete of an object from storage. Silent on failure/disabled."""
+    if not is_enabled():
+        return
+    base, key = _base(), _key()
+    url = f"{base}/storage/v1/object/{BUCKET}/{object_path}"
+    headers = {"Authorization": f"Bearer {key}", "apikey": key}
+    try:
+        httpx.request("DELETE", url, headers=headers, timeout=30)
+    except Exception as exc:
+        logger.warning("Supabase delete error: %s", exc)
+
+
 def signed_url(object_path: str, expires_in: int = 604800) -> str | None:
     """Create a time-limited signed URL (default 7 days) for an object path."""
     if not is_enabled():

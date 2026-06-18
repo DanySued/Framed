@@ -17,7 +17,7 @@ from models.schemas import (
 from models.database import Reel, AudioFile, ReelJob
 from services.job_queue import create_reel_generation_job, get_job_status, approve_clips, replace_clip
 from services.pexels import search_videos
-from services.storage import signed_url
+from services.storage import signed_url, delete_reel as storage_delete_reel
 import subprocess
 import json
 
@@ -418,6 +418,33 @@ async def stream_public_reel(slug: str):
             return RedirectResponse(url)
 
     raise HTTPException(status_code=404, detail="Film file not found")
+
+
+@router.delete("/{reel_id}", status_code=204)
+async def delete_reel_endpoint(reel_id: str):
+    """Delete a reel: its local files, its durable storage object, and the DB record."""
+    try:
+        reel = Reel.get_by_id(reel_id)
+    except Exception:
+        raise HTTPException(status_code=404, detail="Reel not found")
+
+    for path in (reel.output_path, reel.srt_path):
+        if path and os.path.exists(path):
+            try:
+                os.remove(path)
+            except OSError:
+                pass
+
+    # Remove the whole reel working dir if present
+    reel_dir = os.path.join(MEDIA_DIR, "generated", "reels", reel_id)
+    shutil.rmtree(reel_dir, ignore_errors=True)
+
+    if reel.storage_path:
+        storage_delete_reel(reel.storage_path)
+
+    # Remove any jobs referencing this reel, then the reel itself
+    ReelJob.delete().where(ReelJob.reel == reel).execute()
+    reel.delete_instance()
 
 
 @router.get("/download/{reel_id}")
