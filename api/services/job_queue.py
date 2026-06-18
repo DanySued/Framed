@@ -182,8 +182,8 @@ def _phase1_prepare_clips(
             except Exception:
                 return None
 
-        with ThreadPoolExecutor(max_workers=target_clip_count) as pool:
-            results = list(pool.map(_trim_one, enumerate(video_paths[:target_clip_count])))
+        # Trim sequentially on free-tier to avoid OOM; each trim has its own 120s timeout
+        results = [_trim_one(args) for args in enumerate(video_paths[:target_clip_count])]
         clips = [p for p in results if p is not None]
 
         # Free raw downloads
@@ -211,8 +211,7 @@ def _phase1_prepare_clips(
                 except Exception:
                     return clip_path
 
-            with ThreadPoolExecutor(max_workers=len(clips)) as pool:
-                clips = list(pool.map(_retrim_one, clips))
+            clips = list(map(_retrim_one, clips))
 
         # Pause for clip approval (50%)
         job.clip_paths = json.dumps(clips)
