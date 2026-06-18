@@ -68,4 +68,7 @@ else:
 
 @app.get("/")
 def root():
-    return {"status": "ok", "service": "framed-api"}
+    # Expose the deployed commit (Render injects RENDER_GIT_COMMIT) so we can tell
+    # which build is actually live when verifying a deploy.
+    commit = os.getenv("RENDER_GIT_COMMIT", "")
+    return {"status": "ok", "service": "framed-api", "commit": commit[:7] if commit else None}
