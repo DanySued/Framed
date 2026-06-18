@@ -4,7 +4,7 @@ import secrets
 import shutil
 import uuid
 from fastapi import APIRouter, HTTPException, File, UploadFile
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, RedirectResponse
 
 from models.schemas import (
     ReelGenerateRequest,
@@ -17,6 +17,7 @@ from models.schemas import (
 from models.database import Reel, AudioFile, ReelJob
 from services.job_queue import create_reel_generation_job, get_job_status, approve_clips, replace_clip
 from services.pexels import search_videos
+from services.storage import signed_url
 import subprocess
 import json
 
@@ -385,7 +386,8 @@ async def get_public_reel(slug: str):
     except Exception:
         raise HTTPException(status_code=404, detail="Film not found")
 
-    if not reel.output_path or not os.path.exists(reel.output_path):
+    has_local = bool(reel.output_path) and os.path.exists(reel.output_path)
+    if not has_local and not reel.storage_path:
         raise HTTPException(status_code=404, detail="Film file not found")
 
     return {
@@ -406,11 +408,16 @@ async def stream_public_reel(slug: str):
     except Exception:
         raise HTTPException(status_code=404, detail="Film not found")
 
-    if not reel.output_path or not os.path.exists(reel.output_path):
-        raise HTTPException(status_code=404, detail="Film file not found")
+    if reel.output_path and os.path.exists(reel.output_path):
+        filename = f"{reel.title.replace(' ', '_')}.mp4" if reel.title else f"{slug}.mp4"
+        return FileResponse(path=reel.output_path, media_type="video/mp4", filename=filename)
 
-    filename = f"{reel.title.replace(' ', '_')}.mp4" if reel.title else f"{slug}.mp4"
-    return FileResponse(path=reel.output_path, media_type="video/mp4", filename=filename)
+    if reel.storage_path:
+        url = signed_url(reel.storage_path)
+        if url:
+            return RedirectResponse(url)
+
+    raise HTTPException(status_code=404, detail="Film file not found")
 
 
 @router.get("/download/{reel_id}")
@@ -423,14 +430,21 @@ async def download_reel(reel_id: str):
     except Exception:
         raise HTTPException(status_code=404, detail="Reel not found")
 
-    if not reel.output_path or not os.path.exists(reel.output_path):
-        raise HTTPException(status_code=404, detail="Reel file not found")
+    # Fast path: local file (current container lifetime).
+    if reel.output_path and os.path.exists(reel.output_path):
+        return FileResponse(
+            path=reel.output_path,
+            media_type="video/mp4",
+            filename=f"{reel.title.replace(' ', '_')}.mp4",
+        )
 
-    return FileResponse(
-        path=reel.output_path,
-        media_type="video/mp4",
-        filename=f"{reel.title.replace(' ', '_')}.mp4",
-    )
+    # Durable fallback: local file was wiped by a sleep/redeploy — serve from storage.
+    if reel.storage_path:
+        url = signed_url(reel.storage_path)
+        if url:
+            return RedirectResponse(url)
+
+    raise HTTPException(status_code=404, detail="Reel file not found")
 
 
 @router.get("/download/{reel_id}/srt")

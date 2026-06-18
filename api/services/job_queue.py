@@ -13,6 +13,7 @@ from apscheduler.executors.pool import ThreadPoolExecutor as APThreadPoolExecuto
 from models.database import ReelJob, Reel
 from models.schemas import ReelGenerateRequest
 from services.pexels import search_videos, download_video
+from services.storage import upload_reel
 from services.video import (
     get_video_duration,
     trim_and_normalize,
@@ -264,11 +265,18 @@ def _run_reel_job(
         else:
             os.rename(audio_mixed_path, final_path)
 
+        # Mirror to durable storage so the film survives free-tier sleeps/redeploys.
+        # Best-effort: if storage is unconfigured or fails, we keep serving the local
+        # file (which lasts for the current container lifetime).
+        storage_path = upload_reel(final_path, reel_id)
+
         # Done (100%)
         job.progress = 100
         job.status = "done"
         job.completed_at = datetime.now()
         reel.output_path = final_path
+        if storage_path:
+            reel.storage_path = storage_path
         reel.save()
         job.save()
 

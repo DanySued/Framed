@@ -39,7 +39,8 @@ class Reel(BaseModel):
     keywords = TextField()  # Comma-separated keywords
     duration = IntegerField()  # Video duration in seconds
     audio_path = CharField()  # Path to audio file
-    output_path = CharField()  # Path to generated MP4
+    output_path = CharField()  # Path to generated MP4 (local/ephemeral)
+    storage_path = CharField(null=True)  # Object path in Supabase Storage (durable; survives sleeps)
     srt_path = CharField(null=True)  # Path to generated .srt subtitle file (if subtitles were enabled)
     public_slug = CharField(null=True, unique=True)  # Short URL slug, set on first share
     created_at = DateTimeField(default=datetime.now)
@@ -114,6 +115,7 @@ def init_db():
         ("reel_jobs", "pending_request_data", "TEXT"),
         ("reels", "srt_path", "TEXT"),
         ("reels", "public_slug", "TEXT"),
+        ("reels", "storage_path", "TEXT"),
     ]:
         try:
             with db.atomic():

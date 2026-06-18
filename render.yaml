@@ -21,6 +21,13 @@ services:
         sync: false
       - key: ALLOWED_ORIGINS
         sync: false
+      # Durable storage for finished reels (survives free-tier sleeps). Optional —
+      # if SUPABASE_SERVICE_KEY is unset the backend falls back to local/ephemeral
+      # disk. Set the service key in the Render dashboard to enable persistence.
+      - key: SUPABASE_URL
+        value: https://hhnxglovthqxansfafeo.supabase.co
+      - key: SUPABASE_SERVICE_KEY
+        sync: false
 
   # Render background worker — FFmpeg job runner
   - type: worker
