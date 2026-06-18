@@ -340,9 +340,6 @@ export function StudioProvider({ children }: { children: React.ReactNode }) {
     const allDone = valid.every((s) => s.status === "done");
     if (allDone) return "done";
 
-    const anyApproval = valid.some((s) => s.status === "awaiting_clip_approval");
-    if (anyApproval) return "approval";
-
     const anyPhase2 = valid.some(
       (s) => s.status === "processing" && s.phase === 2
     );
