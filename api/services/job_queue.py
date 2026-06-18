@@ -5,10 +5,10 @@ import os
 import random
 import shutil
 import uuid
-from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime
 
 from apscheduler.schedulers.background import BackgroundScheduler
+from apscheduler.executors.pool import ThreadPoolExecutor as APThreadPoolExecutor
 
 from models.database import ReelJob, Reel
 from models.schemas import ReelGenerateRequest
@@ -40,10 +40,18 @@ def _set_stage(job, job_id: str, progress: int, stage: str, status: str = "proce
 
 
 def init_scheduler():
-    """Initialize the background scheduler."""
+    """Initialize the background scheduler.
+
+    Pinned to a SINGLE worker so reel jobs run one at a time. With bulkCount up to 5,
+    the default pool would run several renders concurrently — each spawning ffmpeg —
+    and blow the 512MB free tier. Serializing keeps peak memory to one render.
+    """
     global scheduler
     if scheduler is None:
-        scheduler = BackgroundScheduler()
+        scheduler = BackgroundScheduler(
+            executors={"default": APThreadPoolExecutor(1)},
+            job_defaults={"max_instances": 1, "misfire_grace_time": None},
+        )
         scheduler.start()
 
 

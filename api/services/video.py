@@ -225,6 +225,8 @@ def trim_and_normalize(
         "-c:v", "libx264",
         "-preset", "ultrafast",
         "-crf", "23",
+        # Cap bitrate so ultrafast doesn't produce huge files (faster downloads).
+        "-maxrate", "4M", "-bufsize", "8M",
         "-threads", FFMPEG_THREADS,
         "-y",
         output_path,
@@ -548,6 +550,7 @@ def burn_text_overlays(input_path: str, output_path: str, overlays: list) -> Non
         "ffmpeg", "-i", input_path,
         "-vf", ",".join(filters),
         "-c:v", "libx264", "-preset", "ultrafast", "-crf", "23",
+        "-maxrate", "4M", "-bufsize", "8M",
         "-threads", FFMPEG_THREADS,
         "-c:a", "copy", "-y", output_path,
     ]
