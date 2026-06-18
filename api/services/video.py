@@ -11,6 +11,18 @@ class VideoProcessingError(Exception):
     pass
 
 
+# Final Instagram Reels frame. Kept as constants so the whole pipeline targets one
+# resolution and it's a one-line change if the host gets more memory/CPU.
+REEL_W = 1080
+REEL_H = 1920
+
+# libx264 spawns one worker thread per CPU by default. Render's free tier reports
+# several cores but only has 512 MB RAM, so multithreaded x264 allocates per-thread
+# frame/lookahead buffers and OOM-kills the container mid-encode. Pinning to a single
+# thread keeps peak memory low and predictable. This is the key free-tier fix.
+FFMPEG_THREADS = "1"
+
+
 def get_video_duration(filepath: str) -> float:
     """
     Get the duration of a video file in seconds using ffprobe.
@@ -178,6 +190,108 @@ def concatenate_videos(
         raise VideoProcessingError("Video concatenation timeout")
     except Exception as e:
         raise VideoProcessingError(f"Concat failed: {str(e)}")
+
+
+def trim_and_normalize(
+    input_path: str,
+    output_path: str,
+    start_time: float = 0,
+    duration: float = 5,
+    target_w: int = REEL_W,
+    target_h: int = REEL_H,
+) -> None:
+    """
+    Trim a clip AND scale/crop it to the final 9:16 frame in a single, low-memory
+    ffmpeg pass (single-threaded, audio dropped).
+
+    Doing trim + normalize per-clip and sequentially means only ONE libx264 encode
+    of one short clip is ever in flight, so peak memory stays well under the free
+    tier's 512 MB. All output clips share identical codec/resolution/fps/SAR, which
+    lets the later concat run as a pure stream-copy (no re-encode at all).
+    """
+    os.makedirs(os.path.dirname(output_path), exist_ok=True)
+
+    vf = (
+        f"scale={target_w}:{target_h}:force_original_aspect_ratio=increase,"
+        f"crop={target_w}:{target_h},setsar=1,fps=30"
+    )
+    cmd = [
+        "ffmpeg",
+        "-ss", str(start_time),  # fast seek before -i
+        "-i", input_path,
+        "-t", str(duration),
+        "-vf", vf,
+        "-an",
+        "-c:v", "libx264",
+        "-preset", "ultrafast",
+        "-crf", "23",
+        "-threads", FFMPEG_THREADS,
+        "-y",
+        output_path,
+    ]
+
+    try:
+        result = subprocess.run(cmd, capture_output=True, text=True, timeout=120)
+        if result.returncode != 0:
+            raise VideoProcessingError(f"ffmpeg trim/normalize failed: {result.stderr}")
+    except subprocess.TimeoutExpired:
+        raise VideoProcessingError("Trim/normalize timeout")
+    except VideoProcessingError:
+        raise
+    except Exception as e:
+        raise VideoProcessingError(f"Trim/normalize failed: {str(e)}")
+
+
+def concat_clips_copy(video_paths: List[str], output_path: str) -> None:
+    """
+    Concatenate clips that are ALREADY normalized to identical params (see
+    trim_and_normalize) using the concat demuxer with stream copy — no decode and
+    no encode, so memory use is negligible. This replaces the old filter_complex
+    concat that decoded every clip + encoded simultaneously (an OOM risk).
+    """
+    if len(video_paths) < 1:
+        raise VideoProcessingError("No videos to concatenate")
+
+    os.makedirs(os.path.dirname(output_path), exist_ok=True)
+
+    if len(video_paths) == 1:
+        import shutil
+        shutil.copy2(video_paths[0], output_path)
+        return
+
+    # Concat demuxer needs a list file of absolute paths.
+    list_path = os.path.join(os.path.dirname(output_path), "concat_list.txt")
+    with open(list_path, "w") as f:
+        for p in video_paths:
+            safe = os.path.abspath(p).replace("'", "'\\''")
+            f.write(f"file '{safe}'\n")
+
+    cmd = [
+        "ffmpeg",
+        "-f", "concat",
+        "-safe", "0",
+        "-i", list_path,
+        "-c", "copy",
+        "-movflags", "+faststart",
+        "-y",
+        output_path,
+    ]
+
+    try:
+        result = subprocess.run(cmd, capture_output=True, text=True, timeout=120)
+        if result.returncode != 0:
+            raise VideoProcessingError(f"ffmpeg concat(copy) failed: {result.stderr}")
+    except subprocess.TimeoutExpired:
+        raise VideoProcessingError("Video concatenation timeout")
+    except VideoProcessingError:
+        raise
+    except Exception as e:
+        raise VideoProcessingError(f"Concat failed: {str(e)}")
+    finally:
+        try:
+            os.remove(list_path)
+        except OSError:
+            pass
 
 
 def scale_to_instagram_reels(
@@ -434,6 +548,7 @@ def burn_text_overlays(input_path: str, output_path: str, overlays: list) -> Non
         "ffmpeg", "-i", input_path,
         "-vf", ",".join(filters),
         "-c:v", "libx264", "-preset", "ultrafast", "-crf", "23",
+        "-threads", FFMPEG_THREADS,
         "-c:a", "copy", "-y", output_path,
     ]
 

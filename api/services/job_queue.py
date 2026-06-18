@@ -15,8 +15,8 @@ from models.schemas import ReelGenerateRequest
 from services.pexels import search_videos, download_video
 from services.video import (
     get_video_duration,
-    trim_video,
-    concatenate_videos,
+    trim_and_normalize,
+    concat_clips_copy,
     mix_audio,
     burn_text_overlays,
     VideoProcessingError,
@@ -177,12 +177,14 @@ def _run_reel_job(
                 video_dur = get_video_duration(video_path)
                 start = random.uniform(0, max(0.0, video_dur - clip_duration))
                 clip_path = os.path.join(clips_dir, f"clip_{idx}.mp4")
-                trim_video(video_path, clip_path, start, clip_duration)
+                # trim + scale/crop to 1080x1920 in one single-threaded pass
+                trim_and_normalize(video_path, clip_path, start, clip_duration)
                 return clip_path
             except Exception:
                 return None
 
-        # Trim sequentially on free-tier to avoid OOM; each trim has its own 120s timeout
+        # Trim sequentially on free-tier to avoid OOM; each pass is single-threaded
+        # and processes exactly one short clip, so peak memory stays low.
         results = [_trim_one(args) for args in enumerate(video_paths[:target_clip_count])]
         clips = [p for p in results if p is not None]
 
@@ -205,7 +207,7 @@ def _run_reel_job(
                     video_dur = get_video_duration(clip_path)
                     start = random.uniform(0, max(0.0, video_dur - clip_duration))
                     retrimmed_path = clip_path.rsplit(".mp4", 1)[0] + "_rt.mp4"
-                    trim_video(clip_path, retrimmed_path, start, clip_duration)
+                    trim_and_normalize(clip_path, retrimmed_path, start, clip_duration)
                     os.remove(clip_path)
                     return retrimmed_path
                 except Exception:
@@ -219,11 +221,12 @@ def _run_reel_job(
         job.save()
 
         # ── Render straight through — no approval pause ──────────────
-        # Concat clips directly to 1080x1920 (60%) — one pass, no separate scale step
+        # Clips are already normalized to 1080x1920, so concat is a pure stream-copy
+        # (no decode/encode → negligible memory). (60%)
         _set_stage(job, job_id, 60, "assembling sequence")
 
         concat_path = os.path.join(reel_dir, "concat.mp4")
-        concatenate_videos(clips, concat_path)
+        concat_clips_copy(clips, concat_path)
         # Free clips dir after concat
         clips_dir = os.path.dirname(clips[0]) if clips else None
         if clips_dir:
