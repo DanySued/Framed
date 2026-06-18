@@ -38,15 +38,38 @@ async def test_pexels(payload: KeyPayload):
 @router.get("/schema")
 def schema_debug():
     """Return actual columns in the reels table for debugging."""
-    try:
-        with db.connection_context():
-            rows = db.execute_sql(
-                "SELECT column_name FROM information_schema.columns "
-                "WHERE table_name = 'reels' ORDER BY ordinal_position"
-            ).fetchall()
-            return {"reels_columns": [r[0] for r in rows]}
-    except Exception as exc:
-        return {"error": str(exc)}
+    results = {}
+    for table in ("reels", "reel_jobs"):
+        try:
+            with db.connection_context():
+                rows = db.execute_sql(
+                    "SELECT column_name FROM information_schema.columns "
+                    f"WHERE table_name = '{table}' ORDER BY ordinal_position"
+                ).fetchall()
+                results[table] = [r[0] for r in rows]
+        except Exception as exc:
+            results[table] = f"ERROR: {exc}"
+    return results
+
+
+@router.post("/migrate")
+def force_migrate():
+    """Force-run the column migrations and return results."""
+    migrations = [
+        ("reel_jobs", "clip_paths", "TEXT"),
+        ("reel_jobs", "pending_request_data", "TEXT"),
+        ("reels", "srt_path", "TEXT"),
+        ("reels", "public_slug", "TEXT"),
+    ]
+    results = []
+    for table, col, col_type in migrations:
+        try:
+            with db.connection_context():
+                db.execute_sql(f"ALTER TABLE {table} ADD COLUMN {col} {col_type}")
+            results.append({"table": table, "col": col, "status": "added"})
+        except Exception as exc:
+            results.append({"table": table, "col": col, "status": "skipped", "reason": str(exc)})
+    return {"migrations": results}
 
 
 @router.get("/backend")

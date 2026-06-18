@@ -1,8 +1,11 @@
 """Database models using Peewee ORM — SQLite locally, PostgreSQL (Railway) in production."""
 import os
+import logging
 import urllib.parse
 from datetime import datetime
 from peewee import Model, CharField, TextField, IntegerField, DateTimeField, ForeignKeyField
+
+logger = logging.getLogger(__name__)
 
 # Use PostgreSQL when DATABASE_URL is set (Railway), else fall back to SQLite
 _DATABASE_URL = os.getenv("DATABASE_URL")
@@ -93,8 +96,9 @@ def init_db():
         try:
             with db.atomic():
                 db.execute_sql(f"ALTER TABLE {table} ADD COLUMN {col} {col_type}")
-        except Exception:
-            pass  # Column already exists
+            logger.info("Migration applied: ALTER TABLE %s ADD COLUMN %s", table, col)
+        except Exception as exc:
+            logger.info("Migration skipped (column likely exists): %s.%s — %s", table, col, exc)
 
 
 if __name__ == "__main__":
