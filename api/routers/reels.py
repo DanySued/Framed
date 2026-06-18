@@ -423,7 +423,7 @@ async def download_reel(reel_id: str):
     except Exception:
         raise HTTPException(status_code=404, detail="Reel not found")
 
-    if not reel.output_path:
+    if not reel.output_path or not os.path.exists(reel.output_path):
         raise HTTPException(status_code=404, detail="Reel file not found")
 
     return FileResponse(
