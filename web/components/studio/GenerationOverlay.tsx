@@ -232,15 +232,22 @@ function FilmCard({ job, index }: { job: JobEntry; index: number }) {
 
 // ── Main overlay ──────────────────────────────────────────────────
 export default function GenerationOverlay() {
-  const { phase, jobs, approvalJobIndex, onApproveClips, onReset } = useStudio();
+  const { phase, jobs, onReset } = useStudio();
 
   const visible = phase !== "compose";
-  const approvalJob = jobs[approvalJobIndex];
-  const clipCount = approvalJob?.status?.clip_count ?? 0;
 
-  const avgProgress = jobs.length > 0
-    ? jobs.reduce((s, j) => s + (j.status?.progress ?? 0), 0) / jobs.length
-    : 0;
+  // Unified 0–100 progress: phase1 maps to 0–50, phase2 maps to 50–100
+  const unifiedProgress = (() => {
+    if (!jobs.length) return 0;
+    if (phase === "done") return 100;
+    const avg = jobs.reduce((s, j) => {
+      const st = j.status;
+      if (!st) return s;
+      if (st.phase === 2) return s + 50 + (st.phase_progress ?? st.progress / 2) / 2;
+      return s + (st.phase_progress ?? st.progress / 2) / 2;
+    }, 0) / jobs.length;
+    return Math.min(avg, 99); // never show 100 until done
+  })();
 
   const stageLabel = (() => {
     const first = jobs[0]?.status;
