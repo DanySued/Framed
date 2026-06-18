@@ -286,102 +286,34 @@ export default function GenerationOverlay() {
             }}
           >
 
-            {/* ── Generating (phase 1) ─────────────────────────── */}
-            {phase === "generating" && (
+            {/* ── In progress (generating + rendering unified) ── */}
+            {(phase === "generating" || phase === "rendering") && (
               <>
                 <div style={{ textAlign: "center" }}>
                   <p style={{ fontFamily: "var(--font-display), Georgia, serif", fontStyle: "italic", fontSize: "1.25rem", color: "var(--fr-ivory)", marginBottom: 6 }}>
-                    Building your film…
+                    {phase === "rendering" ? "Rendering…" : "Building your film…"}
                   </p>
                   <p style={{ fontFamily: "var(--font-mono), monospace", fontSize: "0.55rem", color: "var(--fr-muted)", letterSpacing: "0.06em", textTransform: "uppercase" }}>
                     {stageLabel}
                   </p>
                 </div>
-                <ProgressBar value={avgProgress} label="Phase 1 — sourcing clips" />
+                <ProgressBar value={unifiedProgress} label="creating your film" />
                 {jobs.length > 1 && (
                   <div style={{ display: "flex", gap: 16, flexWrap: "wrap", justifyContent: "center" }}>
-                    {jobs.map((j, i) => (
-                      <div key={j.jobId} style={{ textAlign: "center" }}>
-                        <div style={{ fontFamily: "var(--font-mono), monospace", fontSize: "0.4rem", color: "var(--fr-muted)", marginBottom: 4, letterSpacing: "0.06em" }}>
-                          film {i + 1}
+                    {jobs.map((j, i) => {
+                      const st = j.status;
+                      const p = st ? (st.phase === 2 ? 50 + (st.phase_progress ?? st.progress / 2) / 2 : (st.phase_progress ?? st.progress / 2) / 2) : 0;
+                      return (
+                        <div key={j.jobId} style={{ textAlign: "center" }}>
+                          <div style={{ fontFamily: "var(--font-mono), monospace", fontSize: "0.4rem", color: "var(--fr-muted)", marginBottom: 4, letterSpacing: "0.06em" }}>
+                            film {i + 1}
+                          </div>
+                          <div style={{ width: 60, height: 2, background: "var(--fr-line)", borderRadius: 1, overflow: "hidden" }}>
+                            <div style={{ height: "100%", background: "var(--fr-gold)", width: `${Math.min(p, 99)}%`, transition: "width 0.4s ease" }} />
+                          </div>
                         </div>
-                        <div style={{ width: 60, height: 2, background: "var(--fr-line)", borderRadius: 1, overflow: "hidden" }}>
-                          <div style={{ height: "100%", background: "var(--fr-gold)", width: `${j.status?.progress ?? 0}%`, transition: "width 0.4s ease" }} />
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </>
-            )}
-
-            {/* ── Approval gate ────────────────────────────────── */}
-            {phase === "approval" && approvalJob && (
-              <>
-                <div style={{ textAlign: "center" }}>
-                  <p style={{ fontFamily: "var(--font-display), Georgia, serif", fontStyle: "italic", fontSize: "1.25rem", color: "var(--fr-ivory)", marginBottom: 6 }}>
-                    Review your clips
-                  </p>
-                  <p style={{ fontFamily: "var(--font-mono), monospace", fontSize: "0.55rem", color: "var(--fr-muted)", letterSpacing: "0.06em", textTransform: "uppercase" }}>
-                    {clipCount} clip{clipCount !== 1 ? "s" : ""} — hover to preview · approve to render
-                  </p>
-                </div>
-
-                <div style={{ display: "flex", gap: 10, justifyContent: "center", flexWrap: "wrap", width: "100%" }}>
-                  {Array.from({ length: clipCount }, (_, i) => (
-                    <ClipCard key={i} jobId={approvalJob.jobId} index={i} total={clipCount} />
-                  ))}
-                </div>
-
-                {jobs.length > 1 && (
-                  <p style={{ fontFamily: "var(--font-mono), monospace", fontSize: "0.45rem", color: "var(--fr-muted)", letterSpacing: "0.06em" }}>
-                    film {approvalJobIndex + 1} of {jobs.length}
-                  </p>
-                )}
-
-                <button
-                  onClick={() => onApproveClips(approvalJob.jobId)}
-                  style={{
-                    display: "flex", alignItems: "center", gap: 8,
-                    fontFamily: "var(--font-display), Georgia, serif",
-                    fontSize: "0.9375rem", letterSpacing: "0.02em",
-                    color: "#04110e", background: "var(--fr-gold)",
-                    border: "none", padding: "10px 32px", borderRadius: 4,
-                    cursor: "pointer", transition: "opacity 150ms ease",
-                  }}
-                  onMouseEnter={(e) => { e.currentTarget.style.opacity = "0.85"; }}
-                  onMouseLeave={(e) => { e.currentTarget.style.opacity = "1"; }}
-                >
-                  <Check size={14} strokeWidth={2.5} />
-                  Approve — begin render
-                </button>
-              </>
-            )}
-
-            {/* ── Rendering (phase 2) ──────────────────────────── */}
-            {phase === "rendering" && (
-              <>
-                <div style={{ textAlign: "center" }}>
-                  <p style={{ fontFamily: "var(--font-display), Georgia, serif", fontStyle: "italic", fontSize: "1.25rem", color: "var(--fr-ivory)", marginBottom: 6 }}>
-                    Rendering…
-                  </p>
-                  <p style={{ fontFamily: "var(--font-mono), monospace", fontSize: "0.55rem", color: "var(--fr-muted)", letterSpacing: "0.06em", textTransform: "uppercase" }}>
-                    {stageLabel}
-                  </p>
-                </div>
-                <ProgressBar value={avgProgress} label="Phase 2 — stitching & encoding" />
-                {jobs.length > 1 && (
-                  <div style={{ display: "flex", gap: 16, flexWrap: "wrap", justifyContent: "center" }}>
-                    {jobs.map((j, i) => (
-                      <div key={j.jobId} style={{ textAlign: "center" }}>
-                        <div style={{ fontFamily: "var(--font-mono), monospace", fontSize: "0.4rem", color: "var(--fr-muted)", marginBottom: 4, letterSpacing: "0.06em" }}>
-                          film {i + 1}
-                        </div>
-                        <div style={{ width: 60, height: 2, background: "var(--fr-line)", borderRadius: 1, overflow: "hidden" }}>
-                          <div style={{ height: "100%", background: "var(--fr-gold)", width: `${j.status?.progress ?? 0}%`, transition: "width 0.4s ease" }} />
-                        </div>
-                      </div>
-                    ))}
+                      );
+                    })}
                   </div>
                 )}
               </>
