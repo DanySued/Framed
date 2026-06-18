@@ -1,10 +1,12 @@
 import Link from "next/link";
 import NavLinks from "@/components/NavLinks";
+import WarmApi from "@/components/studio/WarmApi";
 
 export default async function StudioLayout({ children }: { children: React.ReactNode }) {
   // Auth temporarily disabled.
   return (
     <div className="flex flex-col min-h-screen" style={{ backgroundColor: "var(--fr-black)" }}>
+      <WarmApi />
       <div className="max-w-7xl mx-auto w-full flex flex-col flex-1">
       {/* Top bar — frosted sticky nav */}
       <header
